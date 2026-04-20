@@ -5,3 +5,8 @@ db.properties
 *.iml
 .idea/
 .DS_Store
+.gradle/
+.vscode/
+build/
+*.class
+*.war
