@@ -1,0 +1,7 @@
+target/
+*.class
+*.war
+db.properties
+*.iml
+.idea/
+.DS_Store
