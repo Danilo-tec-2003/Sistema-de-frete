@@ -1,0 +1,135 @@
+/* ============================================================
+   Sistema de Fretes GW  –  style.css
+   ============================================================ */
+   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+   :root {
+       --primary:   #1a5276;
+       --primary-h: #154360;
+       --accent:    #2e86c1;
+       --danger:    #c0392b;
+       --success:   #1e8449;
+       --warning:   #d35400;
+       --bg:        #f4f6f8;
+       --card-bg:   #ffffff;
+       --border:    #d5d8dc;
+       --text:      #2c3e50;
+       --text-muted:#7f8c8d;
+       --radius:    6px;
+       --shadow:    0 2px 8px rgba(0,0,0,.10);
+   }
+   
+   body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px;
+          background: var(--bg); color: var(--text); }
+   
+   /* ---- NAVBAR ---- */
+   .navbar { display:flex; align-items:center; background:var(--primary);
+             padding: 0 24px; height: 52px; gap: 24px; }
+   .navbar-brand a { color:#fff; font-size:18px; font-weight:700; text-decoration:none; }
+   .navbar-menu { display:flex; list-style:none; gap:4px; flex:1; }
+   .navbar-menu li a { color:#cce; padding:8px 14px; border-radius:var(--radius);
+                       text-decoration:none; font-size:13px; transition:.15s; }
+   .navbar-menu li a:hover { background:rgba(255,255,255,.15); color:#fff; }
+   .navbar-user { display:flex; align-items:center; gap:12px; color:#dde; font-size:13px; }
+   .btn-logout { background:rgba(255,255,255,.15); color:#fff; padding:5px 12px;
+                 border-radius:var(--radius); text-decoration:none; font-size:12px; }
+   .btn-logout:hover { background:var(--danger); }
+   
+   /* ---- CONTAINER ---- */
+   .container { max-width:1200px; margin:0 auto; padding:24px 20px; }
+   .page-header { display:flex; justify-content:space-between; align-items:center;
+                  margin-bottom:20px; }
+   .page-header h1 { font-size:20px; font-weight:600; }
+   
+   /* ---- CARDS ---- */
+   .card { background:var(--card-bg); border:1px solid var(--border);
+           border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
+   .card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+                gap:16px; margin-top:16px; }
+   .card-link { text-decoration:none; color:inherit; }
+   .card-menu { text-align:center; padding:30px 16px; transition:.2s; cursor:pointer; }
+   .card-menu:hover { border-color:var(--accent); box-shadow:0 4px 16px rgba(0,0,0,.15); }
+   .card-menu .card-icon { font-size:36px; margin-bottom:10px; }
+   .card-menu h3 { font-size:15px; margin-bottom:4px; }
+   .card-menu p { font-size:12px; color:var(--text-muted); }
+   .mt-4 { margin-top:24px; }
+   .text-center { text-align:center; }
+   
+   /* ---- LOGIN PAGE ---- */
+   .login-page { display:flex; justify-content:center; align-items:center;
+                 min-height:100vh; background:var(--primary); }
+   .login-box { background:#fff; border-radius:8px; padding:40px 36px;
+                width:100%; max-width:380px; box-shadow:0 8px 32px rgba(0,0,0,.25); }
+   .login-logo { text-align:center; margin-bottom:28px; }
+   .login-logo .logo-text { font-size:42px; font-weight:800; color:var(--primary); }
+   .login-logo p { color:var(--text-muted); font-size:13px; margin-top:4px; }
+   
+   /* ---- FORMS ---- */
+   .form-group { margin-bottom:14px; }
+   .form-group label { display:block; font-weight:600; font-size:13px; margin-bottom:5px; }
+   .form-control { width:100%; padding:8px 10px; border:1px solid var(--border);
+                   border-radius:var(--radius); font-size:14px; transition:.15s; }
+   .form-control:focus { outline:none; border-color:var(--accent);
+                         box-shadow:0 0 0 3px rgba(46,134,193,.2); }
+   .form-control.is-invalid { border-color:var(--danger); }
+   .form-row { display:grid; gap:12px; }
+   .form-row.cols-2 { grid-template-columns:1fr 1fr; }
+   .form-row.cols-3 { grid-template-columns:1fr 1fr 1fr; }
+   
+   /* ---- BUTTONS ---- */
+   .btn { display:inline-block; padding:8px 18px; border:none; border-radius:var(--radius);
+          cursor:pointer; font-size:14px; text-decoration:none; text-align:center;
+          transition:.15s; font-family:inherit; }
+   .btn-primary  { background:var(--primary); color:#fff; }
+   .btn-primary:hover  { background:var(--primary-h); }
+   .btn-success  { background:var(--success); color:#fff; }
+   .btn-danger   { background:var(--danger);  color:#fff; }
+   .btn-secondary{ background:#ecf0f1; color:var(--text); border:1px solid var(--border); }
+   .btn-secondary:hover { background:#d5d8dc; }
+   .btn-sm { padding:5px 12px; font-size:12px; }
+   .btn-block { display:block; width:100%; margin-top:6px; }
+   
+   /* ---- ALERTS ---- */
+   .alert { padding:10px 14px; border-radius:var(--radius); margin-bottom:14px; font-size:13px; }
+   .alert-erro   { background:#fdecea; border:1px solid #f1948a; color:var(--danger); }
+   .alert-sucesso{ background:#eafaf1; border:1px solid #82e0aa; color:var(--success); }
+   
+   /* ---- TABLE ---- */
+   .table-wrapper { overflow-x:auto; }
+   table { width:100%; border-collapse:collapse; font-size:13px; }
+   thead tr { background:var(--primary); color:#fff; }
+   thead th { padding:10px 12px; text-align:left; font-weight:600; white-space:nowrap; }
+   tbody tr:nth-child(even) { background:#f8f9fa; }
+   tbody tr:hover { background:#eaf4fc; }
+   tbody td { padding:9px 12px; border-bottom:1px solid var(--border); }
+   .badge { display:inline-block; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; }
+   .badge-ativo    { background:#d5f5e3; color:#1e8449; }
+   .badge-inativo  { background:#f9ebea; color:#922b21; }
+   .badge-suspenso { background:#fef9e7; color:#d35400; }
+   .badge-disponivel   { background:#d5f5e3; color:#1e8449; }
+   .badge-viagem       { background:#d6eaf8; color:#1a5276; }
+   .badge-manutencao   { background:#fef9e7; color:#d35400; }
+   .badge-emitido      { background:#eaf4fc; color:#2e86c1; }
+   .badge-transito     { background:#fef9e7; color:#d35400; }
+   .badge-entregue     { background:#d5f5e3; color:#1e8449; }
+   .badge-naoe         { background:#f9ebea; color:#922b21; }
+   .badge-cancelado    { background:#f2f3f4; color:#717d7e; }
+   
+   /* ---- PAGINAÇÃO ---- */
+   .paginacao { display:flex; align-items:center; gap:6px; justify-content:flex-end;
+                margin-top:14px; }
+   .paginacao a, .paginacao span {
+       display:inline-block; padding:5px 10px; border:1px solid var(--border);
+       border-radius:var(--radius); font-size:13px; text-decoration:none; color:var(--text); }
+   .paginacao a:hover  { background:var(--accent); color:#fff; border-color:var(--accent); }
+   .paginacao .ativo   { background:var(--primary); color:#fff; border-color:var(--primary); }
+   
+   /* ---- FILTRO ---- */
+   .filtro-bar { display:flex; gap:10px; align-items:flex-end; margin-bottom:16px;
+                 flex-wrap:wrap; }
+   .filtro-bar .form-group { margin:0; min-width:200px; }
+   
+   /* ---- TEXT HELPERS ---- */
+   .text-danger  { color:var(--danger); }
+   .text-muted   { color:var(--text-muted); }
+   .text-success { color:var(--success); }
