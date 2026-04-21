@@ -1,82 +1,265 @@
 -- ============================================================
 -- 05_dml_seed_data.sql
--- DADOS INICIAIS (Seed)
+-- DADOS INICIAIS — Sistema de Gestão de Fretes GW
+--
+-- ⚠️  ATENÇÃO — senhas em SHA-256 (geradas pelo LoginDAO.sha256()):
+--     admin     / admin123    → 240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9
+--     operador  / operador123 → 1725165c9a0b3698a3d01016e0d8205155820b8d7f21835ca64c0f81c728d880
+--
+-- ⚠️  ATENÇÃO — tipo cliente: 'r'=Remetente | 'd'=Destinatário | 'a'=Ambos (CHAR(1) minúsculo)
+-- ⚠️  ATENÇÃO — status frete: 'E'|'S'|'T'|'R'|'N'|'C'  (FreteStatus enum)
+-- ⚠️  ATENÇÃO — tipo ocorrência: 'P'|'R'|'T'|'E'|'A'|'X'|'O' (TipoOcorrencia enum)
+-- ⚠️  ATENÇÃO — status motorista: 'A'|'I'|'S'  (StatusMotorista enum)
+-- ⚠️  ATENÇÃO — status veículo: 'D'|'V'|'M'  (StatusVeiculo enum)
+-- ⚠️  ATENÇÃO — tipo veículo: 'K'=Truck | 'C'=Carreta | 'V'=Van | 'U'=Utilitário
+-- ⚠️  ATENÇÃO — cnh_categoria: 'A'|'B'|'C'|'D'|'E'
+-- ⚠️  ATENÇÃO — tipo_vinculo: 'F'=Funcionário | 'G'=Agregado | 'T'=Terceiro
 -- ============================================================
 
+
+-- ============================================================
 -- USUARIOS
-INSERT INTO usuario (login, senha_hash, nome, perfil) VALUES 
-('admin', 'admin123', 'Administrador', 'ADMIN'),
-('operador1', 'hash123', 'Carlos Eduardo', 'OPERADOR'),
-('operador2', 'hash123', 'Ana Beatriz', 'OPERADOR'),
-('operador3', 'hash123', 'Lucas Santos', 'OPERADOR'),
-('operador4', 'hash123', 'Mariana Costa', 'OPERADOR'),
-('admin2', 'admin456', 'Roberto Almeida', 'ADMIN'),
-('operador5', 'hash123', 'Fernanda Lima', 'OPERADOR'),
-('operador6', 'hash123', 'Pedro Henrique', 'OPERADOR'),
-('operador7', 'hash123', 'Camila Alves', 'OPERADOR'),
-('operador8', 'hash123', 'João Vitor', 'OPERADOR');
+-- ============================================================
+INSERT INTO usuario (nome, login, senha, perfil) VALUES
+('Administrador',  'admin',     '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'ADMIN'),
+('Carlos Eduardo', 'carlos',    '1725165c9a0b3698a3d01016e0d8205155820b8d7f21835ca64c0f81c728d880', 'OPERADOR'),
+('Ana Beatriz',    'ana',       '1725165c9a0b3698a3d01016e0d8205155820b8d7f21835ca64c0f81c728d880', 'OPERADOR'),
+('Lucas Santos',   'lucas',     '1725165c9a0b3698a3d01016e0d8205155820b8d7f21835ca64c0f81c728d880', 'OPERADOR');
+-- Senhas: admin=admin123 | demais=operador123
 
+
+-- ============================================================
 -- CLIENTES
-INSERT INTO cliente (nome, cpf_cnpj, telefone, email, cidade, uf) VALUES
-('Transportadora Silva Ltda', '12.345.678/0001-90', '(81) 3000-1111', 'silva@transp.com.br', 'Recife', 'PE'),
-('Comércio Nordeste S.A.', '98.765.432/0001-10', '(81) 3000-2222', 'contato@nordeste.com', 'Caruaru', 'PE'),
-('Distribuidora Boa Vista', '11.222.333/0001-44', '(84) 3000-3333', 'bv@distribuidora.com', 'Natal', 'RN'),
-('Armazéns Paraíba Log', '33.444.555/0001-66', '(83) 3000-4444', 'log@armazens.pb', 'João Pessoa', 'PB'),
-('Indústria Ceará Tec', '55.666.777/0001-88', '(85) 3000-5555', 'contato@cearatec.com', 'Fortaleza', 'CE'),
-('Mercadinho São José', '77.888.999/0001-00', '(81) 3000-6666', 'saojose@mercado.com', 'Olinda', 'PE'),
-('Agropecuária Sertão', '22.111.000/0001-22', '(87) 3000-7777', 'agro@sertao.com', 'Petrolina', 'PE'),
-('Lojas Alagoas Varejo', '44.333.222/0001-33', '(82) 3000-8888', 'varejo@alagoas.com', 'Maceió', 'AL'),
-('Bahia Materiais', '66.555.444/0001-55', '(71) 3000-9999', 'vendas@bahiamat.com', 'Salvador', 'BA'),
-('Sergipe Bebidas', '88.777.666/0001-77', '(79) 3000-0000', 'logistica@sergipebebidas.com', 'Aracaju', 'SE');
+-- cnpj: apenas dígitos (14 chars) — ClienteDAO.preencherStatement() remove a máscara
+-- tipo: 'r'=Remetente | 'd'=Destinatário | 'a'=Ambos
+-- ============================================================
+INSERT INTO cliente
+    (razao_social, nome_fantasia, cnpj, inscricao_est, tipo,
+     logradouro, numero_end, complemento, bairro, municipio, uf, cep,
+     telefone, email, is_ativo)
+VALUES
+-- Remetentes
+('Transportadora Silva Ltda',    'Trans Silva',   '11222333000181', '0112233-42', 'r',
+ 'Rua das Palmeiras',       '100', NULL,           'Boa Viagem',    'Recife',        'PE', '51020010',
+ '(81) 3000-1111', 'silva@transporte.com.br', TRUE),
 
+('Comércio Nordeste S.A.',       'ComNordeste',   '22333444000160', '0223344-53', 'r',
+ 'Av. Agamenon Magalhães',  '500', 'Sala 301',     'Espinheiro',    'Recife',        'PE', '52020010',
+ '(81) 3000-2222', 'contato@nordeste.com', TRUE),
+
+-- Destinatários
+('Distribuidora Boa Vista LTDA', 'Boa Vista',     '33444555000149', '0334455-64', 'd',
+ 'Rua XV de Novembro',      '200', NULL,           'Centro',        'Natal',         'RN', '59010100',
+ '(84) 3000-3333', 'bv@distribuidora.com', TRUE),
+
+('Armazéns Paraíba Log EIRELI',  'APL Logística', '44555666000128', '0445566-75', 'd',
+ 'Rua Duque de Caxias',     '300', 'Galpão 2',     'Centro',        'João Pessoa',   'PB', '58010000',
+ '(83) 3000-4444', 'log@armazens.pb', TRUE),
+
+-- Ambos (usam tanto como remetente quanto destinatário)
+('Indústria Ceará Tec LTDA',     'CearáTec',      '55666777000188', '0556677-86', 'a',
+ 'Rod. CE-060',              'km 5','Bloco B',     'Maracanaú',     'Fortaleza',     'CE', '61900000',
+ '(85) 3000-5555', 'contato@cearatec.com', TRUE),
+
+('Bahia Materiais S.A.',         'BahiaMat',      '66777888000167', '0667788-97', 'a',
+ 'Av. Paralela',            '1500', NULL,           'Paralela',      'Salvador',      'BA', '41730300',
+ '(71) 3000-6666', 'vendas@bahiamat.com', TRUE),
+
+-- Inativo (para testar regra de exibição)
+('Sergipe Bebidas LTDA',         'SergipeBeb',    '77888999000146', '0778899-08', 'a',
+ 'Rua João Pessoa',          '50', NULL,           'Centro',        'Aracaju',       'SE', '49010020',
+ '(79) 3000-7777', 'logistica@sergipebeb.com', FALSE);
+
+
+-- ============================================================
 -- MOTORISTAS
-INSERT INTO motorista (nome, cpf, numero_cnh, categoria_cnh, validade_cnh, telefone) VALUES
-('João Carlos Souza', '123.456.789-09', 'CNH0001234', 'E', '2027-12-31', '(81) 99001-1111'),
-('Maria Fernanda Lima', '987.654.321-00', 'CNH0005678', 'D', '2026-06-30', '(81) 99002-2222'),
-('Antônio Silva', '111.222.333-44', 'CNH0009012', 'E', '2028-05-15', '(83) 99003-3333'),
-('Francisco Oliveira', '555.666.777-88', 'CNH0003456', 'E', '2026-10-20', '(84) 99004-4444'),
-('José Santos', '999.888.777-66', 'CNH0007890', 'C', '2027-01-10', '(85) 99005-5555'),
-('Paulo Almeida', '444.333.222-11', 'CNH0002468', 'D', '2029-03-25', '(81) 99006-6666'),
-('Marcos Rocha', '222.333.444-55', 'CNH0001357', 'E', '2026-08-12', '(82) 99007-7777'),
-('Raimundo Nonato', '666.555.444-33', 'CNH0008642', 'E', '2028-11-05', '(71) 99008-8888'),
-('Luiz Gonzaga', '777.888.999-00', 'CNH0009753', 'D', '2027-09-18', '(87) 99009-9999'),
-('Severino Ramos', '000.111.222-33', 'CNH0005555', 'E', '2026-12-01', '(79) 99010-0000');
+-- cpf: apenas dígitos (11 chars) — MotoristaDAO.preencher() remove a máscara
+-- cnh_categoria: 'A'|'B'|'C'|'D'|'E'
+-- tipo_vinculo:  'F'=Funcionário | 'G'=Agregado | 'T'=Terceiro
+-- status:        'A'=Ativo | 'I'=Inativo | 'S'=Suspenso
+-- ============================================================
+INSERT INTO motorista
+    (nome, cpf, data_nascimento, telefone,
+     cnh_numero, cnh_categoria, cnh_validade,
+     tipo_vinculo, status)
+VALUES
+-- CNH válida, ativo
+('Carlos Alberto Silva',   '52998224725', '1985-03-10', '(81) 99001-1111',
+ 'CNH-00001', 'E', '2027-12-31', 'F', 'A'),
 
+('Marcos Pereira Santos',  '37432720038', '1978-07-22', '(81) 99002-2222',
+ 'CNH-00002', 'D', '2028-06-30', 'G', 'A'),
+
+('João Carlos Souza',      '56854288027', '1990-11-05', '(81) 99003-3333',
+ 'CNH-00003', 'E', '2026-09-15', 'F', 'A'),
+
+('Francisco Oliveira',     '98765432100', '1982-04-18', '(84) 99004-4444',
+ 'CNH-00004', 'D', '2027-03-20', 'T', 'A'),
+
+('Paulo Almeida Costa',    '11144477735', '1975-12-01', '(71) 99005-5555',
+ 'CNH-00005', 'E', '2029-11-30', 'G', 'A'),
+
+-- CNH vencida (bloqueia novos fretes, não impede cadastro)
+('José Oliveira Lima',     '86822582900', '1970-06-14', '(83) 99006-6666',
+ 'CNH-00006', 'C', '2024-03-01', 'T', 'A'),
+
+-- Suspenso (para testar regra de status)
+('Luiz Gonzaga Ferreira',  '72338925073', '1988-09-22', '(87) 99007-7777',
+ 'CNH-00007', 'E', '2027-07-10', 'F', 'S');
+
+
+-- ============================================================
 -- VEICULOS
-INSERT INTO veiculo (placa, modelo, marca, ano, tipo_veiculo, capacidade_kg) VALUES
-('ABC-1234', 'Axor 2544', 'Mercedes-Benz', 2020, 'CARRETA', 28000.00),
-('XYZ-5678', 'FH 460', 'Volvo', 2021, 'BITRUCK', 18000.00),
-('DEF-9012', 'Constellation', 'Volkswagen', 2019, 'TOCO', 6000.00),
-('GHI-3456', 'Stralis', 'Iveco', 2022, 'RODOTREM', 50000.00),
-('JKL-7890', 'R450', 'Scania', 2023, 'CARRETA', 32000.00),
-('MNO-1111', 'Atego 2426', 'Mercedes-Benz', 2018, 'TRUCK', 14000.00),
-('PQR-2222', 'VM 270', 'Volvo', 2020, 'TRUCK', 14500.00),
-('STU-3333', 'Cargo 2429', 'Ford', 2017, 'TRUCK', 13000.00),
-('VWX-4444', 'Meteor', 'Volkswagen', 2022, 'CARRETA', 30000.00),
-('YZA-5555', 'S500', 'Scania', 2024, 'RODOTREM', 52000.00);
+-- tipo:   'K'=Truck | 'C'=Carreta | 'V'=Van | 'U'=Utilitário
+-- status: 'D'=Disponível | 'V'=EmViagem | 'M'=EmManutenção
+-- placa:  Mercosul (ABC1D23) ou antigo (ABC1234)
+-- ============================================================
+INSERT INTO veiculo
+    (placa, rntrc, ano_fabricacao, tipo, tara_kg, capacidade_kg, volume_m3, status)
+VALUES
+('ABC1D23', 'RNTRC-00001', 2019, 'K', 8000.00,  14000.00,  90.000, 'D'),  -- Truck disponível
+('XYZ2E45', 'RNTRC-00002', 2021, 'C', 7000.00,  25000.00, 120.000, 'D'),  -- Carreta disponível
+('QWE3F67', 'RNTRC-00003', 2022, 'C', 7500.00,  28000.00, 135.000, 'D'),  -- Carreta disponível
+('RST4G89', 'RNTRC-00004', 2020, 'V', 2500.00,   3000.00,  18.000, 'D'),  -- Van disponível
+('MNO5H12', 'RNTRC-00005', 2018, 'U', 1200.00,   1500.00,   9.000, 'D'),  -- Utilitário disponível
+('DEF6789', 'RNTRC-00006', 2023, 'K', 8500.00,  16000.00,  95.000, 'V'),  -- Truck em viagem (sincronizado com frete EM_TRANSITO abaixo)
+('GHI1234', 'RNTRC-00007', 2017, 'C', 6500.00,  22000.00, 110.000, 'M');  -- Carreta em manutenção
 
+
+-- ============================================================
 -- FRETES
-INSERT INTO frete (numero_frete, id_cliente, id_motorista, id_veiculo, status, cidade_origem, uf_origem, cidade_destino, uf_destino, data_emissao, peso_kg, valor_frete, aliquota_icms, valor_icms, valor_total) VALUES
-('FRT-2026-00001', 1, 1, 1, 'ENTREGUE', 'Recife', 'PE', 'João Pessoa', 'PB', '2026-04-10', 15000.00, 2000.00, 12.00, 240.00, 2240.00),
-('FRT-2026-00002', 2, 2, 2, 'EM_TRANSITO', 'Caruaru', 'PE', 'Campina Grande', 'PB', '2026-04-18', 12000.00, 1500.00, 12.00, 180.00, 1680.00),
-('FRT-2026-00003', 3, 3, 3, 'PENDENTE', 'Natal', 'RN', 'Fortaleza', 'CE', '2026-04-20', 5000.00, 1000.00, 12.00, 120.00, 1120.00),
-('FRT-2026-00004', 4, 4, 4, 'ENTREGUE', 'João Pessoa', 'PB', 'Recife', 'PE', '2026-04-05', 45000.00, 4500.00, 12.00, 540.00, 5040.00),
-('FRT-2026-00005', 5, 5, 5, 'CANCELADO', 'Fortaleza', 'CE', 'Mossoró', 'RN', '2026-04-12', 20000.00, 2800.00, 12.00, 336.00, 3136.00),
-('FRT-2026-00006', 6, 6, 6, 'EM_TRANSITO', 'Olinda', 'PE', 'Maceió', 'AL', '2026-04-19', 10000.00, 1200.00, 12.00, 144.00, 1344.00),
-('FRT-2026-00007', 7, 7, 7, 'PENDENTE', 'Petrolina', 'PE', 'Juazeiro', 'BA', '2026-04-20', 14000.00, 1600.00, 12.00, 192.00, 1792.00),
-('FRT-2026-00008', 8, 8, 8, 'ENTREGUE', 'Maceió', 'AL', 'Aracaju', 'SE', '2026-04-15', 11000.00, 1300.00, 12.00, 156.00, 1456.00),
-('FRT-2026-00009', 9, 9, 9, 'EM_TRANSITO', 'Salvador', 'BA', 'Feira de Santana', 'BA', '2026-04-19', 25000.00, 2200.00, 18.00, 396.00, 2596.00),
-('FRT-2026-00010', 10, 10, 10, 'PENDENTE', 'Aracaju', 'SE', 'Salvador', 'BA', '2026-04-20', 48000.00, 5000.00, 12.00, 600.00, 5600.00);
+-- Cobrir todos os status para demonstração:
+--   'E'=Emitido | 'S'=SaídaConfirmada | 'T'=EmTrânsito
+--   'R'=Entregue | 'N'=NãoEntregue   | 'C'=Cancelado
+--
+-- id_remetente e id_destinatario devem referenciar clientes diferentes
+-- (ou o mesmo cliente com tipo 'a').
+-- ============================================================
+INSERT INTO frete
+    (numero, id_remetente, id_destinatario, id_motorista, id_veiculo,
+     municipio_origem, uf_origem, municipio_destino, uf_destino,
+     descricao_carga, peso_kg, volumes,
+     valor_frete, aliquota_icms, valor_icms, valor_total,
+     status, data_emissao, data_prev_entrega, data_saida, data_entrega,
+     created_by)
+VALUES
+-- 1. EMITIDO — ainda não saiu do pátio
+('FRT-2026-00001',
+ 1, 3,   -- Trans Silva (remetente) → Distribuidora Boa Vista (destinatário)
+ 1, 1,   -- Carlos Alberto, placa ABC1D23 (Truck)
+ 'Recife','PE','Natal','RN',
+ 'Eletrodomésticos', 8000.00, 30,
+ 2000.00, 12.00, 240.00, 2240.00,
+ 'E', '2026-04-20', '2026-04-25', NULL, NULL, 'admin'),
 
--- OCORRENCIAS
-INSERT INTO ocorrencia (id_frete, tipo, descricao) VALUES
-(1, 'AVARIA', 'Carga levemente molhada devido à chuva forte na estrada.'),
-(2, 'ATRASO', 'Pneu furado na BR-232, atraso de 3 horas.'),
-(3, 'INFORMATIVO', 'Aguardando liberação da nota fiscal na origem.'),
-(4, 'ENTREGA', 'Mercadoria descarregada sem avarias no cliente final.'),
-(5, 'CANCELAMENTO', 'Cliente cancelou o pedido antes do embarque.'),
-(6, 'FISCALIZACAO', 'Parada no posto fiscal de fronteira, aguardando vistoria.'),
-(7, 'MANUTENCAO', 'Troca de lâmpada do farol antes de iniciar a viagem.'),
-(8, 'ENTREGA', 'Recebedor ausente na primeira tentativa, entregue na segunda.'),
-(9, 'CLIMA', 'Pista alagada, velocidade reduzida por segurança.'),
-(10, 'INFORMATIVO', 'Veículo carregado e aguardando horário de saída autorizado.');
+-- 2. SAÍDA CONFIRMADA — veículo saiu, ainda não entrou em rota
+('FRT-2026-00002',
+ 2, 4,   -- ComNordeste → Armazéns Paraíba
+ 2, 2,   -- Marcos Pereira, placa XYZ2E45 (Carreta)
+ 'Recife','PE','João Pessoa','PB',
+ 'Alimentos secos e embalados', 12000.00, 50,
+ 1800.00, 12.00, 216.00, 2016.00,
+ 'S', '2026-04-19', '2026-04-22', '2026-04-19 08:00:00', NULL, 'admin'),
+
+-- 3. EM TRÂNSITO — em rota (veículo 6 = DEF6789 com status 'V')
+('FRT-2026-00003',
+ 5, 3,   -- CearáTec (remetente e destinatário ambos) → Distribuidora Boa Vista
+ 3, 6,   -- João Carlos, placa DEF6789 (Truck em viagem)
+ 'Fortaleza','CE','Natal','RN',
+ 'Peças eletrônicas', 5000.00, 20,
+ 3200.00, 12.00, 384.00, 3584.00,
+ 'T', '2026-04-18', '2026-04-23', '2026-04-18 07:30:00', NULL, 'admin'),
+
+-- 4. ENTREGUE — concluído com sucesso
+('FRT-2026-00004',
+ 1, 4,   -- Trans Silva → Armazéns Paraíba
+ 4, 3,   -- Francisco Oliveira, placa QWE3F67 (Carreta — já devolvida como D)
+ 'Recife','PE','João Pessoa','PB',
+ 'Produtos têxteis', 10000.00, 80,
+ 1500.00, 12.00, 180.00, 1680.00,
+ 'R', '2026-04-10', '2026-04-15', '2026-04-10 06:00:00', '2026-04-15 14:30:00', 'carlos'),
+
+-- 5. NÃO ENTREGUE — tentativa frustrada
+('FRT-2026-00005',
+ 2, 6,   -- ComNordeste → BahiaMat
+ 5, 4,   -- Paulo Almeida, placa RST4G89 (Van — já devolvida como D)
+ 'Recife','PE','Salvador','BA',
+ 'Materiais de construção', 2800.00, 15,
+ 2100.00, 12.00, 252.00, 2352.00,
+ 'N', '2026-04-12', '2026-04-17', '2026-04-12 08:00:00', NULL, 'carlos'),
+
+-- 6. CANCELADO — cancelado antes da saída
+('FRT-2026-00006',
+ 6, 3,   -- BahiaMat → Distribuidora Boa Vista
+ 2, 2,   -- Marcos Pereira, Carreta (retornou como D)
+ 'Salvador','BA','Natal','RN',
+ 'Bebidas diversas', 18000.00, 120,
+ 4500.00, 12.00, 540.00, 5040.00,
+ 'C', '2026-04-15', '2026-04-20', NULL, NULL, 'ana');
+
+
+-- ============================================================
+-- OCORRÊNCIAS
+-- tipo: 'P'=SaídaPátio | 'R'=EmRota | 'T'=TentativaEntrega
+--       'E'=EntregaRealizada | 'A'=Avaria | 'X'=Extravio | 'O'=Outros
+-- ============================================================
+INSERT INTO ocorrencia_frete
+    (id_frete, tipo, data_hora, municipio, uf, descricao,
+     nome_recebedor, documento_recebedor, created_by)
+VALUES
+-- Frete 2 (SAÍDA CONFIRMADA) — ocorrência de saída do pátio
+(2, 'P', '2026-04-19 08:00:00', 'Recife',       'PE',
+ 'Veículo saiu do pátio em perfeitas condições. Carga conferida e lacrada.',
+ NULL, NULL, 'carlos'),
+
+-- Frete 3 (EM TRÂNSITO) — saída e ocorrência de rota
+(3, 'P', '2026-04-18 07:30:00', 'Fortaleza',    'CE',
+ 'Veículo saiu do pátio da Ceará Tec.',
+ NULL, NULL, 'admin'),
+
+(3, 'R', '2026-04-19 14:00:00', 'Mossoró',      'RN',
+ 'Em rota, passagem por Mossoró sem intercorrências. Abastecimento realizado.',
+ NULL, NULL, 'admin'),
+
+(3, 'A', '2026-04-20 09:30:00', 'São Gonçalo do Amarante', 'RN',
+ 'Pequena avaria na embalagem de uma caixa identificada na vistoria. Conteúdo preservado.',
+ NULL, NULL, 'admin'),
+
+-- Frete 4 (ENTREGUE) — histórico completo
+(4, 'P', '2026-04-10 06:00:00', 'Recife',       'PE',
+ 'Veículo saiu do pátio pontualmente.',
+ NULL, NULL, 'carlos'),
+
+(4, 'R', '2026-04-11 10:00:00', 'Caruaru',      'PE',
+ 'Em rota normal, sem intercorrências. Parada para descanso do motorista.',
+ NULL, NULL, 'carlos'),
+
+(4, 'E', '2026-04-15 14:30:00', 'João Pessoa',  'PB',
+ 'Entrega realizada com sucesso. Carga conferida pelo responsável.',
+ 'Pedro Henrique Almeida', '123.456.789-00', 'carlos'),
+
+-- Frete 5 (NÃO ENTREGUE) — tentativa frustrada
+(5, 'P', '2026-04-12 08:00:00', 'Recife',       'PE',
+ 'Veículo saiu do pátio.',
+ NULL, NULL, 'carlos'),
+
+(5, 'R', '2026-04-13 16:00:00', 'Feira de Santana', 'BA',
+ 'Em rota, parada para abastecimento e descanso obrigatório.',
+ NULL, NULL, 'carlos'),
+
+(5, 'T', '2026-04-17 09:00:00', 'Salvador',     'BA',
+ 'Tentativa de entrega frustrada: responsável ausente no estabelecimento. Retentativa agendada.',
+ NULL, NULL, 'carlos');
+
+
+-- ============================================================
+-- Ajuste de sequências após seed (garante que os próximos
+-- INSERTs peguem o próximo valor correto)
+-- ============================================================
+SELECT setval('seq_usuario',       (SELECT COALESCE(MAX(idusuario),  0) + 1 FROM usuario),  FALSE);
+SELECT setval('seq_cliente',       (SELECT COALESCE(MAX(idcliente),  0) + 1 FROM cliente),  FALSE);
+SELECT setval('seq_motorista',     (SELECT COALESCE(MAX(idmotorista),0) + 1 FROM motorista),FALSE);
+SELECT setval('seq_veiculo',       (SELECT COALESCE(MAX(idveiculo),  0) + 1 FROM veiculo),  FALSE);
+SELECT setval('seq_frete',         (SELECT COALESCE(MAX(idfrete),    0) + 1 FROM frete),    FALSE);
+SELECT setval('seq_numero_frete',  (SELECT COALESCE(MAX(idfrete),    0) + 1 FROM frete),    FALSE);
+SELECT setval('seq_ocorrencia',    (SELECT COALESCE(MAX(idocorrencia),0)+ 1 FROM ocorrencia_frete), FALSE);
