@@ -44,13 +44,15 @@ public class AuthFilter implements Filter {
         }
     }
 
+// ✅ SUBSTITUIR o método completo
     private boolean isRecursoPublico(String uri, String ctx) {
         return uri.equals(ctx + "/login")
+            || uri.equals(ctx + "/cadastroUsuario")   // ← linha que falta
             || uri.startsWith(ctx + "/css/")
             || uri.startsWith(ctx + "/js/")
-            || uri.startsWith(ctx + "/img/")
+            || uri.startsWith(ctx + "/img/")    
             || uri.endsWith(".ico");
-    }
+}
 
     @Override
     public void destroy() {}
