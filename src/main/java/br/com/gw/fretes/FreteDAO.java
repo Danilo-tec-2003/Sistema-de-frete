@@ -1,3 +1,3 @@
-public class FreteDAO {
+// public class FreteDAO {
     
-}
+// }
