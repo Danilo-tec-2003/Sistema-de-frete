@@ -3,7 +3,7 @@ package br.com.gw.veiculos;
 import br.com.gw.Enums.StatusVeiculo;
 import br.com.gw.nucleo.exception.CadastroException;
 import br.com.gw.nucleo.exception.NegocioException;
-
+import br.com.gw.nucleo.utils.ValidadorUtil;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.Year;
@@ -86,46 +86,59 @@ public class VeiculoBO {
     }
 
     private void validar(Veiculo v) throws CadastroException {
-        if (v.getPlaca() == null || v.getPlaca().trim().isEmpty()) {
-            throw new CadastroException("O campo Placa é obrigatório.");
-        }
-        String placa = v.getPlaca().toUpperCase().trim().replaceAll("-", "");
-        if (!PLACA_MERCOSUL.matcher(placa).matches()
-                && !PLACA_ANTIGA.matcher(placa).matches()) {
-            throw new CadastroException(
-                "A placa informada (" + v.getPlaca() + ") não está no formato Mercosul (ABC1D23) "
-                + "nem no formato antigo (ABC1234).");
-        }
-        if (v.getTipo() == null) {
-            throw new CadastroException("O tipo do veículo é obrigatório.");
-        }
-        if (v.getStatus() == null) {
-            throw new CadastroException("O status do veículo é obrigatório.");
-        }
-        if (v.getCapacidadeKg() != null
-                && v.getCapacidadeKg().compareTo(BigDecimal.ZERO) < 0) {
-            throw new CadastroException("A capacidade de carga não pode ser negativa.");
-        }
 
+        // ── Placa ─────────────────────────────────────────────────────────────
+        if (v.getPlaca() == null || v.getPlaca().trim().isEmpty())
+            throw new CadastroException("O campo Placa é obrigatório.");
+    
+        String placa = v.getPlaca().toUpperCase().trim().replaceAll("[\\s\\-]", "");
+        if (!PLACA_MERCOSUL.matcher(placa).matches() && !PLACA_ANTIGA.matcher(placa).matches())
+            throw new CadastroException(
+                "A placa informada (" + v.getPlaca() + ") não está no formato Mercosul (ABC1D23) " +
+                "nem no formato antigo (ABC1234).");
+    
+        // ── RNTRC ─────────────────────────────────────────────────────────────
+        if (v.getRntrc() == null || v.getRntrc().trim().isEmpty())
+            throw new CadastroException("O campo RNTRC é obrigatório.");
+    
+        // ── Tipo e status ─────────────────────────────────────────────────────
+        if (v.getTipo() == null)
+            throw new CadastroException("O tipo do veículo é obrigatório.");
+    
+        if (v.getStatus() == null)
+            throw new CadastroException("O status do veículo é obrigatório.");
+    
+        // ── Ano de fabricação ─────────────────────────────────────────────────
+        if (v.getAnoFabricacao() == null)
+            throw new CadastroException("O campo Ano de Fabricação é obrigatório.");
+    
+        int anoAtual = Year.now().getValue();
+        if (v.getAnoFabricacao() < 1950 || v.getAnoFabricacao() > anoAtual + 1)
+            throw new CadastroException("Ano de fabricação inválido: " + v.getAnoFabricacao() + ".");
+    
+        // ── Capacidades numéricas ─────────────────────────────────────────────
+        if (v.getTaraKg() == null || v.getTaraKg().compareTo(BigDecimal.ZERO) <= 0)
+            throw new CadastroException("O campo Tara (kg) é obrigatório e deve ser maior que zero.");
+    
+        if (v.getCapacidadeKg() == null || v.getCapacidadeKg().compareTo(BigDecimal.ZERO) <= 0)
+            throw new CadastroException("O campo Capacidade de Carga (kg) é obrigatório e deve ser maior que zero.");
+    
+        if (v.getCapacidadeKg().compareTo(v.getTaraKg()) < 0)
+            throw new CadastroException("A Capacidade de Carga não pode ser menor que a Tara do veículo.");
+    
+        if (v.getVolumeM3() == null || v.getVolumeM3().compareTo(BigDecimal.ZERO) <= 0)
+            throw new CadastroException("O campo Volume (m³) é obrigatório e deve ser maior que zero.");
+    
+        // ── Regra: status disponível com frete em trânsito ───────────────────
         if (v.getId() > 0 && v.getStatus() == StatusVeiculo.DISPONIVEL) {
             try {
-                if (dao.estaEmViagem(v.getId())) {
+                if (dao.estaEmViagem(v.getId()))
                     throw new CadastroException(
-                        "Não é permitido alterar o status para Disponível manualmente "
-                        + "enquanto há frete Em Trânsito vinculado. "
-                        + "O status será atualizado automaticamente ao concluir o frete.");
-                }
+                        "Não é permitido alterar o status para Disponível manualmente enquanto há " +
+                        "frete Em Trânsito vinculado. O status é atualizado automaticamente ao concluir o frete.");
             } catch (SQLException e) {
                 LOG.severe("Erro ao verificar viagem do veículo: " + e.getMessage());
                 throw new CadastroException("Erro ao verificar status do frete vinculado.");
-            }
-        }
-
-        if (v.getAnoFabricacao() != null) {
-            int anoAtual = Year.now().getValue();
-            if (v.getAnoFabricacao() < 1950 || v.getAnoFabricacao() > anoAtual + 1) {
-                throw new CadastroException(
-                    "Ano de fabricação inválido: " + v.getAnoFabricacao() + ".");
             }
         }
     }

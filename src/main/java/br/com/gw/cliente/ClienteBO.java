@@ -8,6 +8,7 @@ import br.com.gw.nucleo.utils.ValidadorCNPJ;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Logger;
+import br.com.gw.nucleo.utils.ValidadorUtil;
 
 public class ClienteBO {
 
@@ -90,23 +91,62 @@ public class ClienteBO {
     }
 
     private void validar(Cliente c) throws CadastroException {
-        if (c.getRazaoSocial() == null || c.getRazaoSocial().trim().isEmpty()) {
+
+        // ── Obrigatórios principais ──────────────────────────────────────────
+        if (vazio(c.getRazaoSocial()))
             throw new CadastroException("O campo Razão Social é obrigatório.");
-        }
-        if (c.getTipo() == null) {
+    
+        if (c.getRazaoSocial().trim().length() < 3)
+            throw new CadastroException("A Razão Social deve ter pelo menos 3 caracteres.");
+    
+        if (c.getTipo() == null)
             throw new CadastroException("O campo Tipo é obrigatório.");
-        }
-
-        String cnpj = c.getCnpj();
-        if (cnpj != null && !c.getCnpj().trim().isEmpty()) {
-            if (!ValidadorCNPJ.isValido(cnpj)) {
-                throw new CadastroException(
-                    "O CNPJ informado (" + cnpj + ") é inválido. Verifique os dígitos.");
-            }
-        }
-
-        if (c.getUf() != null && !c.getUf().trim().isEmpty() && c.getUf().length() != 2) {
-            throw new CadastroException("A UF deve ter exatamente 2 caracteres.");
-        }
+    
+        // ── CNPJ ─────────────────────────────────────────────────────────────
+        if (vazio(c.getCnpj()))
+            throw new CadastroException("O campo CNPJ é obrigatório.");
+    
+        if (!ValidadorCNPJ.isValido(c.getCnpj()))
+            throw new CadastroException("O CNPJ informado (" + c.getCnpj() + ") é inválido. Verifique os dígitos.");
+    
+        // ── Endereço ──────────────────────────────────────────────────────────
+        if (vazio(c.getLogradouro()))
+            throw new CadastroException("O campo Logradouro é obrigatório.");
+    
+        if (vazio(c.getNumeroEnd()))
+            throw new CadastroException("O campo Número do endereço é obrigatório.");
+    
+        if (vazio(c.getBairro()))
+            throw new CadastroException("O campo Bairro é obrigatório.");
+    
+        if (vazio(c.getMunicipio()))
+            throw new CadastroException("O campo Município é obrigatório.");
+    
+        if (vazio(c.getUf()))
+            throw new CadastroException("O campo UF é obrigatório.");
+    
+        if (!ValidadorUtil.isUfValida(c.getUf()))
+            throw new CadastroException("A UF informada (" + c.getUf().toUpperCase() + ") é inválida.");
+    
+        if (vazio(c.getCep()))
+            throw new CadastroException("O campo CEP é obrigatório.");
+    
+        if (!ValidadorUtil.isCepValido(c.getCep()))
+            throw new CadastroException("O CEP informado é inválido. Use o formato 00000-000.");
+    
+        // ── Contato ───────────────────────────────────────────────────────────
+        if (vazio(c.getTelefone()))
+            throw new CadastroException("O campo Telefone é obrigatório.");
+    
+        if (!ValidadorUtil.isTelefoneValido(c.getTelefone()))
+            throw new CadastroException("O Telefone informado é inválido. Use o formato (XX) XXXXX-XXXX.");
+    
+        if (!vazio(c.getEmail()) && !ValidadorUtil.isEmailValido(c.getEmail()))
+            throw new CadastroException("O E-mail informado não é válido.");
+    }
+    
+    // ── helper ────────────────────────────────────────────────────────────────
+    private boolean vazio(String s) {
+        return s == null || s.trim().isEmpty();
     }
 }

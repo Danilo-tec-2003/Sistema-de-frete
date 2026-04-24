@@ -6,6 +6,8 @@
     <meta charset="UTF-8">
     <title>${empty veiculo.id || veiculo.id == 0 ? 'Novo Veículo' : 'Editar Veículo'} – GW Fretes</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/imask@7.6.1/dist/imask.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/masks.js" defer></script>
 </head>
 <body>
 <%@ include file="/jsp/NavBar.jsp" %>
@@ -29,21 +31,25 @@
             <div class="form-row cols-3">
                 <div class="form-group">
                     <label for="placa">Placa *</label>
+                    <%-- type="text" obrigatório — IMask não funciona com type="number" --%>
                     <input type="text" id="placa" name="placa"
-                           value="${veiculo.placa}" class="form-control" required
+                           value="${veiculo.placa}" class="form-control"
                            maxlength="8" placeholder="ABC1D23"
+                           data-mask="placa" required
                            style="text-transform:uppercase">
                 </div>
                 <div class="form-group">
-                    <label for="rntrc">RNTRC</label>
+                    <label for="rntrc">RNTRC *</label>
                     <input type="text" id="rntrc" name="rntrc"
-                           value="${veiculo.rntrc}" class="form-control" maxlength="15">
+                           value="${veiculo.rntrc}" class="form-control"
+                           maxlength="15" required>
                 </div>
                 <div class="form-group">
-                    <label for="anoFabricacao">Ano de Fabricação</label>
-                    <input type="number" id="anoFabricacao" name="anoFabricacao"
+                    <label for="anoFabricacao">Ano de Fabricação *</label>
+                    <%-- type="text" + data-mask="ano" — evita conflito com IMask --%>
+                    <input type="text" id="anoFabricacao" name="anoFabricacao"
                            value="${veiculo.anoFabricacao}" class="form-control"
-                           min="1950" max="2027" placeholder="2021">
+                           placeholder="2021" data-mask="ano" required maxlength="4">
                 </div>
             </div>
 
@@ -63,10 +69,10 @@
                 <div class="form-group">
                     <label for="status">Status *</label>
                     <select id="status" name="status" class="form-control" required>
+                        <option value="">Selecione...</option>
                         <c:forEach var="s" items="${statusList}">
                             <option value="${s.codigo}"
-                                <c:if test="${veiculo.status == s}">selected</c:if>
-                                <c:if test="${empty veiculo && s.codigo.equals('D')}">selected</c:if>>
+                                <c:if test="${veiculo.status == s}">selected</c:if>>
                                 ${s.descricao}
                             </option>
                         </c:forEach>
@@ -78,22 +84,23 @@
 
             <div class="form-row cols-3">
                 <div class="form-group">
-                    <label for="taraKg">Tara (kg)</label>
-                    <input type="number" id="taraKg" name="taraKg"
+                    <label for="taraKg">Tara (kg) *</label>
+                    <%-- type="text" obrigatório — IMask não funciona com type="number" --%>
+                    <input type="text" id="taraKg" name="taraKg"
                            value="${veiculo.taraKg}" class="form-control"
-                           min="0" step="0.01" placeholder="8000">
+                           placeholder="8.000,00" data-mask="decimal" required>
                 </div>
                 <div class="form-group">
-                    <label for="capacidadeKg">Capacidade de Carga (kg)</label>
-                    <input type="number" id="capacidadeKg" name="capacidadeKg"
+                    <label for="capacidadeKg">Capacidade de Carga (kg) *</label>
+                    <input type="text" id="capacidadeKg" name="capacidadeKg"
                            value="${veiculo.capacidadeKg}" class="form-control"
-                           min="0" step="0.01" placeholder="14000">
+                           placeholder="14.000,00" data-mask="decimal" required>
                 </div>
                 <div class="form-group">
-                    <label for="volumeM3">Volume (m³)</label>
-                    <input type="number" id="volumeM3" name="volumeM3"
+                    <label for="volumeM3">Volume (m³) *</label>
+                    <input type="text" id="volumeM3" name="volumeM3"
                            value="${veiculo.volumeM3}" class="form-control"
-                           min="0" step="0.001" placeholder="90.0">
+                           placeholder="90,00" data-mask="decimal" required>
                 </div>
             </div>
 

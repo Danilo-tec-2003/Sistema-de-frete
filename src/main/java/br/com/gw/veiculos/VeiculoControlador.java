@@ -130,8 +130,11 @@ public class VeiculoControlador extends HttpServlet {
     }
 
     private BigDecimal parseBD(String s) {
-        try { return (s == null || s.trim().isEmpty()) ? null
-                      : new BigDecimal(s.trim().replace(",",".")); }
-        catch (NumberFormatException e) { return null; }
+        try {
+            if (s == null || s.trim().isEmpty()) return null;
+            // remove pontos de milhar, troca vírgula decimal por ponto
+            String limpo = s.trim().replaceAll("\\.", "").replace(",", ".");
+            return new BigDecimal(limpo);
+        } catch (NumberFormatException e) { return null; }
     }
 }

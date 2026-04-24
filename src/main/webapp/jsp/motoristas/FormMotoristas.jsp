@@ -6,6 +6,8 @@
     <meta charset="UTF-8">
     <title>${empty motorista.id || motorista.id == 0 ? 'Novo Motorista' : 'Editar Motorista'} – GW Fretes</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/imask@7.6.1/dist/imask.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/masks.js" defer></script>
 </head>
 <body>
 <%@ include file="/jsp/NavBar.jsp" %>
@@ -30,27 +32,32 @@
                 <div class="form-group">
                     <label for="nome">Nome Completo *</label>
                     <input type="text" id="nome" name="nome"
-                           value="${motorista.nome}" class="form-control" required maxlength="100">
+                           value="${motorista.nome}" class="form-control"
+                           required maxlength="100">
                 </div>
                 <div class="form-group">
                     <label for="cpf">CPF *</label>
                     <input type="text" id="cpf" name="cpf"
                            value="${motorista.cpf}" class="form-control"
-                           required maxlength="14" placeholder="000.000.000-00">
+                           required maxlength="14" placeholder="000.000.000-00"
+                           data-mask="cpf">
                 </div>
             </div>
 
             <div class="form-row cols-2">
                 <div class="form-group">
-                    <label for="dataNascimento">Data de Nascimento</label>
+                    <label for="dataNascimento">Data de Nascimento *</label>
+                    <%-- max calculado no controller e enviado como atributo --%>
                     <input type="date" id="dataNascimento" name="dataNascimento"
-                           value="${motorista.dataNascimento}" class="form-control">
+                           value="${motorista.dataNascimento}" class="form-control"
+                           required max="${maxDataNascimento}">
                 </div>
                 <div class="form-group">
-                    <label for="telefone">Telefone</label>
+                    <label for="telefone">Telefone *</label>
                     <input type="text" id="telefone" name="telefone"
                            value="${motorista.telefone}" class="form-control"
-                           maxlength="15" placeholder="(81) 99999-0000">
+                           maxlength="15" placeholder="(81) 99999-0000"
+                           required data-mask="telefone">
                 </div>
             </div>
 
@@ -60,16 +67,17 @@
                 <div class="form-group">
                     <label for="cnhNumero">Número da CNH *</label>
                     <input type="text" id="cnhNumero" name="cnhNumero"
-                           value="${motorista.cnhNumero}" class="form-control" required maxlength="20">
+                           value="${motorista.cnhNumero}" class="form-control"
+                           required maxlength="20">
                 </div>
                 <div class="form-group">
                     <label for="cnhCategoria">Categoria *</label>
                     <select id="cnhCategoria" name="cnhCategoria" class="form-control" required>
                         <option value="">Selecione...</option>
                         <c:forEach var="cat" items="${categorias}">
-                            <option value="${cat.codigo}"
+                            <option value="${cat}"
                                 <c:if test="${motorista.cnhCategoria == cat}">selected</c:if>>
-                                ${cat.codigo}
+                                ${cat}
                             </option>
                         </c:forEach>
                     </select>
@@ -99,10 +107,10 @@
                 <div class="form-group">
                     <label for="status">Status *</label>
                     <select id="status" name="status" class="form-control" required>
+                        <option value="">Selecione...</option>
                         <c:forEach var="s" items="${statusList}">
                             <option value="${s.codigo}"
-                                <c:if test="${motorista.status == s}">selected</c:if>
-                                <c:if test="${empty motorista && s.codigo.equals('A')}">selected</c:if>>
+                                <c:if test="${motorista.status == s}">selected</c:if>>
                                 ${s.descricao}
                             </option>
                         </c:forEach>

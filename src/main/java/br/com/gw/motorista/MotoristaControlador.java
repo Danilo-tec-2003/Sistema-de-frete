@@ -80,6 +80,8 @@ public class MotoristaControlador extends HttpServlet {
         } catch (NegocioException e) {
             req.setAttribute("erro",       e.getMessage());
             req.setAttribute("motorista",  m);
+            req.setAttribute("maxDataNascimento",
+            java.time.LocalDate.now().minusYears(18).toString()); // ex: "2008-04-24"
             req.setAttribute("categorias", CategoriaCNH.values());
             req.setAttribute("vinculos",   TipoVinculo.values());
             req.setAttribute("statusList", StatusMotorista.values());

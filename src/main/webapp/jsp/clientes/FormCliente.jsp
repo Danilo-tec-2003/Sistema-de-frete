@@ -6,6 +6,8 @@
     <meta charset="UTF-8">
     <title>${empty cliente.id || cliente.id == 0 ? 'Novo Cliente' : 'Editar Cliente'} – GW Fretes</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/imask@7.6.1/dist/imask.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/masks.js" defer></script>
 </head>
 <body>
 <%@ include file="/jsp/NavBar.jsp" %>
@@ -13,9 +15,7 @@
 
     <div class="page-header">
         <h1>${empty cliente.id || cliente.id == 0 ? 'Novo Cliente' : 'Editar Cliente'}</h1>
-        <a href="${pageContext.request.contextPath}/clientes" class="btn btn-secondary">
-            &larr; Voltar
-        </a>
+        <a href="${pageContext.request.contextPath}/clientes" class="btn btn-secondary">&larr; Voltar</a>
     </div>
 
     <c:if test="${not empty erro}">
@@ -32,7 +32,8 @@
                 <div class="form-group">
                     <label for="razaoSocial">Razão Social *</label>
                     <input type="text" id="razaoSocial" name="razaoSocial"
-                           value="${cliente.razaoSocial}" class="form-control" required maxlength="100">
+                           value="${cliente.razaoSocial}" class="form-control"
+                           required maxlength="100">
                 </div>
                 <div class="form-group">
                     <label for="nomeFantasia">Nome Fantasia</label>
@@ -43,10 +44,11 @@
 
             <div class="form-row cols-3">
                 <div class="form-group">
-                    <label for="cnpj">CNPJ</label>
+                    <label for="cnpj">CNPJ *</label>
                     <input type="text" id="cnpj" name="cnpj"
                            value="${cliente.cnpj}" class="form-control"
-                           maxlength="18" placeholder="00.000.000/0000-00">
+                           maxlength="18" placeholder="00.000.000/0000-00"
+                           data-mask="cnpj" required>
                 </div>
                 <div class="form-group">
                     <label for="inscricaoEst">Inscrição Estadual</label>
@@ -71,14 +73,16 @@
 
             <div class="form-row cols-2">
                 <div class="form-group">
-                    <label for="logradouro">Logradouro</label>
+                    <label for="logradouro">Logradouro *</label>
                     <input type="text" id="logradouro" name="logradouro"
-                           value="${cliente.logradouro}" class="form-control" maxlength="80">
+                           value="${cliente.logradouro}" class="form-control"
+                           maxlength="80" required>
                 </div>
                 <div class="form-group">
-                    <label for="numeroEnd">Número</label>
+                    <label for="numeroEnd">Número *</label>
                     <input type="text" id="numeroEnd" name="numeroEnd"
-                           value="${cliente.numeroEnd}" class="form-control" maxlength="10">
+                           value="${cliente.numeroEnd}" class="form-control"
+                           maxlength="10" required>
                 </div>
             </div>
 
@@ -89,29 +93,32 @@
                            value="${cliente.complemento}" class="form-control" maxlength="120">
                 </div>
                 <div class="form-group">
-                    <label for="bairro">Bairro</label>
+                    <label for="bairro">Bairro *</label>
                     <input type="text" id="bairro" name="bairro"
-                           value="${cliente.bairro}" class="form-control" maxlength="60">
+                           value="${cliente.bairro}" class="form-control"
+                           maxlength="60" required>
                 </div>
                 <div class="form-group">
-                    <label for="cep">CEP</label>
+                    <label for="cep">CEP *</label>
                     <input type="text" id="cep" name="cep"
                            value="${cliente.cep}" class="form-control"
-                           maxlength="9" placeholder="00000-000">
+                           maxlength="9" placeholder="00000-000"
+                           data-mask="cep" required>
                 </div>
             </div>
 
             <div class="form-row cols-2">
                 <div class="form-group">
-                    <label for="municipio">Município</label>
+                    <label for="municipio">Município *</label>
                     <input type="text" id="municipio" name="municipio"
-                           value="${cliente.municipio}" class="form-control" maxlength="80">
+                           value="${cliente.municipio}" class="form-control"
+                           maxlength="80" required>
                 </div>
                 <div class="form-group">
                     <label for="uf">UF</label>
                     <input type="text" id="uf" name="uf"
                            value="${cliente.uf}" class="form-control"
-                           maxlength="2" placeholder="PE" style="text-transform:uppercase">
+                           maxlength="2" placeholder="PE" style="text-transform:uppercase" required>
                 </div>
             </div>
 
@@ -119,10 +126,11 @@
 
             <div class="form-row cols-2">
                 <div class="form-group">
-                    <label for="telefone">Telefone</label>
+                    <label for="telefone">Telefone *</label>
                     <input type="text" id="telefone" name="telefone"
                            value="${cliente.telefone}" class="form-control"
-                           maxlength="15" placeholder="(81) 99999-0000">
+                           maxlength="15" placeholder="(81) 99999-0000"
+                           data-mask="telefone" required>
                 </div>
                 <div class="form-group">
                     <label for="email">E-mail</label>
