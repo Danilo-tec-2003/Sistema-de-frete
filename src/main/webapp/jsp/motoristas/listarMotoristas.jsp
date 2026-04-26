@@ -83,10 +83,10 @@
                                         <td>${empty m.telefone ? '—' : m.telefone}</td>
                                         <td>
                                             <c:choose>
-                                                <c:when test="${m.status.codigo.equals('A')}">
+                                                <c:when test="${m.status == 'ATIVO'}">
                                                     <span class="badge badge-ativo">Ativo</span>
                                                 </c:when>
-                                                <c:when test="${m.status.codigo.equals('S')}">
+                                                <c:when test="${m.status == 'SUSPENSO'}">
                                                     <span class="badge badge-suspenso">Suspenso</span>
                                                 </c:when>
                                                 <c:otherwise>

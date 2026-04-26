@@ -78,10 +78,10 @@
                                         <td>${empty v.volumeM3 ? '—' : v.volumeM3}</td>
                                         <td>
                                             <c:choose>
-                                                <c:when test="${v.status.codigo.equals('D')}">
+                                                <c:when test="${v.status == 'DISPONIVEL'}">
                                                     <span class="badge badge-disponivel">Disponível</span>
                                                 </c:when>
-                                                <c:when test="${v.status.codigo.equals('V')}">
+                                                <c:when test="${v.status == 'EM_VIAGEM'}">
                                                     <span class="badge badge-viagem">Em Viagem</span>
                                                 </c:when>
                                                 <c:otherwise>
