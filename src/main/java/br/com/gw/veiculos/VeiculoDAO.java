@@ -100,6 +100,18 @@ public class VeiculoDAO {
         }
     }
 
+    public List<Veiculo> listarDisponiveis(String filtro, int pagina, int tamPagina) throws SQLException {
+        List<Veiculo> todos = listar(filtro, pagina, tamPagina);
+        List<Veiculo> disponiveis = new ArrayList<>();
+        for (Veiculo v : todos) {
+            if (v != null && v.getStatus() == StatusVeiculo.DISPONIVEL) {
+                disponiveis.add(v);
+            }
+        }
+        return disponiveis;
+    }
+
+
     private void preencher(PreparedStatement ps, Veiculo v) throws SQLException {
         ps.setString(1, v.getPlaca() == null ? null : v.getPlaca().toUpperCase().trim());
         ps.setString(2, v.getRntrc());

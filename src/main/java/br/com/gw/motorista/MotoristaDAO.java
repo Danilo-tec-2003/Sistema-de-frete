@@ -102,6 +102,18 @@ public class MotoristaDAO {
         }
     }
 
+    public List<Motorista> listarAtivos() throws SQLException {
+        // Reutiliza o método listar para evitar duplicação do mapeamento do ResultSet.
+        List<Motorista> todos = listar("%", 1, Integer.MAX_VALUE);
+        List<Motorista> ativos = new ArrayList<>();
+        for (Motorista m : todos) {
+            if (m != null && m.getStatus() == StatusMotorista.ATIVO) {
+                ativos.add(m);
+            }
+        }
+        return ativos;
+    }
+
     private void preencher(PreparedStatement ps, Motorista m) throws SQLException {
         ps.setString(1, m.getNome());
         ps.setString(2, m.getCpf() == null ? null : m.getCpf().replaceAll("[^0-9]",""));

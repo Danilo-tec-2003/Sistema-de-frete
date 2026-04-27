@@ -117,6 +117,21 @@ public class ClienteDAO {
         }
     }
 
+    // ...existing code...
+    public List<Cliente> listarAtivos() throws SQLException {
+        List<Cliente> lista = new ArrayList<>();
+        String sql = "SELECT idcliente, razao_social, nome_fantasia, cnpj, inscricao_est, tipo, logradouro, numero_end, complemento, bairro, municipio, uf, cep, telefone, email, is_ativo FROM cliente WHERE is_ativo = TRUE ORDER BY razao_social";
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(mapear(rs));
+            }
+        }
+        return lista;
+    }
+// ...existing code...
+
     private void preencherStatement(PreparedStatement ps, Cliente c) throws SQLException {
         ps.setString(1,  c.getRazaoSocial());
         ps.setString(2,  c.getNomeFantasia());
