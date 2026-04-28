@@ -8,6 +8,7 @@ import br.com.gw.veiculos.Veiculo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Entidade principal de frete.
@@ -207,4 +208,14 @@ public class Frete {
             || status == StatusFrete.SAIDA_CONFIRMADA
             || status == StatusFrete.EM_TRANSITO;
     }
+
+    public String getDataEmissaoFormatada() {
+    if (this.dataEmissao == null) return "";
+    return this.dataEmissao.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+}
+
+public String getDataPrevEntregaFormatada() {
+    if (this.dataPrevEntrega == null) return "";
+    return this.dataPrevEntrega.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+}
 }

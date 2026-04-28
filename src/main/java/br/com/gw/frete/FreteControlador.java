@@ -70,11 +70,11 @@ public class FreteControlador extends HttpServlet {
                 }
             }
         } catch (NegocioException e) {
-            tratarErro(req, resp, e.getMessage(), "/jsp/fretes/listarFrete.jsp");
+            tratarErro(req, resp, e.getMessage(), "/jsp/Frete/listarFretes.jsp");
         } catch (Exception e) {
             LOG.severe("Erro inesperado no GET /fretes: " + e.getMessage());
             tratarErro(req, resp, "Erro inesperado. Tente novamente.",
-                       "/jsp/fretes/listarFrete.jsp");
+                       "/jsp/Frete/listarFretes.jsp");
         }
     }
 
@@ -118,7 +118,7 @@ public class FreteControlador extends HttpServlet {
         } catch (Exception e) {
             LOG.severe("Erro inesperado no POST /fretes acao=" + acao + ": " + e.getMessage());
             tratarErro(req, resp, "Erro inesperado. Tente novamente.",
-                       "/jsp/fretes/listarFrete.jsp");
+                       "/jsp/Frete/listarFretes.jsp");
         }
     }
 
@@ -142,7 +142,7 @@ public class FreteControlador extends HttpServlet {
         req.setAttribute("statusList",    StatusFrete.values());
         req.setAttribute("paginaAtual",   pagina);
         req.setAttribute("totalPaginas",  totalPaginas);
-        req.getRequestDispatcher("/jsp/fretes/listarFrete.jsp").forward(req, resp);
+        req.getRequestDispatcher("/jsp/Frete/listarFretes.jsp").forward(req, resp);
     }
 
     private void formNovo(HttpServletRequest req, HttpServletResponse resp)
@@ -150,11 +150,11 @@ public class FreteControlador extends HttpServlet {
         try {
             carregarDadosFormulario(req);
             req.setAttribute("frete", new Frete());
-            req.getRequestDispatcher("/jsp/fretes/FormFrete.jsp").forward(req, resp);
+            req.getRequestDispatcher("/jsp/Frete/FormFrete.jsp").forward(req, resp);
         } catch (SQLException e) {
             LOG.severe("Erro ao carregar dados para formulário: " + e.getMessage());
             tratarErro(req, resp, "Erro ao carregar dados do formulário.",
-                       "/jsp/fretes/listarFrete.jsp");
+                       "/jsp/Frete/listarFretes.jsp");
         }
     }
 
@@ -166,7 +166,7 @@ public class FreteControlador extends HttpServlet {
             return;
         }
         carregarDetalhe(req, id);
-        req.getRequestDispatcher("/jsp/fretes/FreteDetalhe.jsp").forward(req, resp);
+        req.getRequestDispatcher("/jsp/Frete/FreteDetalhe.jsp").forward(req, resp);
     }
 
     private void detalheComErro(HttpServletRequest req, HttpServletResponse resp, int idFrete)
@@ -176,7 +176,7 @@ public class FreteControlador extends HttpServlet {
         } catch (NegocioException e) {
             req.setAttribute("erro", e.getMessage());
         }
-        req.getRequestDispatcher("/jsp/fretes/FreteDetalhe.jsp").forward(req, resp);
+        req.getRequestDispatcher("/jsp/Frete/FreteDetalhe.jsp").forward(req, resp);
     }
 
     private void carregarDetalhe(HttpServletRequest req, int idFrete)
@@ -345,7 +345,7 @@ public class FreteControlador extends HttpServlet {
     private void carregarDadosFormulario(HttpServletRequest req) throws SQLException {
         List<Cliente>   clientes   = clienteDAO.listarAtivos();
         List<Motorista> motoristas = motoDAO.listarAtivos();
-        List<Veiculo>   veiculos   = veicDAO.listarDisponiveis(null, 0, 10); // Adjust arguments as needed
+        List<Veiculo>   veiculos   = veicDAO.listarDisponiveis(null, 1, 10); // Adjust arguments as needed
         req.setAttribute("clientes",   clientes);
         req.setAttribute("motoristas", motoristas);
         req.setAttribute("veiculos",   veiculos);
