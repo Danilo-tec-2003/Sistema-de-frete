@@ -113,7 +113,10 @@ public class FreteControlador extends HttpServlet {
                 detalheComErro(req, resp, idFrete);
             } else {
                 req.setAttribute("erro", e.getMessage());
-                formNovo(req, resp);
+                // CORREÇÃO: montar o frete com os dados do request, não new Frete()
+                req.setAttribute("frete", montarFreteDoRequest(req));
+                try { carregarDadosFormulario(req); } catch (Exception ex) { /* ignora */ }
+                req.getRequestDispatcher("/jsp/Frete/FormFrete.jsp").forward(req, resp);
             }
         } catch (Exception e) {
             LOG.severe("Erro inesperado no POST /fretes acao=" + acao + ": " + e.getMessage());
