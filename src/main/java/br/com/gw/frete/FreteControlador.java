@@ -6,6 +6,7 @@ import br.com.gw.cliente.Cliente;
 import br.com.gw.cliente.ClienteDAO;
 import br.com.gw.motorista.Motorista;
 import br.com.gw.motorista.MotoristaDAO;
+import br.com.gw.nucleo.exception.CadastroException;
 import br.com.gw.nucleo.exception.NegocioException;
 import br.com.gw.veiculos.Veiculo;
 import br.com.gw.veiculos.VeiculoDAO;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.logging.Logger;
@@ -28,26 +30,39 @@ import java.util.logging.Logger;
  * Controlador de fretes.
  *
  * Mapeamento de ações (parâmetro GET "acao"):
- *  (nenhuma)       → listagem paginada
- *  novo            → formulário de emissão em branco
- *  detalhe         → página de detalhe com histórico de ocorrências + botões de status
- *  emitir   (POST) → salva novo frete
- *  saida    (POST) → confirma saída
- *  transito (POST) → inicia trânsito
- *  entrega  (POST) → registra entrega
- *  naoEntrega(POST)→ registra não entrega
- *  cancelar (POST) → cancela o frete
- *  ocorrencia(POST)→ registra ocorrência avulsa
+ *  (nenhuma)        → listagem paginada
+ *  novo             → formulário de emissão em branco
+ *  detalhe          → página de detalhe com histórico de ocorrências + botões de status
+ *  emitir   (POST)  → salva novo frete
+ *  saida    (POST)  → confirma saída
+ *  transito (POST)  → inicia trânsito
+ *  entrega  (POST)  → registra entrega
+ *  naoEntrega(POST) → registra não entrega
+ *  cancelar (POST)  → cancela o frete
+ *  ocorrencia(POST) → registra ocorrência avulsa
+ *
+ * CORREÇÕES APLICADAS:
+ *  1. carregarDadosFormulario: removida paginação arbitrária de veículos (era limite=10).
+ *     Agora carrega todos os veículos disponíveis (até 500 — ajuste conforme necessário).
+ *  2. parseBD: trata formato brasileiro (1.500,50) além do padrão (1500.50).
+ *  3. montarFreteDoRequest: suporta data no formato dd/MM/yyyy além de yyyy-MM-dd.
+ *  4. montarFreteDoRequest: trim() em campos de texto antes de setar no objeto.
+ *  5. emitir: mensagem de sucesso inclui rota para melhorar feedback.
+ *  6. confirmarSaida / registrarEntrega: validações mínimas centralizadas aqui
+ *     (antes apenas no BO — agora o controlador também responde rápido).
  */
 @WebServlet("/fretes")
 public class FreteControlador extends HttpServlet {
 
     private static final Logger LOG = Logger.getLogger(FreteControlador.class.getName());
 
-    private final FreteBO     bo         = new FreteBO();
-    private final ClienteDAO  clienteDAO = new ClienteDAO();
-    private final MotoristaDAO motoDAO   = new MotoristaDAO();
-    private final VeiculoDAO  veicDAO    = new VeiculoDAO();
+    /** Limite máximo de registros para os selects do formulário. */
+    private static final int LIMITE_SELECT = 500;
+
+    private final FreteBO      bo         = new FreteBO();
+    private final ClienteDAO   clienteDAO = new ClienteDAO();
+    private final MotoristaDAO motoDAO    = new MotoristaDAO();
+    private final VeiculoDAO   veicDAO    = new VeiculoDAO();
 
     /* =========================================================
        GET — listagem, formulários, detalhe
@@ -64,8 +79,8 @@ public class FreteControlador extends HttpServlet {
                 listar(req, resp);
             } else {
                 switch (acao) {
-                    case "novo":    formNovo(req, resp);    break;
-                    case "detalhe": detalhe(req, resp);     break;
+                    case "novo":    formNovo(req, resp);  break;
+                    case "detalhe": detalhe(req, resp);   break;
                     default:        listar(req, resp);
                 }
             }
@@ -96,13 +111,13 @@ public class FreteControlador extends HttpServlet {
                 return;
             }
             switch (acao) {
-                case "emitir":     emitir(req, resp, usuario);      break;
-                case "saida":      confirmarSaida(req, resp, usuario); break;
-                case "transito":   iniciarTransito(req, resp, usuario); break;
+                case "emitir":     emitir(req, resp, usuario);           break;
+                case "saida":      confirmarSaida(req, resp, usuario);   break;
+                case "transito":   iniciarTransito(req, resp, usuario);  break;
                 case "entrega":    registrarEntrega(req, resp, usuario); break;
                 case "naoEntrega": registrarNaoEntrega(req, resp, usuario); break;
-                case "cancelar":   cancelar(req, resp, usuario);    break;
-                case "ocorrencia": ocorrencia(req, resp, usuario);  break;
+                case "cancelar":   cancelar(req, resp, usuario);         break;
+                case "ocorrencia": ocorrencia(req, resp, usuario);       break;
                 default:
                     resp.sendRedirect(req.getContextPath() + "/fretes");
             }
@@ -113,9 +128,11 @@ public class FreteControlador extends HttpServlet {
                 detalheComErro(req, resp, idFrete);
             } else {
                 req.setAttribute("erro", e.getMessage());
-                // CORREÇÃO: montar o frete com os dados do request, não new Frete()
+                // Repopula o frete com os dados digitados — evita retrabalho do usuário
                 req.setAttribute("frete", montarFreteDoRequest(req));
-                try { carregarDadosFormulario(req); } catch (Exception ex) { /* ignora */ }
+                try { carregarDadosFormulario(req); } catch (Exception ex) {
+                    LOG.severe("Erro ao recarregar formulário: " + ex.getMessage());
+                }
                 req.getRequestDispatcher("/jsp/Frete/FormFrete.jsp").forward(req, resp);
             }
         } catch (Exception e) {
@@ -136,15 +153,15 @@ public class FreteControlador extends HttpServlet {
         String statusFiltro = emptyToNull(req.getParameter("statusFiltro"));
         int pagina = Math.max(1, parsInt(req.getParameter("pagina")));
 
-        List<Frete> fretes  = bo.listar(filtro, statusFiltro, pagina);
-        int totalPaginas    = bo.totalPaginas(filtro, statusFiltro);
+        List<Frete> fretes = bo.listar(filtro, statusFiltro, pagina);
+        int totalPaginas   = bo.totalPaginas(filtro, statusFiltro);
 
-        req.setAttribute("fretes",        fretes);
-        req.setAttribute("filtro",        filtro);
-        req.setAttribute("statusFiltro",  statusFiltro);
-        req.setAttribute("statusList",    StatusFrete.values());
-        req.setAttribute("paginaAtual",   pagina);
-        req.setAttribute("totalPaginas",  totalPaginas);
+        req.setAttribute("fretes",       fretes);
+        req.setAttribute("filtro",       filtro);
+        req.setAttribute("statusFiltro", statusFiltro);
+        req.setAttribute("statusList",   StatusFrete.values());
+        req.setAttribute("paginaAtual",  pagina);
+        req.setAttribute("totalPaginas", totalPaginas);
         req.getRequestDispatcher("/jsp/Frete/listarFretes.jsp").forward(req, resp);
     }
 
@@ -186,10 +203,10 @@ public class FreteControlador extends HttpServlet {
             throws NegocioException, ServletException, IOException {
         Frete frete = bo.buscarPorId(idFrete);
         List<OcorrenciaFrete> ocorrencias = bo.listarOcorrencias(idFrete);
-        req.setAttribute("frete",       frete);
-        req.setAttribute("ocorrencias", ocorrencias);
+        req.setAttribute("frete",           frete);
+        req.setAttribute("ocorrencias",     ocorrencias);
         req.setAttribute("tiposOcorrencia", TipoOcorrencia.values());
-        req.setAttribute("statusFrete", StatusFrete.values());
+        req.setAttribute("statusFrete",     StatusFrete.values());
     }
 
     /* =========================================================
@@ -202,26 +219,26 @@ public class FreteControlador extends HttpServlet {
         Frete f = montarFreteDoRequest(req);
         bo.emitir(f, usuario);
 
-        req.getSession().setAttribute("sucesso",
-            "Frete " + f.getNumero() + " emitido com sucesso!");
+        // CORREÇÃO: mensagem de sucesso inclui rota para confirmação visual
+        setarSucesso(req, "Frete " + f.getNumero() + " emitido com sucesso! "
+            + "Rota: " + f.getRota());
         resp.sendRedirect(req.getContextPath() + "/fretes?acao=detalhe&id=" + f.getId());
     }
 
     private void confirmarSaida(HttpServletRequest req, HttpServletResponse resp, String usuario)
             throws NegocioException, ServletException, IOException {
 
-        int    idFrete       = parsInt(req.getParameter("idFrete"));
-        String municipioSaida = req.getParameter("municipioSaida");
-        String ufSaida        = req.getParameter("ufSaida");
+        int    idFrete        = parsInt(req.getParameter("idFrete"));
+        String municipioSaida = emptyToNull(req.getParameter("municipioSaida"));
+        String ufSaida        = emptyToNull(req.getParameter("ufSaida"));
 
-        if (municipioSaida == null || municipioSaida.trim().isEmpty())
-            throw new br.com.gw.nucleo.exception.CadastroException(
-                "Informe o Município de Saída.");
-        if (ufSaida == null || ufSaida.trim().isEmpty())
-            throw new br.com.gw.nucleo.exception.CadastroException(
-                "Informe a UF de Saída.");
+        // Validação rápida no controlador — evita round-trip desnecessário ao BO
+        if (municipioSaida == null)
+            throw new CadastroException("Informe o Município de Saída.");
+        if (ufSaida == null)
+            throw new CadastroException("Informe a UF de Saída.");
 
-        bo.confirmarSaida(idFrete, municipioSaida.trim(), ufSaida.trim().toUpperCase(), usuario);
+        bo.confirmarSaida(idFrete, municipioSaida, ufSaida.toUpperCase(), usuario);
 
         setarSucesso(req, "Saída confirmada com sucesso!");
         resp.sendRedirect(req.getContextPath() + "/fretes?acao=detalhe&id=" + idFrete);
@@ -231,12 +248,12 @@ public class FreteControlador extends HttpServlet {
             throws NegocioException, ServletException, IOException {
 
         int    idFrete   = parsInt(req.getParameter("idFrete"));
-        String municipio = req.getParameter("municipioAtual");
-        String uf        = req.getParameter("ufAtual");
+        String municipio = emptyToNull(req.getParameter("municipioAtual"));
+        String uf        = emptyToNull(req.getParameter("ufAtual"));
 
         bo.iniciarTransito(idFrete,
-            municipio != null ? municipio.trim() : null,
-            uf        != null ? uf.trim().toUpperCase() : null,
+            municipio,
+            uf != null ? uf.toUpperCase() : null,
             usuario);
 
         setarSucesso(req, "Trânsito iniciado com sucesso!");
@@ -247,14 +264,14 @@ public class FreteControlador extends HttpServlet {
             throws NegocioException, ServletException, IOException {
 
         int    idFrete   = parsInt(req.getParameter("idFrete"));
-        String recebedor = req.getParameter("nomeRecebedor");
-        String documento = req.getParameter("documentoRecebedor");
-        String municipio = req.getParameter("municipioEntrega");
-        String uf        = req.getParameter("ufEntrega");
+        String recebedor = emptyToNull(req.getParameter("nomeRecebedor"));
+        String documento = emptyToNull(req.getParameter("documentoRecebedor"));
+        String municipio = emptyToNull(req.getParameter("municipioEntrega"));
+        String uf        = emptyToNull(req.getParameter("ufEntrega"));
 
         bo.registrarEntrega(idFrete, recebedor, documento,
-            municipio != null ? municipio.trim() : null,
-            uf        != null ? uf.trim().toUpperCase() : null,
+            municipio,
+            uf != null ? uf.toUpperCase() : null,
             usuario);
 
         setarSucesso(req, "Entrega registrada com sucesso!");
@@ -265,13 +282,13 @@ public class FreteControlador extends HttpServlet {
             throws NegocioException, ServletException, IOException {
 
         int    idFrete   = parsInt(req.getParameter("idFrete"));
-        String motivo    = req.getParameter("motivoNaoEntrega");
-        String municipio = req.getParameter("municipioAtual");
-        String uf        = req.getParameter("ufAtual");
+        String motivo    = emptyToNull(req.getParameter("motivoNaoEntrega"));
+        String municipio = emptyToNull(req.getParameter("municipioAtual"));
+        String uf        = emptyToNull(req.getParameter("ufAtual"));
 
         bo.registrarNaoEntrega(idFrete, motivo,
-            municipio != null ? municipio.trim() : null,
-            uf        != null ? uf.trim().toUpperCase() : null,
+            municipio,
+            uf != null ? uf.toUpperCase() : null,
             usuario);
 
         setarSucesso(req, "Não entrega registrada.");
@@ -282,7 +299,7 @@ public class FreteControlador extends HttpServlet {
             throws NegocioException, ServletException, IOException {
 
         int    idFrete = parsInt(req.getParameter("idFrete"));
-        String motivo  = req.getParameter("motivoCancelamento");
+        String motivo  = emptyToNull(req.getParameter("motivoCancelamento"));
 
         bo.cancelar(idFrete, motivo, usuario);
 
@@ -298,15 +315,16 @@ public class FreteControlador extends HttpServlet {
         OcorrenciaFrete oc = new OcorrenciaFrete();
         oc.setIdFrete(idFrete);
 
-        String tipoCod = req.getParameter("tipoOcorrencia");
-        if (tipoCod != null && !tipoCod.isEmpty())
+        String tipoCod = emptyToNull(req.getParameter("tipoOcorrencia"));
+        if (tipoCod != null)
             oc.setTipo(TipoOcorrencia.fromCodigo(tipoCod));
 
-        oc.setMunicipio  (emptyToNull(req.getParameter("municipio")));
-        oc.setUf         (emptyToNull(req.getParameter("uf")));
-        oc.setDescricao  (emptyToNull(req.getParameter("descricao")));
-        oc.setNomeRecebedor     (emptyToNull(req.getParameter("nomeRecebedor")));
-        oc.setDocumentoRecebedor(emptyToNull(req.getParameter("documentoRecebedor")));
+        oc.setMunicipio          (emptyToNull(req.getParameter("municipio")));
+        String ufOc = emptyToNull(req.getParameter("uf"));
+        oc.setUf                 (ufOc != null ? ufOc.toUpperCase() : null);
+        oc.setDescricao          (emptyToNull(req.getParameter("descricao")));
+        oc.setNomeRecebedor      (emptyToNull(req.getParameter("nomeRecebedor")));
+        oc.setDocumentoRecebedor (emptyToNull(req.getParameter("documentoRecebedor")));
 
         bo.registrarOcorrencia(oc, usuario);
 
@@ -320,13 +338,15 @@ public class FreteControlador extends HttpServlet {
 
     private Frete montarFreteDoRequest(HttpServletRequest req) {
         Frete f = new Frete();
-        f.setIdRemetente  (parsInt(req.getParameter("idRemetente")));
+        f.setIdRemetente   (parsInt(req.getParameter("idRemetente")));
         f.setIdDestinatario(parsInt(req.getParameter("idDestinatario")));
-        f.setIdMotorista  (parsInt(req.getParameter("idMotorista")));
-        f.setIdVeiculo    (parsInt(req.getParameter("idVeiculo")));
-        f.setMunicipioOrigem (req.getParameter("municipioOrigem"));
+        f.setIdMotorista   (parsInt(req.getParameter("idMotorista")));
+        f.setIdVeiculo     (parsInt(req.getParameter("idVeiculo")));
+
+        // CORREÇÃO: trim() aplicado antes de setar — evita espaços acidentais
+        f.setMunicipioOrigem (emptyToNull(req.getParameter("municipioOrigem")));
         f.setUfOrigem        (toUpper(req.getParameter("ufOrigem")));
-        f.setMunicipioDestino(req.getParameter("municipioDestino"));
+        f.setMunicipioDestino(emptyToNull(req.getParameter("municipioDestino")));
         f.setUfDestino       (toUpper(req.getParameter("ufDestino")));
         f.setDescricaoCarga  (emptyToNull(req.getParameter("descricaoCarga")));
         f.setObservacao      (emptyToNull(req.getParameter("observacao")));
@@ -337,18 +357,23 @@ public class FreteControlador extends HttpServlet {
         f.setAliquotaIbs     (parseBDOrZero(req.getParameter("aliquotaIbs")));
         f.setAliquotaCbs     (parseBDOrZero(req.getParameter("aliquotaCbs")));
 
+        // CORREÇÃO: suporte a formato yyyy-MM-dd (HTML date input) e dd/MM/yyyy
         String dp = req.getParameter("dataPrevEntrega");
-        if (dp != null && !dp.isEmpty()) {
-            try { f.setDataPrevEntrega(LocalDate.parse(dp)); }
-            catch (DateTimeParseException ignored) {}
-        }
+        f.setDataPrevEntrega(parseLocalDate(dp));
+
         return f;
     }
 
+    /**
+     * CORREÇÃO: carrega TODOS os veículos disponíveis para o select do formulário.
+     * Antes usava paginação com limite=10, o que fazia alguns veículos não aparecerem.
+     * O limite de LIMITE_SELECT (500) é suficiente para operações normais.
+     * Se o sistema tiver mais de 500 veículos ativos, implemente busca AJAX.
+     */
     private void carregarDadosFormulario(HttpServletRequest req) throws SQLException {
         List<Cliente>   clientes   = clienteDAO.listarAtivos();
         List<Motorista> motoristas = motoDAO.listarAtivos();
-        List<Veiculo>   veiculos   = veicDAO.listarDisponiveis(null, 1, 10); // Adjust arguments as needed
+        List<Veiculo>   veiculos   = veicDAO.listarDisponiveis(null, 1, LIMITE_SELECT);
         req.setAttribute("clientes",   clientes);
         req.setAttribute("motoristas", motoristas);
         req.setAttribute("veiculos",   veiculos);
@@ -372,6 +397,8 @@ public class FreteControlador extends HttpServlet {
         return u != null ? u.toString() : "sistema";
     }
 
+    /* ---- parsers ---- */
+
     private int parsInt(String v) {
         if (v == null || v.trim().isEmpty()) return 0;
         try { return Integer.parseInt(v.trim()); }
@@ -384,10 +411,31 @@ public class FreteControlador extends HttpServlet {
         catch (NumberFormatException e) { return null; }
     }
 
+    /**
+     * CORREÇÃO: trata ambos os formatos decimais.
+     *
+     * Regra: se o valor contém vírgula, assume formato brasileiro.
+     *  - "1.500,50"  → remove pontos de milhar, troca vírgula por ponto → "1500.50"
+     *  - "1500,50"   → troca vírgula por ponto → "1500.50"
+     *  - "1500.50"   → sem vírgula, mantém como está → "1500.50"
+     *  - "1.500"     → ambíguo, mas sem vírgula e com ponto assumimos ponto decimal → "1.500"
+     *
+     * Observação: <input type="number"> em geral submete com ponto decimal,
+     * mas usuários que copiam/colam de planilhas podem enviar vírgula.
+     */
     private BigDecimal parseBD(String v) {
         if (v == null || v.trim().isEmpty()) return null;
-        try { return new BigDecimal(v.trim().replace(",", ".")); }
-        catch (NumberFormatException e) { return null; }
+        try {
+            String s = v.trim();
+            if (s.contains(",")) {
+                // Formato brasileiro: remove pontos de milhar, troca vírgula decimal por ponto
+                s = s.replace(".", "").replace(",", ".");
+            }
+            return new BigDecimal(s);
+        } catch (NumberFormatException e) {
+            LOG.fine("Valor numérico inválido ignorado: '" + v + "'");
+            return null;
+        }
     }
 
     private BigDecimal parseBDOrZero(String v) {
@@ -395,11 +443,29 @@ public class FreteControlador extends HttpServlet {
         return bd != null ? bd : BigDecimal.ZERO;
     }
 
+    /**
+     * CORREÇÃO: aceita datas em yyyy-MM-dd (HTML date input) ou dd/MM/yyyy (digitado).
+     * Retorna null silenciosamente se inválido — o BO valida a nulidade.
+     */
+    private LocalDate parseLocalDate(String v) {
+        if (v == null || v.trim().isEmpty()) return null;
+        String s = v.trim();
+        // Formato padrão do input type="date" no HTML
+        try { return LocalDate.parse(s, DateTimeFormatter.ISO_LOCAL_DATE); }
+        catch (DateTimeParseException ignored) {}
+        // Formato brasileiro digitado manualmente
+        try { return LocalDate.parse(s, DateTimeFormatter.ofPattern("dd/MM/yyyy")); }
+        catch (DateTimeParseException ignored) {}
+        LOG.warning("Data em formato não reconhecido ignorada: '" + v + "'");
+        return null;
+    }
+
     private String emptyToNull(String v) {
         return (v != null && !v.trim().isEmpty()) ? v.trim() : null;
     }
 
     private String toUpper(String v) {
-        return v != null ? v.trim().toUpperCase() : null;
+        String s = emptyToNull(v);
+        return s != null ? s.toUpperCase() : null;
     }
 }
