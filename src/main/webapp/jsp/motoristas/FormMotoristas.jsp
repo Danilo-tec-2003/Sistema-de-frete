@@ -46,14 +46,14 @@
                         <label for="nome">Nome Completo *</label>
                         <input type="text" id="nome" name="nome"
                                value="${motorista.nome}" class="form-control"
-                               required maxlength="100">
+                               required maxlength="100" data-allow="person-name">
                     </div>
                     <div class="form-group">
                         <label for="cpf">CPF *</label>
                         <input type="text" id="cpf" name="cpf"
                                value="${motorista.cpf}" class="form-control"
                                required maxlength="14" placeholder="000.000.000-00"
-                               data-mask="cpf">
+                               data-mask="cpf" data-validate="cpf">
                     </div>
                 </div>
 
@@ -69,7 +69,7 @@
                         <input type="text" id="telefone" name="telefone"
                                value="${motorista.telefone}" class="form-control"
                                maxlength="15" placeholder="(81) 99999-0000"
-                               required data-mask="telefone">
+                               required data-mask="telefone" data-validate="telefone">
                     </div>
                 </div>
 
@@ -84,7 +84,7 @@
                         <label for="cnhNumero">Número da CNH *</label>
                         <input type="text" id="cnhNumero" name="cnhNumero"
                                value="${motorista.cnhNumero}" class="form-control"
-                               required maxlength="20">
+                               required maxlength="20" data-allow="alphanum">
                     </div>
                     <div class="form-group">
                         <label for="cnhCategoria">Categoria *</label>

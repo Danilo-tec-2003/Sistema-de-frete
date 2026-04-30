@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/validacoes.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/componentes.css">
+    <script src="https://cdn.jsdelivr.net/npm/imask@7.6.1/dist/imask.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/masks.js" defer></script>
     <style>
         /* Estilos inline para validação — mover para validacoes.css após revisão */
         .campo-erro { border-color: #e53e3e !important; }
@@ -62,6 +64,9 @@
         <%-- Erro vindo do backend (após submit) --%>
         <c:if test="${not empty erro}">
             <div class="alert alert-erro" role="alert">${erro}</div>
+        </c:if>
+        <c:if test="${not empty avisoMotoristas}">
+            <div class="alert" role="alert">${avisoMotoristas}</div>
         </c:if>
 
         <%-- Alerta de validação frontend (preenchido via JS) --%>
@@ -124,6 +129,9 @@
                                 </option>
                             </c:forEach>
                         </select>
+                        <small class="campo-hint">
+                            A lista já considera apenas motoristas aptos e sem frete em aberto.
+                        </small>
                         <span class="msg-erro-campo" id="err-motorista">Selecione o motorista.</span>
                     </div>
                     <div class="form-group">
@@ -155,7 +163,7 @@
                         <label for="municipioOrigem">Município de Origem <span class="obrigatorio">*</span></label>
                         <input type="text" id="municipioOrigem" name="municipioOrigem"
                                value="${frete.municipioOrigem}" class="form-control"
-                               maxlength="80" placeholder="Ex: Recife">
+                               maxlength="80" placeholder="Ex: Recife" data-allow="city">
                         <span class="msg-erro-campo" id="err-mun-orig">Informe o município de origem.</span>
                     </div>
                     <div class="form-group">
@@ -173,7 +181,7 @@
                         <label for="municipioDestino">Município de Destino <span class="obrigatorio">*</span></label>
                         <input type="text" id="municipioDestino" name="municipioDestino"
                                value="${frete.municipioDestino}" class="form-control"
-                               maxlength="80" placeholder="Ex: São Paulo">
+                               maxlength="80" placeholder="Ex: São Paulo" data-allow="city">
                         <span class="msg-erro-campo" id="err-mun-dest">Informe o município de destino.</span>
                     </div>
                     <div class="form-group">
@@ -198,7 +206,8 @@
                     <input type="text" id="descricaoCarga" name="descricaoCarga"
                            value="${frete.descricaoCarga}" class="form-control"
                            maxlength="200"
-                           placeholder="Ex: Eletrônicos, Alimentos não perecíveis, Maquinário">
+                           placeholder="Ex: Eletrônicos, Alimentos não perecíveis, Maquinário"
+                           data-allow="text">
                     <small class="campo-hint">Informe o tipo de mercadoria transportada.</small>
                     <span class="msg-erro-campo" id="err-carga">Informe a descrição da carga.</span>
                 </div>
@@ -206,18 +215,18 @@
                 <div class="form-row cols-2">
                     <div class="form-group">
                         <label for="pesoKg">Peso (kg)</label>
-                        <input type="number" id="pesoKg" name="pesoKg"
+                        <input type="text" id="pesoKg" name="pesoKg"
                                value="${frete.pesoKg ne 0 ? frete.pesoKg : ''}"
-                               class="form-control" step="0.01" min="0.01"
+                               class="form-control" data-mask="decimal" data-max-digits="8"
                                placeholder="Ex: 1500.00">
                         <small class="campo-hint" id="hint-capacidade"></small>
                         <span class="msg-erro-campo" id="err-peso"></span>
                     </div>
                     <div class="form-group">
                         <label for="volumes">Volumes</label>
-                        <input type="number" id="volumes" name="volumes"
+                        <input type="text" id="volumes" name="volumes"
                                value="${frete.volumes}" class="form-control"
-                               step="1" min="1" placeholder="Ex: 10">
+                               data-max-digits="6" inputmode="numeric" placeholder="Ex: 10">
                     </div>
                 </div>
 
@@ -228,9 +237,9 @@
                 <div class="form-row cols-2">
                     <div class="form-group">
                         <label for="valorFrete">Valor do Frete (R$) <span class="obrigatorio">*</span></label>
-                        <input type="number" id="valorFrete" name="valorFrete"
+                        <input type="text" id="valorFrete" name="valorFrete"
                                value="${frete.valorFrete ne 0 ? frete.valorFrete : ''}"
-                               class="form-control" step="0.01" min="0.01"
+                               class="form-control" data-mask="decimal" data-max-digits="10"
                                placeholder="Ex: 2500.00">
                         <span class="msg-erro-campo" id="err-valor">
                             O valor do frete deve ser maior que zero.
@@ -242,7 +251,7 @@
                         </label>
                         <%-- CORREÇÃO: min definido via JS para garantir data >= hoje --%>
                         <input type="date" id="dataPrevEntrega" name="dataPrevEntrega"
-                               value="${frete.dataPrevEntregaFormatada ne '' ? frete.dataPrevEntrega : ''}"
+                               value="${frete.dataPrevEntregaIso}"
                                class="form-control">
                         <span class="msg-erro-campo" id="err-data">
                             Informe uma data igual ou posterior a hoje.
@@ -253,23 +262,23 @@
                 <div class="form-row cols-3">
                     <div class="form-group">
                         <label for="aliquotaIcms">Alíquota ICMS (%)</label>
-                        <input type="number" id="aliquotaIcms" name="aliquotaIcms"
+                        <input type="text" id="aliquotaIcms" name="aliquotaIcms"
                                value="${frete.aliquotaIcms ne 0 ? frete.aliquotaIcms : ''}"
-                               class="form-control" step="0.01" min="0" max="100"
+                               class="form-control" data-mask="decimal" data-max-digits="5"
                                placeholder="0,00">
                     </div>
                     <div class="form-group">
                         <label for="aliquotaIbs">Alíquota IBS (%)</label>
-                        <input type="number" id="aliquotaIbs" name="aliquotaIbs"
+                        <input type="text" id="aliquotaIbs" name="aliquotaIbs"
                                value="${frete.aliquotaIbs ne 0 ? frete.aliquotaIbs : ''}"
-                               class="form-control" step="0.01" min="0" max="100"
+                               class="form-control" data-mask="decimal" data-max-digits="5"
                                placeholder="0,00">
                     </div>
                     <div class="form-group">
                         <label for="aliquotaCbs">Alíquota CBS (%)</label>
-                        <input type="number" id="aliquotaCbs" name="aliquotaCbs"
+                        <input type="text" id="aliquotaCbs" name="aliquotaCbs"
                                value="${frete.aliquotaCbs ne 0 ? frete.aliquotaCbs : ''}"
-                               class="form-control" step="0.01" min="0" max="100"
+                               class="form-control" data-mask="decimal" data-max-digits="5"
                                placeholder="0,00">
                     </div>
                 </div>
@@ -285,7 +294,7 @@
                 <div class="form-group" style="margin-top:16px;">
                     <label for="observacao">Observações</label>
                     <textarea id="observacao" name="observacao" class="form-control"
-                              rows="3" maxlength="1000">${frete.observacao}</textarea>
+                              rows="3" maxlength="1000" data-allow="text">${frete.observacao}</textarea>
                 </div>
 
                 <div class="form-acoes">
@@ -349,15 +358,20 @@
     var aCbs       = document.getElementById('aliquotaCbs');
     var preview    = document.getElementById('preview-valores');
 
+    function parseNumeroLocal(valor) {
+        if (!valor) return 0;
+        return parseFloat(String(valor).replace(/\./g, '').replace(',', '.')) || 0;
+    }
+
     function fmt(v) { return 'R$ ' + v.toFixed(2).replace('.', ','); }
 
     function calcularPreview() {
-        var vf = parseFloat(freteInput.value) || 0;
+        var vf = parseNumeroLocal(freteInput.value);
         if (vf <= 0) { preview.style.display = 'none'; return; }
 
-        var qi = parseFloat(aIcms.value) || 0;
-        var qb = parseFloat(aIbs.value)  || 0;
-        var qc = parseFloat(aCbs.value)  || 0;
+        var qi = parseNumeroLocal(aIcms.value);
+        var qb = parseNumeroLocal(aIbs.value);
+        var qc = parseNumeroLocal(aCbs.value);
 
         var icms  = +(vf * qi / 100).toFixed(2);
         var ibs   = +(vf * qb / 100).toFixed(2);
@@ -404,7 +418,7 @@
     function validarPeso() {
         var opt = selVeiculo.options[selVeiculo.selectedIndex];
         var cap = opt ? parseFloat(opt.getAttribute('data-capacidade')) : 0;
-        var peso = parseFloat(inputPeso.value) || 0;
+        var peso = parseNumeroLocal(inputPeso.value);
         if (cap > 0 && peso > 0 && peso > cap) {
             errPeso.textContent =
                 'Peso (' + peso.toLocaleString('pt-BR') + ' kg) excede a capacidade '
@@ -525,7 +539,7 @@
         }
 
         /* Valor do frete */
-        var vf = parseFloat(document.getElementById('valorFrete').value);
+        var vf = parseNumeroLocal(document.getElementById('valorFrete').value);
         if (!vf || vf <= 0) {
             erros.push('Valor do Frete deve ser maior que zero');
             marcarErro('valorFrete', 'err-valor');
@@ -545,7 +559,7 @@
         /* Peso vs capacidade do veículo */
         var capOpt = selVeiculo.options[selVeiculo.selectedIndex];
         var capVal = capOpt ? parseFloat(capOpt.getAttribute('data-capacidade')) : 0;
-        var pesoVal = parseFloat(inputPeso.value) || 0;
+        var pesoVal = parseNumeroLocal(inputPeso.value);
         if (capVal > 0 && pesoVal > 0 && pesoVal > capVal) {
             erros.push('Peso da carga excede a capacidade do veículo selecionado');
         }

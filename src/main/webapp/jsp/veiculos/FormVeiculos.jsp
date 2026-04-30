@@ -47,14 +47,14 @@
                         <input type="text" id="placa" name="placa"
                                value="${veiculo.placa}" class="form-control"
                                maxlength="8" placeholder="ABC1D23"
-                               data-mask="placa" required
+                               data-mask="placa" data-validate="placa" required
                                style="text-transform:uppercase">
                     </div>
                     <div class="form-group">
                         <label for="rntrc">RNTRC *</label>
                         <input type="text" id="rntrc" name="rntrc"
                                value="${veiculo.rntrc}" class="form-control"
-                               maxlength="15" required>
+                               maxlength="15" required data-allow="alphanum">
                     </div>
                     <div class="form-group">
                         <label for="anoFabricacao">Ano de Fabricação *</label>
@@ -102,19 +102,19 @@
                         <label for="taraKg">Tara (kg) *</label>
                         <input type="text" id="taraKg" name="taraKg"
                                value="${veiculo.taraKg}" class="form-control"
-                               placeholder="8.000,00" data-mask="decimal" required>
+                               placeholder="8.000,00" data-mask="decimal" data-max-digits="9" required>
                     </div>
                     <div class="form-group">
                         <label for="capacidadeKg">Capacidade de Carga (kg) *</label>
                         <input type="text" id="capacidadeKg" name="capacidadeKg"
                                value="${veiculo.capacidadeKg}" class="form-control"
-                               placeholder="14.000,00" data-mask="decimal" required>
+                               placeholder="14.000,00" data-mask="decimal" data-max-digits="9" required>
                     </div>
                     <div class="form-group">
                         <label for="volumeM3">Volume (m³) *</label>
                         <input type="text" id="volumeM3" name="volumeM3"
                                value="${veiculo.volumeM3}" class="form-control"
-                               placeholder="90,00" data-mask="decimal" required>
+                               placeholder="90,00" data-mask="decimal" data-max-digits="6" required>
                     </div>
                 </div>
 
