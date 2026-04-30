@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -87,9 +88,8 @@ public class FreteControlador extends HttpServlet {
         } catch (NegocioException e) {
             tratarErro(req, resp, e.getMessage(), "/jsp/Frete/listarFretes.jsp");
         } catch (Exception e) {
-            LOG.severe("Erro inesperado no GET /fretes: " + e.getMessage());
-            tratarErro(req, resp, "Erro inesperado. Tente novamente.",
-                       "/jsp/Frete/listarFretes.jsp");
+            LOG.log(Level.SEVERE, "Erro inesperado no GET /fretes.", e);
+            tratarErro(req, resp, mensagemErroInesperado(e), "/jsp/Frete/listarFretes.jsp");
         }
     }
 
@@ -136,9 +136,8 @@ public class FreteControlador extends HttpServlet {
                 req.getRequestDispatcher("/jsp/Frete/FormFrete.jsp").forward(req, resp);
             }
         } catch (Exception e) {
-            LOG.severe("Erro inesperado no POST /fretes acao=" + acao + ": " + e.getMessage());
-            tratarErro(req, resp, "Erro inesperado. Tente novamente.",
-                       "/jsp/Frete/listarFretes.jsp");
+            LOG.log(Level.SEVERE, "Erro inesperado no POST /fretes acao=" + acao + ".", e);
+            tratarErro(req, resp, mensagemErroInesperado(e), "/jsp/Frete/listarFretes.jsp");
         }
     }
 
@@ -222,7 +221,7 @@ public class FreteControlador extends HttpServlet {
         // CORREÇÃO: mensagem de sucesso inclui rota para confirmação visual
         setarSucesso(req, "Frete " + f.getNumero() + " emitido com sucesso! "
             + "Rota: " + f.getRota());
-        resp.sendRedirect(req.getContextPath() + "/fretes?acao=detalhe&id=" + f.getId());
+        resp.sendRedirect(req.getContextPath() + "/fretes");
     }
 
     private void confirmarSaida(HttpServletRequest req, HttpServletResponse resp, String usuario)
@@ -372,11 +371,16 @@ public class FreteControlador extends HttpServlet {
      */
     private void carregarDadosFormulario(HttpServletRequest req) throws SQLException {
         List<Cliente>   clientes   = clienteDAO.listarAtivos();
-        List<Motorista> motoristas = motoDAO.listarAtivos();
+        List<Motorista> motoristas = motoDAO.listarDisponiveisParaFrete();
         List<Veiculo>   veiculos   = veicDAO.listarDisponiveis(null, 1, LIMITE_SELECT);
         req.setAttribute("clientes",   clientes);
         req.setAttribute("motoristas", motoristas);
         req.setAttribute("veiculos",   veiculos);
+        if (motoristas.isEmpty()) {
+            req.setAttribute("avisoMotoristas",
+                "Nenhum motorista está disponível para novo frete no momento. "
+              + "Verifique se há fretes em aberto, CNHs vencidas ou motoristas suspensos.");
+        }
     }
 
     private void tratarErro(HttpServletRequest req, HttpServletResponse resp,
@@ -467,5 +471,17 @@ public class FreteControlador extends HttpServlet {
     private String toUpper(String v) {
         String s = emptyToNull(v);
         return s != null ? s.toUpperCase() : null;
+    }
+
+    private String mensagemErroInesperado(Exception e) {
+        Throwable causa = e;
+        while (causa.getCause() != null && causa.getCause() != causa) {
+            causa = causa.getCause();
+        }
+        String msg = causa.getMessage();
+        if (msg == null || msg.trim().isEmpty()) {
+            return "Erro inesperado. Tente novamente.";
+        }
+        return "Erro inesperado: " + msg;
     }
 }

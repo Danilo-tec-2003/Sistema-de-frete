@@ -114,6 +114,30 @@ public class MotoristaDAO {
         return ativos;
     }
 
+    public List<Motorista> listarDisponiveisParaFrete() throws SQLException {
+        List<Motorista> lista = new ArrayList<>();
+        String sql =
+            "SELECT * FROM motorista m " +
+            "WHERE m.status = ? " +
+            "  AND (m.cnh_validade IS NULL OR m.cnh_validade >= CURRENT_DATE) " +
+            "  AND NOT EXISTS (" +
+            "      SELECT 1 FROM frete f " +
+            "      WHERE f.id_motorista = m.idmotorista " +
+            "        AND f.status IN ('E','S','T')" +
+            "  ) " +
+            "ORDER BY m.nome";
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, String.valueOf(StatusMotorista.ATIVO.getCodigo()));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapear(rs));
+                }
+            }
+        }
+        return lista;
+    }
+
     private void preencher(PreparedStatement ps, Motorista m) throws SQLException {
         ps.setString(1, m.getNome());
         ps.setString(2, m.getCpf() == null ? null : m.getCpf().replaceAll("[^0-9]",""));

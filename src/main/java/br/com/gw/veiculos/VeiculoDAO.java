@@ -101,11 +101,26 @@ public class VeiculoDAO {
     }
 
     public List<Veiculo> listarDisponiveis(String filtro, int pagina, int tamPagina) throws SQLException {
-        List<Veiculo> todos = listar(filtro, pagina, tamPagina);
+        int offset = (pagina - 1) * tamPagina;
+        String sql =
+            "SELECT * FROM veiculo v " +
+            "WHERE v.status = ? " +
+            "  AND v.placa ILIKE ? " +
+            "  AND NOT EXISTS (" +
+            "      SELECT 1 FROM frete f " +
+            "      WHERE f.id_veiculo = v.idveiculo " +
+            "        AND f.status IN ('E','S','T')" +
+            "  ) " +
+            "ORDER BY v.placa LIMIT ? OFFSET ?";
         List<Veiculo> disponiveis = new ArrayList<>();
-        for (Veiculo v : todos) {
-            if (v != null && v.getStatus() == StatusVeiculo.DISPONIVEL) {
-                disponiveis.add(v);
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, String.valueOf(StatusVeiculo.DISPONIVEL.getCodigo()));
+            ps.setString(2, "%" + (filtro == null ? "" : filtro.trim()) + "%");
+            ps.setInt(3, tamPagina);
+            ps.setInt(4, offset);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) disponiveis.add(mapear(rs));
             }
         }
         return disponiveis;
