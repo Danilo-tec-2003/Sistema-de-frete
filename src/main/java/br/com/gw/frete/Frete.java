@@ -19,6 +19,11 @@ import java.time.format.DateTimeFormatter;
  */
 public class Frete {
 
+    private static final DateTimeFormatter FMT_DATA =
+        DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter FMT_DATA_HORA =
+        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
     /* ---- Identificação ---- */
     private int          id;
     private String       numero;         // FRT-AAAA-NNNNN
@@ -209,13 +214,76 @@ public class Frete {
             || status == StatusFrete.EM_TRANSITO;
     }
 
-    public String getDataEmissaoFormatada() {
-    if (this.dataEmissao == null) return "";
-    return this.dataEmissao.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-}
+    public boolean isStatusEmitido() {
+        return status == StatusFrete.EMITIDO;
+    }
 
-public String getDataPrevEntregaFormatada() {
-    if (this.dataPrevEntrega == null) return "";
-    return this.dataPrevEntrega.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-}
+    public boolean isStatusSaidaConfirmada() {
+        return status == StatusFrete.SAIDA_CONFIRMADA;
+    }
+
+    public boolean isStatusEmTransito() {
+        return status == StatusFrete.EM_TRANSITO;
+    }
+
+    public boolean isStatusEntregue() {
+        return status == StatusFrete.ENTREGUE;
+    }
+
+    public boolean isStatusNaoEntregue() {
+        return status == StatusFrete.NAO_ENTREGUE;
+    }
+
+    public boolean isStatusCancelado() {
+        return status == StatusFrete.CANCELADO;
+    }
+
+    public boolean isTimelineEmitidoDone() {
+        return status != null;
+    }
+
+    public boolean isTimelineSaidaDone() {
+        return status == StatusFrete.SAIDA_CONFIRMADA
+            || status == StatusFrete.EM_TRANSITO
+            || status == StatusFrete.ENTREGUE
+            || status == StatusFrete.NAO_ENTREGUE;
+    }
+
+    public boolean isTimelineTransitoDone() {
+        return status == StatusFrete.EM_TRANSITO
+            || status == StatusFrete.ENTREGUE
+            || status == StatusFrete.NAO_ENTREGUE;
+    }
+
+    public boolean isTimelineFinalDone() {
+        return status == StatusFrete.ENTREGUE
+            || status == StatusFrete.NAO_ENTREGUE
+            || status == StatusFrete.CANCELADO;
+    }
+
+    public String getStatusFinalLabel() {
+        if (status == StatusFrete.NAO_ENTREGUE) return "Não Entregue";
+        if (status == StatusFrete.CANCELADO) return "Cancelado";
+        return "Entregue";
+    }
+
+    public String getDataEmissaoFormatada() {
+        return dataEmissao != null ? dataEmissao.format(FMT_DATA) : "";
+    }
+
+    public String getDataPrevEntregaFormatada() {
+        return dataPrevEntrega != null ? dataPrevEntrega.format(FMT_DATA) : "";
+    }
+
+    public String getDataPrevEntregaIso() {
+        return dataPrevEntrega != null ? dataPrevEntrega.toString() : "";
+    }
+
+    public String getDataSaidaFormatada() {
+        return dataSaida != null ? dataSaida.format(FMT_DATA_HORA) : "";
+    }
+
+    public String getDataEntregaFormatada() {
+        return dataEntrega != null ? dataEntrega.format(FMT_DATA_HORA) : "";
+    }
 }

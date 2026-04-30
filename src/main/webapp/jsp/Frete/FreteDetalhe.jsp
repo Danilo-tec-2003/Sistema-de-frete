@@ -13,14 +13,26 @@
 </head>
 <body>
 <%@ include file="/jsp/NavBar.jsp" %>
-<div class="container">
 
-    <div class="page-header">
+<div class="main-wrapper">
+
+    <div class="topbar">
+        <div class="topbar-title">Fretes</div>
+        <div class="topbar-actions">
+            <a href="${pageContext.request.contextPath}/fretes" class="btn btn-secondary">&larr; Voltar</a>
+        </div>
+    </div>
+
+<div class="container detalhe-frete-page">
+
+    <div class="detalhe-header">
         <div>
-            <h1>${frete.numero}</h1>
+            <h1 class="detalhe-titulo">${frete.numero}</h1>
             <span class="subtitulo-pagina">${frete.rota}</span>
         </div>
-        <a href="${pageContext.request.contextPath}/fretes" class="btn btn-secondary">&larr; Voltar</a>
+        <span class="badge ${frete.aberto ? 'badge-transito' : (frete.statusCancelado ? 'badge-cancelado' : (frete.statusNaoEntregue ? 'badge-naoentregue' : 'badge-entregue'))}">
+            ${frete.status.descricao}
+        </span>
     </div>
 
     <c:if test="${not empty sessionScope.sucesso}">
@@ -35,31 +47,24 @@
          LINHA DO TEMPO DE STATUS
          ========================================================= --%>
     <div class="status-timeline">
-        <c:set var="cod" value="${frete.status.codigo}"/>
-        <div class="step ${cod == 'E' || cod == 'S' || cod == 'T' || cod == 'R' || cod == 'N' ? 'done' : ''} ${cod == 'E' ? 'atual' : ''}">
+        <div class="step ${frete.timelineEmitidoDone ? 'done' : ''} ${frete.statusEmitido ? 'atual' : ''}">
             <div class="step-dot"></div>
             <div class="step-label">Emitido</div>
         </div>
-        <div class="step-line ${cod == 'S' || cod == 'T' || cod == 'R' || cod == 'N' ? 'done' : ''}"></div>
-        <div class="step ${cod == 'S' || cod == 'T' || cod == 'R' || cod == 'N' ? 'done' : ''} ${cod == 'S' ? 'atual' : ''}">
+        <div class="step-line ${frete.timelineSaidaDone ? 'done' : ''}"></div>
+        <div class="step ${frete.timelineSaidaDone ? 'done' : ''} ${frete.statusSaidaConfirmada ? 'atual' : ''}">
             <div class="step-dot"></div>
             <div class="step-label">Saída Conf.</div>
         </div>
-        <div class="step-line ${cod == 'T' || cod == 'R' || cod == 'N' ? 'done' : ''}"></div>
-        <div class="step ${cod == 'T' || cod == 'R' || cod == 'N' ? 'done' : ''} ${cod == 'T' ? 'atual' : ''}">
+        <div class="step-line ${frete.timelineTransitoDone ? 'done' : ''}"></div>
+        <div class="step ${frete.timelineTransitoDone ? 'done' : ''} ${frete.statusEmTransito ? 'atual' : ''}">
             <div class="step-dot"></div>
             <div class="step-label">Em Trânsito</div>
         </div>
-        <div class="step-line ${cod == 'R' || cod == 'N' ? 'done' : ''}"></div>
-        <div class="step ${cod == 'R' ? 'done' : ''} ${cod == 'R' ? 'atual entregue' : ''} ${cod == 'N' ? 'nao-entregue' : ''}">
+        <div class="step-line ${frete.timelineFinalDone ? 'done' : ''}"></div>
+        <div class="step ${frete.timelineFinalDone ? 'done' : ''} ${frete.statusEntregue ? 'atual entregue' : ''} ${frete.statusNaoEntregue ? 'nao-entregue' : ''} ${frete.statusCancelado ? 'atual cancelado' : ''}">
             <div class="step-dot"></div>
-            <div class="step-label">
-                <c:choose>
-                    <c:when test="${cod == 'N'}">Não Entregue</c:when>
-                    <c:when test="${cod == 'C'}">Cancelado</c:when>
-                    <c:otherwise>Entregue</c:otherwise>
-                </c:choose>
-            </div>
+            <div class="step-label">${frete.statusFinalLabel}</div>
         </div>
     </div>
 
@@ -87,8 +92,7 @@
                 <dt>Motorista</dt>
                 <dd>${frete.motorista.nome}
                     <small class="text-muted">— CNH válida até
-                        <fmt:formatDate value="${frete.motorista.cnhValidade}"
-                                        pattern="dd/MM/yyyy"/>
+                        ${frete.motorista.cnhValidadeFormatada}
                     </small>
                 </dd>
                 <dt>Veículo</dt>
@@ -139,11 +143,11 @@
             <h3 class="secao-titulo">Datas</h3>
             <dl class="dados-lista">
                 <dt>Emissão</dt>
-                <dd><fmt:formatDate value="${frete.dataEmissao}" pattern="dd/MM/yyyy"/></dd>
+                <dd>${frete.dataEmissaoFormatada}</dd>
 
                 <dt>Prev. Entrega</dt>
                 <dd>
-                    <fmt:formatDate value="${frete.dataPrevEntrega}" pattern="dd/MM/yyyy"/>
+                    ${frete.dataPrevEntregaFormatada}
                     <c:if test="${frete.diasAtraso > 0}">
                         <span class="badge badge-erro">${frete.diasAtraso}d atraso</span>
                     </c:if>
@@ -151,12 +155,12 @@
 
                 <c:if test="${not empty frete.dataSaida}">
                     <dt>Saída</dt>
-                    <dd><fmt:formatDate value="${frete.dataSaida}" pattern="dd/MM/yyyy HH:mm"/></dd>
+                    <dd>${frete.dataSaidaFormatada}</dd>
                 </c:if>
 
                 <c:if test="${not empty frete.dataEntrega}">
                     <dt>Entrega</dt>
-                    <dd><fmt:formatDate value="${frete.dataEntrega}" pattern="dd/MM/yyyy HH:mm"/></dd>
+                    <dd>${frete.dataEntregaFormatada}</dd>
                 </c:if>
             </dl>
 
@@ -176,7 +180,7 @@
             <h3 class="secao-titulo">Movimentar Frete</h3>
 
             <%-- EMITIDO → Confirmar Saída --%>
-            <c:if test="${frete.status.codigo == 'E'}">
+            <c:if test="${frete.statusEmitido}">
                 <details class="acao-collapse">
                     <summary class="btn btn-warning">▶ Confirmar Saída do Pátio</summary>
                     <form method="post" action="${pageContext.request.contextPath}/fretes"
@@ -187,12 +191,12 @@
                             <div class="form-group">
                                 <label>Município de Saída</label>
                                 <input type="text" name="municipioSaida" class="form-control"
-                                       placeholder="${frete.municipioOrigem}" required maxlength="80">
+                                       value="${frete.municipioOrigem}" required maxlength="80">
                             </div>
                             <div class="form-group">
                                 <label>UF</label>
                                 <input type="text" name="ufSaida" class="form-control"
-                                       placeholder="${frete.ufOrigem}" maxlength="2"
+                                       value="${frete.ufOrigem}" maxlength="2"
                                        style="text-transform:uppercase" required>
                             </div>
                         </div>
@@ -202,7 +206,7 @@
             </c:if>
 
             <%-- SAÍDA_CONFIRMADA → Iniciar Trânsito --%>
-            <c:if test="${frete.status.codigo == 'S'}">
+            <c:if test="${frete.statusSaidaConfirmada}">
                 <details class="acao-collapse">
                     <summary class="btn btn-info">🚛 Iniciar Trânsito</summary>
                     <form method="post" action="${pageContext.request.contextPath}/fretes"
@@ -227,7 +231,7 @@
             </c:if>
 
             <%-- EM_TRANSITO → Registrar Entrega --%>
-            <c:if test="${frete.status.codigo == 'T'}">
+            <c:if test="${frete.statusEmTransito}">
                 <details class="acao-collapse">
                     <summary class="btn btn-primary">✓ Registrar Entrega</summary>
                     <form method="post" action="${pageContext.request.contextPath}/fretes"
@@ -250,12 +254,12 @@
                             <div class="form-group">
                                 <label>Município da Entrega</label>
                                 <input type="text" name="municipioEntrega" class="form-control"
-                                       placeholder="${frete.municipioDestino}" maxlength="80">
+                                       value="${frete.municipioDestino}" maxlength="80">
                             </div>
                             <div class="form-group">
                                 <label>UF</label>
                                 <input type="text" name="ufEntrega" class="form-control"
-                                       placeholder="${frete.ufDestino}" maxlength="2"
+                                       value="${frete.ufDestino}" maxlength="2"
                                        style="text-transform:uppercase">
                             </div>
                         </div>
@@ -269,7 +273,7 @@
                           class="acao-form">
                         <input type="hidden" name="acao"    value="naoEntrega">
                         <input type="hidden" name="idFrete" value="${frete.id}">
-                        <div class="form-row cols-2">
+                        <div class="form-row cols-3">
                             <div class="form-group">
                                 <label>Motivo <span class="obrigatorio">*</span></label>
                                 <input type="text" name="motivoNaoEntrega" class="form-control"
@@ -279,7 +283,13 @@
                             <div class="form-group">
                                 <label>Município Atual</label>
                                 <input type="text" name="municipioAtual" class="form-control"
-                                       placeholder="${frete.municipioDestino}" maxlength="80">
+                                       value="${frete.municipioDestino}" maxlength="80">
+                            </div>
+                            <div class="form-group">
+                                <label>UF</label>
+                                <input type="text" name="ufAtual" class="form-control"
+                                       value="${frete.ufDestino}" maxlength="2"
+                                       style="text-transform:uppercase">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-warning">Registrar Não Entrega</button>
@@ -381,25 +391,16 @@
                     <c:forEach var="oc" items="${ocorrencias}">
                         <div class="oc-item oc-tipo-${oc.tipo.codigo}">
                             <div class="oc-icon">
-                                <c:choose>
-                                    <c:when test="${oc.tipo.codigo == 'P'}">🚦</c:when>
-                                    <c:when test="${oc.tipo.codigo == 'R'}">🚛</c:when>
-                                    <c:when test="${oc.tipo.codigo == 'T'}">📦</c:when>
-                                    <c:when test="${oc.tipo.codigo == 'E'}">✅</c:when>
-                                    <c:when test="${oc.tipo.codigo == 'A'}">⚠️</c:when>
-                                    <c:when test="${oc.tipo.codigo == 'X'}">❌</c:when>
-                                    <c:otherwise>📝</c:otherwise>
-                                </c:choose>
+                                ${oc.icone}
                             </div>
                             <div class="oc-corpo">
                                 <div class="oc-header">
                                     <strong>${oc.tipo.descricao}</strong>
                                     <span class="oc-data">
-                                        <fmt:formatDate value="${oc.dataHora}"
-                                                        pattern="dd/MM/yyyy HH:mm"/>
+                                        ${oc.dataHoraFormatada}
                                     </span>
                                 </div>
-                                <c:if test="${not empty oc.localizacao && oc.localizacao != '—'}">
+                                <c:if test="${not empty oc.localizacao and oc.localizacao ne '—'}">
                                     <div class="oc-local">📍 ${oc.localizacao}</div>
                                 </c:if>
                                 <c:if test="${not empty oc.descricao}">
@@ -422,6 +423,7 @@
         </c:choose>
     </div>
 
+</div>
 </div>
 
 <script>

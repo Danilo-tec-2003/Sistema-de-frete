@@ -1,0 +1,99 @@
+.btn-warning {
+  background: rgba(245, 166, 35, 0.16);
+  color: #ffd08a;
+  border: 1px solid rgba(245, 166, 35, 0.35);
+}
+
+.btn-warning:hover {
+  background: rgba(245, 166, 35, 0.24);
+  color: #ffe4ba;
+}
+
+.btn-info {
+  background: rgba(46, 184, 230, 0.16);
+  color: #9ae8ff;
+  border: 1px solid rgba(46, 184, 230, 0.35);
+}
+
+.btn-info:hover {
+  background: rgba(46, 184, 230, 0.24);
+  color: #c8f4ff;
+}
+
+.badge-erro,
+.badge-emitido,
+.badge-saida,
+.badge-transito,
+.badge-entregue,
+.badge-naoentregue,
+.badge-cancelado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.badge-erro {
+  background: rgba(232, 64, 58, 0.12);
+  color: #ff9a95;
+  border-color: rgba(232, 64, 58, 0.28);
+}
+
+.badge-emitido {
+  background: rgba(109, 197, 42, 0.12);
+  color: #b4f07b;
+  border-color: rgba(109, 197, 42, 0.3);
+}
+
+.badge-saida {
+  background: rgba(245, 166, 35, 0.12);
+  color: #ffd08a;
+  border-color: rgba(245, 166, 35, 0.28);
+}
+
+.badge-transito {
+  background: rgba(46, 184, 230, 0.12);
+  color: #9ae8ff;
+  border-color: rgba(46, 184, 230, 0.28);
+}
+
+.badge-entregue {
+  background: rgba(109, 197, 42, 0.18);
+  color: #d3ffae;
+  border-color: rgba(109, 197, 42, 0.35);
+}
+
+.badge-naoentregue,
+.badge-cancelado {
+  background: rgba(232, 64, 58, 0.12);
+  color: #ff9a95;
+  border-color: rgba(232, 64, 58, 0.28);
+}
+
+.rota-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(109, 197, 42, 0.12);
+  color: #b4f07b;
+  border: 1px solid rgba(109, 197, 42, 0.22);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.destaque {
+  color: #fff;
+  font-weight: 700;
+}
+
+.text-right {
+  text-align: right;
+}

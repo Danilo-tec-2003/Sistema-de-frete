@@ -5,8 +5,12 @@ import br.com.gw.Enums.StatusMotorista;
 import br.com.gw.Enums.TipoVinculo;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class Motorista {
+
+    private static final DateTimeFormatter FMT_DATA =
+        DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private int            id;
     private String         nome;
@@ -34,6 +38,10 @@ public class Motorista {
 
     public boolean isCnhVencida() {
         return cnhValidade != null && cnhValidade.isBefore(LocalDate.now());
+    }
+
+    public String getCnhValidadeFormatada() {
+        return cnhValidade != null ? cnhValidade.format(FMT_DATA) : "";
     }
 
     public void setId(int id)                          { this.id             = id; }

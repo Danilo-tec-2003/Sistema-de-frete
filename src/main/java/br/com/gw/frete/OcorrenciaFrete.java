@@ -3,12 +3,16 @@ package br.com.gw.frete;
 import br.com.gw.Enums.TipoOcorrencia;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Registro de ocorrência vinculado a um frete.
  * Cada movimentação de status gera ao menos uma ocorrência.
  */
 public class OcorrenciaFrete {
+
+    private static final DateTimeFormatter FMT_DATA_HORA =
+        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private int             id;
     private int             idFrete;
@@ -64,5 +68,22 @@ public class OcorrenciaFrete {
         if (municipio == null || municipio.isEmpty()) return "—";
         if (uf == null || uf.isEmpty()) return municipio;
         return municipio + "/" + uf;
+    }
+
+    public String getDataHoraFormatada() {
+        return dataHora != null ? dataHora.format(FMT_DATA_HORA) : "";
+    }
+
+    public String getIcone() {
+        if (tipo == null) return "📝";
+        switch (tipo) {
+            case SAIDA_PATIO:       return "🚦";
+            case EM_ROTA:           return "🚛";
+            case TENTATIVA_ENTREGA: return "📦";
+            case ENTREGA_REALIZADA: return "✅";
+            case AVARIA:            return "⚠️";
+            case EXTRAVIO:          return "❌";
+            default:                return "📝";
+        }
     }
 }

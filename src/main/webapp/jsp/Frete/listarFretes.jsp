@@ -109,10 +109,10 @@
                                             <br>
                                             <small class="text-muted">${f.veiculo.placa}</small>
                                         </td>
-                                        <td>${f.dataEmissao}</td>
-                                        <td>${f.dataPrevEntrega}</td>
+                                        <td>${f.dataEmissaoFormatada}</td>
+                                        <td>${f.dataPrevEntregaFormatada}</td>
                                         <td class="text-right">
-                                            <fmt:formatNumber value="${f.valorTotal}" type="currency" currencySymbol="R$"/>
+                                            <fmt:formatNumber value="${f.valorTotal}" type="currency" currencySymbol="R$ "/>
                                         </td>
                                         <td>
                                             <c:choose>

@@ -1,0 +1,32 @@
+.campo-erro {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 1px rgba(232, 64, 58, 0.25);
+}
+
+.msg-erro-campo {
+  display: none;
+  color: #ff8f8a;
+  font-size: 0.8rem;
+}
+
+.msg-erro-campo.visivel {
+  display: block;
+}
+
+.obrigatorio {
+  color: #ff8f8a;
+}
+
+.campo-hint {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.info-calculada {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(46, 184, 230, 0.2);
+  border-radius: var(--radius-sm);
+  background: rgba(46, 184, 230, 0.08);
+  color: #cdefff;
+}
