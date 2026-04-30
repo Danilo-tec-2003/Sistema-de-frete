@@ -25,8 +25,8 @@
         }
         .msg-erro-campo.visivel { display: block; }
         #alerta-validacao {
-            background: #fff5f5;
-            border: 1px solid #fc8181;
+            background:rgb(37, 93, 53);
+            border: 1px solidrgb(250, 250, 250);
             border-radius: 6px;
             padding: 12px 16px;
             margin-bottom: 16px;
@@ -36,8 +36,8 @@
         #alerta-validacao ul { margin: 8px 0 0 16px; padding: 0; }
         #alerta-validacao li { margin: 4px 0; font-size: 0.9rem; }
         .aviso-igual {
-            background: #fffbeb;
-            border: 1px solid #f6ad55;
+            background:rgb(37, 93, 53);
+            border: 1px solidrgb(250, 250, 250);
             border-radius: 4px;
             padding: 6px 10px;
             font-size: 0.82rem;
