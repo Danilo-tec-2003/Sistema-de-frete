@@ -44,11 +44,11 @@
         <div class="alert alert-erro">${erro}</div>
     </c:if>
 
-    <% if ("ok".equals(request.getParameter("cadastro"))) { %>
-    <div class="alert alert-sucesso">
-        ✓ Conta criada com sucesso! Faça login para continuar.
-    </div>
-    <% } %>
+    <c:if test="${param.cadastro eq 'ok'}">
+        <div class="alert alert-sucesso">
+            ✓ Conta criada com sucesso! Faça login para continuar.
+        </div>
+    </c:if>
 
     <h2>Acesse sua conta</h2>
 

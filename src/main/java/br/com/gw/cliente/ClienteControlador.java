@@ -24,7 +24,6 @@ public class ClienteControlador extends HttpServlet {
         String acao = req.getParameter("acao");
 
         if ("novo".equals(acao)) {
-            req.setAttribute("tipos", TipoCliente.values());
             req.getRequestDispatcher("/jsp/clientes/FormCliente.jsp").forward(req, resp);
             return;
         }
@@ -34,7 +33,6 @@ public class ClienteControlador extends HttpServlet {
             try {
                 Cliente c = bo.buscarPorId(id);
                 req.setAttribute("cliente", c);
-                req.setAttribute("tipos", TipoCliente.values());
                 req.getRequestDispatcher("/jsp/clientes/FormCliente.jsp").forward(req, resp);
             } catch (NegocioException e) {
                 req.setAttribute("erro", e.getMessage());
@@ -77,7 +75,6 @@ public class ClienteControlador extends HttpServlet {
         } catch (NegocioException e) {
             req.setAttribute("erro",    e.getMessage());
             req.setAttribute("cliente", c);
-            req.setAttribute("tipos",   TipoCliente.values());
             req.getRequestDispatcher("/jsp/clientes/FormCliente.jsp").forward(req, resp);
         }
     }
@@ -108,11 +105,7 @@ public class ClienteControlador extends HttpServlet {
         c.setNomeFantasia(req.getParameter("nomeFantasia"));
         c.setCnpj(req.getParameter("cnpj"));
         c.setInscricaoEst(req.getParameter("inscricaoEst"));
-
-        String tipoParam = req.getParameter("tipo");
-        if (tipoParam != null && !tipoParam.isEmpty()) {
-            c.setTipo(TipoCliente.fromCodigo(tipoParam));
-        }
+        c.setTipo(TipoCliente.AMBOS);
 
         c.setLogradouro(req.getParameter("logradouro"));
         c.setNumeroEnd(req.getParameter("numeroEnd"));

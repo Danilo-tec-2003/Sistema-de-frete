@@ -6,7 +6,8 @@
 --     admin     / admin123    → 240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9
 --     operador  / operador123 → 1725165c9a0b3698a3d01016e0d8205155820b8d7f21835ca64c0f81c728d880
 --
--- ⚠️  ATENÇÃO — tipo cliente: 'r'=Remetente | 'd'=Destinatário | 'a'=Ambos (CHAR(1) minúsculo)
+-- ⚠️  ATENÇÃO — papel do cliente no frete é definido por id_remetente/id_destinatario.
+--     O campo cliente.tipo permanece por compatibilidade e deve usar 'a'.
 -- ⚠️  ATENÇÃO — status frete: 'E'|'S'|'T'|'R'|'N'|'C'  (FreteStatus enum)
 -- ⚠️  ATENÇÃO — tipo ocorrência: 'P'|'R'|'T'|'E'|'A'|'X'|'O' (TipoOcorrencia enum)
 -- ⚠️  ATENÇÃO — status motorista: 'A'|'I'|'S'  (StatusMotorista enum)
@@ -30,33 +31,30 @@ INSERT INTO usuario (nome, login, senha, perfil) VALUES
 
 -- ============================================================
 -- CLIENTES
--- cnpj: apenas dígitos (14 chars) — ClienteDAO.preencherStatement() remove a máscara
--- tipo: 'r'=Remetente | 'd'=Destinatário | 'a'=Ambos
+-- cnpj: documento fiscal apenas com dígitos: CPF (11) ou CNPJ (14).
+-- tipo: compatibilidade; use 'a' para todos os clientes.
 -- ============================================================
 INSERT INTO cliente
     (razao_social, nome_fantasia, cnpj, inscricao_est, tipo,
      logradouro, numero_end, complemento, bairro, municipio, uf, cep,
      telefone, email, is_ativo)
 VALUES
--- Remetentes
-('Transportadora Silva Ltda',    'Trans Silva',   '11222333000181', '0112233-42', 'r',
+('Transportadora Silva Ltda',    'Trans Silva',   '11222333000181', '0112233-42', 'a',
  'Rua das Palmeiras',       '100', NULL,           'Boa Viagem',    'Recife',        'PE', '51020010',
  '(81) 3000-1111', 'silva@transporte.com.br', TRUE),
 
-('Comércio Nordeste S.A.',       'ComNordeste',   '22333444000160', '0223344-53', 'r',
+('Comércio Nordeste S.A.',       'ComNordeste',   '22333444000160', '0223344-53', 'a',
  'Av. Agamenon Magalhães',  '500', 'Sala 301',     'Espinheiro',    'Recife',        'PE', '52020010',
  '(81) 3000-2222', 'contato@nordeste.com', TRUE),
 
--- Destinatários
-('Distribuidora Boa Vista LTDA', 'Boa Vista',     '33444555000149', '0334455-64', 'd',
+('Distribuidora Boa Vista LTDA', 'Boa Vista',     '33444555000149', '0334455-64', 'a',
  'Rua XV de Novembro',      '200', NULL,           'Centro',        'Natal',         'RN', '59010100',
  '(84) 3000-3333', 'bv@distribuidora.com', TRUE),
 
-('Armazéns Paraíba Log EIRELI',  'APL Logística', '44555666000128', '0445566-75', 'd',
+('Armazéns Paraíba Log EIRELI',  'APL Logística', '44555666000128', '0445566-75', 'a',
  'Rua Duque de Caxias',     '300', 'Galpão 2',     'Centro',        'João Pessoa',   'PB', '58010000',
  '(83) 3000-4444', 'log@armazens.pb', TRUE),
 
--- Ambos (usam tanto como remetente quanto destinatário)
 ('Indústria Ceará Tec LTDA',     'CearáTec',      '55666777000188', '0556677-86', 'a',
  'Rod. CE-060',              'km 5','Bloco B',     'Maracanaú',     'Fortaleza',     'CE', '61900000',
  '(85) 3000-5555', 'contato@cearatec.com', TRUE),

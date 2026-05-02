@@ -84,14 +84,14 @@
             <dl class="dados-lista">
                 <dt>Remetente</dt>
                 <dd>${frete.remetente.razaoSocial}
-                    <c:if test="${not empty frete.remetente.cnpj}">
-                        <small class="text-muted">(${frete.remetente.cnpj})</small>
+                    <c:if test="${not empty frete.remetente.documentoFiscal}">
+                        <small class="text-muted">(${frete.remetente.documentoFiscalFormatado})</small>
                     </c:if>
                 </dd>
                 <dt>Destinatário</dt>
                 <dd>${frete.destinatario.razaoSocial}
-                    <c:if test="${not empty frete.destinatario.cnpj}">
-                        <small class="text-muted">(${frete.destinatario.cnpj})</small>
+                    <c:if test="${not empty frete.destinatario.documentoFiscal}">
+                        <small class="text-muted">(${frete.destinatario.documentoFiscalFormatado})</small>
                     </c:if>
                 </dd>
                 <dt>Motorista</dt>

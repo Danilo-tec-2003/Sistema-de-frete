@@ -4,6 +4,7 @@ import br.com.gw.Enums.TipoCliente;
 import br.com.gw.nucleo.exception.CadastroException;
 import br.com.gw.nucleo.exception.NegocioException;
 import br.com.gw.nucleo.utils.ValidadorCNPJ;
+import br.com.gw.nucleo.utils.ValidadorCPF;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -51,13 +52,14 @@ public class ClienteBO {
     }
 
     public void salvar(Cliente c) throws NegocioException {
+        c.setTipo(TipoCliente.AMBOS);
         validar(c);
 
         try {
-            if (c.getCnpj() != null  && !c.getCnpj().trim().isEmpty()) {
-                if (dao.existeCnpj(c.getCnpj(), c.getId())) {
+            if (c.getCnpj() != null && !c.getCnpj().trim().isEmpty()) {
+                if (dao.existeDocumentoFiscal(c.getCnpj(), c.getId())) {
                     throw new CadastroException(
-                        "O CNPJ " + c.getCnpj() + " já está cadastrado para outro cliente.");
+                        "O documento " + c.getCnpj() + " já está cadastrado para outro cliente.");
                 }
             }
 
@@ -99,15 +101,20 @@ public class ClienteBO {
         if (c.getRazaoSocial().trim().length() < 3)
             throw new CadastroException("A Razão Social deve ter pelo menos 3 caracteres.");
     
-        if (c.getTipo() == null)
-            throw new CadastroException("O campo Tipo é obrigatório.");
-    
-        // ── CNPJ ─────────────────────────────────────────────────────────────
+        // ── Documento fiscal ─────────────────────────────────────────────────
         if (vazio(c.getCnpj()))
-            throw new CadastroException("O campo CNPJ é obrigatório.");
-    
-        if (!ValidadorCNPJ.isValido(c.getCnpj()))
-            throw new CadastroException("O CNPJ informado (" + c.getCnpj() + ") é inválido. Verifique os dígitos.");
+            throw new CadastroException("O campo CPF/CNPJ é obrigatório.");
+
+        String documento = somenteDigitos(c.getCnpj());
+        if (documento.length() == 11) {
+            if (!ValidadorCPF.isValido(documento))
+                throw new CadastroException("O CPF informado (" + c.getCnpj() + ") é inválido. Verifique os dígitos.");
+        } else if (documento.length() == 14) {
+            if (!ValidadorCNPJ.isValido(documento))
+                throw new CadastroException("O CNPJ informado (" + c.getCnpj() + ") é inválido. Verifique os dígitos.");
+        } else {
+            throw new CadastroException("Informe um CPF com 11 dígitos ou CNPJ com 14 dígitos.");
+        }
     
         // ── Endereço ──────────────────────────────────────────────────────────
         if (vazio(c.getLogradouro()))
@@ -148,5 +155,9 @@ public class ClienteBO {
     // ── helper ────────────────────────────────────────────────────────────────
     private boolean vazio(String s) {
         return s == null || s.trim().isEmpty();
+    }
+
+    private String somenteDigitos(String s) {
+        return s == null ? "" : s.replaceAll("[^0-9]", "");
     }
 }

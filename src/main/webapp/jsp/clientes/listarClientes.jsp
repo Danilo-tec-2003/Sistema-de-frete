@@ -50,8 +50,7 @@
                         <tr>
                             <th>#</th>
                             <th>Razão Social</th>
-                            <th>CNPJ</th>
-                            <th>Tipo</th>
+                            <th>CPF/CNPJ</th>
                             <th>Município/UF</th>
                             <th>Telefone</th>
                             <th>Status</th>
@@ -61,7 +60,7 @@
                     <tbody>
                         <c:choose>
                             <c:when test="${empty clientes}">
-                                <tr><td colspan="8" class="text-center text-muted">
+                                <tr><td colspan="7" class="text-center text-muted">
                                     Nenhum cliente encontrado.
                                 </td></tr>
                             </c:when>
@@ -75,8 +74,15 @@
                                                 <br><small class="text-muted">${c.nomeFantasia}</small>
                                             </c:if>
                                         </td>
-                                        <td>${empty c.cnpj ? '—' : c.cnpj}</td>
-                                        <td>${c.tipo.descricao}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${empty c.documentoFiscal}">—</c:when>
+                                                <c:otherwise>
+                                                    <small class="text-muted">${c.tipoDocumentoFiscal}</small><br>
+                                                    ${c.documentoFiscalFormatado}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
                                         <td>
                                             <c:if test="${not empty c.municipio}">
                                                 ${c.municipio}/${c.uf}

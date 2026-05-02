@@ -32,13 +32,14 @@ CREATE TABLE IF NOT EXISTS usuario (
 
 -- ============================================================
 -- CLIENTE
--- tipo CHAR(1): r=Remetente | d=Destinatário | a=Ambos
+-- cnpj guarda o documento fiscal do cliente: CPF (11 dígitos) ou CNPJ (14 dígitos).
+-- tipo permanece por compatibilidade, mas o papel no frete é definido por id_remetente/id_destinatario.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS cliente (
     idcliente     INTEGER       NOT NULL DEFAULT nextval('seq_cliente'),
     razao_social  VARCHAR(120)  NOT NULL,
     nome_fantasia VARCHAR(100),
-    cnpj          VARCHAR(14),  
+    cnpj          VARCHAR(14),
     inscricao_est VARCHAR(20),
     tipo          CHAR(1)       NOT NULL DEFAULT 'a',
     logradouro    VARCHAR(80),
@@ -57,6 +58,7 @@ CREATE TABLE IF NOT EXISTS cliente (
     updated_by    VARCHAR(60),
     CONSTRAINT pk_cliente       PRIMARY KEY (idcliente),
     CONSTRAINT uq_cliente_cnpj  UNIQUE      (cnpj),
+    CONSTRAINT ck_cliente_documento_tamanho CHECK (cnpj IS NULL OR length(cnpj) IN (11, 14)),
     CONSTRAINT ck_cliente_tipo  CHECK (tipo IN ('r','d','a'))
 );
 

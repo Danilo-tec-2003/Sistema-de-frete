@@ -355,10 +355,10 @@ public class RelatorioDAO {
         doc.setDataEntrega(formatarDataHora(rs.getTimestamp("data_entrega")));
 
         doc.setRemetenteRazao(rs.getString("rem_razao"));
-        doc.setRemetenteCnpj(mascaraCnpj(rs.getString("rem_cnpj")));
+        doc.setRemetenteCnpj(mascaraDocumentoFiscal(rs.getString("rem_cnpj")));
         doc.setRemetenteEndereco(endereco(rs, "rem"));
         doc.setDestinatarioRazao(rs.getString("dest_razao"));
-        doc.setDestinatarioCnpj(mascaraCnpj(rs.getString("dest_cnpj")));
+        doc.setDestinatarioCnpj(mascaraDocumentoFiscal(rs.getString("dest_cnpj")));
         doc.setDestinatarioEndereco(endereco(rs, "dest"));
 
         doc.setMotoristaNome(rs.getString("motorista_nome"));
@@ -479,12 +479,18 @@ public class RelatorioDAO {
                d.substring(6, 9) + "-" + d.substring(9);
     }
 
-    private String mascaraCnpj(String cnpj) {
-        if (cnpj == null) return "";
-        String d = cnpj.replaceAll("[^0-9]", "");
-        if (d.length() != 14) return cnpj;
-        return d.substring(0, 2) + "." + d.substring(2, 5) + "." +
-               d.substring(5, 8) + "/" + d.substring(8, 12) + "-" +
-               d.substring(12);
+    private String mascaraDocumentoFiscal(String documento) {
+        if (documento == null) return "";
+        String d = documento.replaceAll("[^0-9]", "");
+        if (d.length() == 11) {
+            return d.substring(0, 3) + "." + d.substring(3, 6) + "." +
+                   d.substring(6, 9) + "-" + d.substring(9);
+        }
+        if (d.length() == 14) {
+            return d.substring(0, 2) + "." + d.substring(2, 5) + "." +
+                   d.substring(5, 8) + "/" + d.substring(8, 12) + "-" +
+                   d.substring(12);
+        }
+        return documento;
     }
 }

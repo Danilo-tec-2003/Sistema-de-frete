@@ -58,10 +58,14 @@ public class ClienteDAO {
     }
 
     public boolean existeCnpj(String cnpj, int ignorarId) throws SQLException {
+        return existeDocumentoFiscal(cnpj, ignorarId);
+    }
+
+    public boolean existeDocumentoFiscal(String documentoFiscal, int ignorarId) throws SQLException {
         String sql = "SELECT 1 FROM cliente WHERE cnpj = ? AND idcliente <> ?";
         try (Connection conn = ConexaoUtil.getConexao();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, cnpj.replaceAll("[^0-9]", ""));
+            ps.setString(1, documentoFiscal.replaceAll("[^0-9]", ""));
             ps.setInt(2, ignorarId);
             try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
         }
@@ -135,10 +139,11 @@ public class ClienteDAO {
     private void preencherStatement(PreparedStatement ps, Cliente c) throws SQLException {
         ps.setString(1,  c.getRazaoSocial());
         ps.setString(2,  c.getNomeFantasia());
-        String cnpjNums = c.getCnpj() == null ? null : c.getCnpj().replaceAll("[^0-9]", "");
-        ps.setString(3,  cnpjNums);
+        String documentoNums = c.getCnpj() == null ? null : c.getCnpj().replaceAll("[^0-9]", "");
+        ps.setString(3,  documentoNums);
         ps.setString(4,  c.getInscricaoEst());
-        ps.setString(5,  String.valueOf(c.getTipo().getCodigo()));
+        TipoCliente tipo = c.getTipo() == null ? TipoCliente.AMBOS : c.getTipo();
+        ps.setString(5,  String.valueOf(tipo.getCodigo()));
         ps.setString(6,  c.getLogradouro());
         ps.setString(7,  c.getNumeroEnd());
         ps.setString(8,  c.getComplemento());

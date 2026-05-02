@@ -5,7 +5,7 @@
 
 -- ---- CLIENTE ----
 CREATE INDEX IF NOT EXISTS idx_cli_razao_social ON cliente(razao_social);   -- filtro ILIKE no ClienteDAO.listar()
-CREATE INDEX IF NOT EXISTS idx_cli_cnpj         ON cliente(cnpj);
+CREATE INDEX IF NOT EXISTS idx_cli_cnpj         ON cliente(cnpj);         -- documento fiscal: CPF ou CNPJ
 CREATE INDEX IF NOT EXISTS idx_cli_is_ativo     ON cliente(is_ativo);
 
 -- ---- MOTORISTA ----

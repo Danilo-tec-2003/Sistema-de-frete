@@ -29,6 +29,26 @@ public class Cliente {
     public String      getRazaoSocial()   { return razaoSocial; }
     public String      getNomeFantasia()  { return nomeFantasia; }
     public String      getCnpj()          { return cnpj; }
+    public String      getDocumentoFiscal() { return cnpj; }
+    public String      getTipoDocumentoFiscal() {
+        String nums = somenteDigitos(cnpj);
+        if (nums.length() == 11) return "CPF";
+        if (nums.length() == 14) return "CNPJ";
+        return "Documento";
+    }
+    public String      getDocumentoFiscalFormatado() {
+        String nums = somenteDigitos(cnpj);
+        if (nums.length() == 11) {
+            return nums.substring(0, 3) + "." + nums.substring(3, 6) + "."
+                 + nums.substring(6, 9) + "-" + nums.substring(9);
+        }
+        if (nums.length() == 14) {
+            return nums.substring(0, 2) + "." + nums.substring(2, 5) + "."
+                 + nums.substring(5, 8) + "/" + nums.substring(8, 12)
+                 + "-" + nums.substring(12);
+        }
+        return cnpj;
+    }
     public String      getInscricaoEst()  { return inscricaoEst; }
     public TipoCliente getTipo()          { return tipo; }
     public String      getLogradouro()    { return logradouro; }
@@ -46,6 +66,7 @@ public class Cliente {
     public void setRazaoSocial(String v)              { this.razaoSocial  = v; }
     public void setNomeFantasia(String v)             { this.nomeFantasia = v; }
     public void setCnpj(String v)                     { this.cnpj         = v; }
+    public void setDocumentoFiscal(String v)          { this.cnpj         = v; }
     public void setInscricaoEst(String v)             { this.inscricaoEst = v; }
     public void setTipo(TipoCliente v)                { this.tipo         = v; }
     public void setLogradouro(String v)               { this.logradouro   = v; }
@@ -58,4 +79,8 @@ public class Cliente {
     public void setTelefone(String v)                 { this.telefone     = v; }
     public void setEmail(String v)                    { this.email        = v; }
     public void setAtivo(boolean v)                   { this.ativo        = v; }
+
+    private String somenteDigitos(String valor) {
+        return valor == null ? "" : valor.replaceAll("[^0-9]", "");
+    }
 }

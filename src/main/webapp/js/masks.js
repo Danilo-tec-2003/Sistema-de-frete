@@ -59,6 +59,11 @@ document.addEventListener('DOMContentLoaded', function () {
         return d;
     }
 
+    function formatCpfCnpj(value) {
+        var d = digitsOnly(value);
+        return d.length <= 11 ? formatCpf(d) : formatCnpj(d);
+    }
+
     function formatCep(value) {
         var d = digitsOnly(value).slice(0, 8);
         return d.length > 5 ? d.replace(/(\d{5})(\d{0,3}).*/, '$1-$2') : d;
@@ -153,6 +158,21 @@ document.addEventListener('DOMContentLoaded', function () {
             setFieldError(el, 'Informe um CNPJ valido no formato 00.000.000/0000-00.');
             return false;
         }
+        if (validator === 'cpf-cnpj') {
+            var docDigits = digitsOnly(value);
+            if (docDigits.length === 11 && !isValidCpf(value)) {
+                setFieldError(el, 'Informe um CPF valido no formato 000.000.000-00.');
+                return false;
+            }
+            if (docDigits.length === 14 && !isValidCnpj(value)) {
+                setFieldError(el, 'Informe um CNPJ valido no formato 00.000.000/0000-00.');
+                return false;
+            }
+            if (docDigits.length !== 11 && docDigits.length !== 14) {
+                setFieldError(el, 'Informe um CPF com 11 digitos ou CNPJ com 14 digitos.');
+                return false;
+            }
+        }
         if (validator === 'telefone') {
             var telDigits = digitsOnly(value);
             if (telDigits.length !== 10 && telDigits.length !== 11) {
@@ -209,6 +229,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function applyMasksWithoutIMask() {
         attachSanitizer('[data-mask="cpf"]', formatCpf);
         attachSanitizer('[data-mask="cnpj"]', formatCnpj);
+        attachSanitizer('[data-mask="cpf-cnpj"]', formatCpfCnpj);
         attachSanitizer('[data-mask="cep"]', formatCep);
         attachSanitizer('[data-mask="telefone"]', formatPhone);
         attachSanitizer('[data-mask="placa"]', function (value) {
@@ -238,6 +259,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         document.querySelectorAll('[data-mask="cnpj"]').forEach(function (el) {
             IMask(el, { mask: '00.000.000/0000-00' });
+        });
+        document.querySelectorAll('[data-mask="cpf-cnpj"]').forEach(function (el) {
+            IMask(el, {
+                mask: [
+                    { mask: '000.000.000-00' },
+                    { mask: '00.000.000/0000-00' }
+                ],
+                dispatch: function (appended, dynamicMasked) {
+                    var value = (dynamicMasked.value + appended).replace(/\D/g, '');
+                    return dynamicMasked.compiledMasks[value.length > 11 ? 1 : 0];
+                }
+            });
         });
         document.querySelectorAll('[data-mask="telefone"]').forEach(function (el) {
             IMask(el, {

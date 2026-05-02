@@ -92,7 +92,7 @@
                             <c:forEach var="c" items="${clientes}">
                                 <option value="${c.id}"
                                     <c:if test="${frete.idRemetente == c.id}">selected</c:if>>
-                                    ${c.razaoSocial}<c:if test="${not empty c.cnpj}"> — ${c.cnpj}</c:if>
+                                    ${c.razaoSocial}<c:if test="${not empty c.documentoFiscal}"> — ${c.documentoFiscalFormatado}</c:if>
                                 </option>
                             </c:forEach>
                         </select>
@@ -105,7 +105,7 @@
                             <c:forEach var="c" items="${clientes}">
                                 <option value="${c.id}"
                                     <c:if test="${frete.idDestinatario == c.id}">selected</c:if>>
-                                    ${c.razaoSocial}<c:if test="${not empty c.cnpj}"> — ${c.cnpj}</c:if>
+                                    ${c.razaoSocial}<c:if test="${not empty c.documentoFiscal}"> — ${c.documentoFiscalFormatado}</c:if>
                                 </option>
                             </c:forEach>
                         </select>

@@ -56,31 +56,19 @@
                     </div>
                 </div>
 
-                <div class="form-row cols-3">
+                <div class="form-row cols-2">
                     <div class="form-group">
-                        <label for="cnpj">CNPJ *</label>
+                        <label for="cnpj">CPF/CNPJ *</label>
                         <input type="text" id="cnpj" name="cnpj"
-                               value="${cliente.cnpj}" class="form-control"
-                               maxlength="18" placeholder="00.000.000/0000-00"
-                               data-mask="cnpj" data-validate="cnpj" required>
+                               value="${cliente.documentoFiscalFormatado}" class="form-control"
+                               maxlength="18" placeholder="CPF ou CNPJ"
+                               data-mask="cpf-cnpj" data-validate="cpf-cnpj" required>
                     </div>
                     <div class="form-group">
                         <label for="inscricaoEst">Inscrição Estadual</label>
                         <input type="text" id="inscricaoEst" name="inscricaoEst"
                                value="${cliente.inscricaoEst}" class="form-control" maxlength="20"
                                data-allow="alphanum">
-                    </div>
-                    <div class="form-group">
-                        <label for="tipo">Tipo *</label>
-                        <select id="tipo" name="tipo" class="form-control" required>
-                            <option value="">Selecione...</option>
-                            <c:forEach var="t" items="${tipos}">
-                                <option value="${t.codigo}"
-                                    <c:if test="${cliente.tipo == t}">selected</c:if>>
-                                    ${t.descricao}
-                                </option>
-                            </c:forEach>
-                        </select>
                     </div>
                 </div>
 
