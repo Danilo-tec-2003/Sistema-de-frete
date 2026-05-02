@@ -19,6 +19,11 @@
     <div class="topbar">
         <div class="topbar-title">Fretes</div>
         <div class="topbar-actions">
+            <a href="${pageContext.request.contextPath}/relatorios?acao=documentoFrete&idFrete=${frete.id}"
+               class="btn btn-primary"
+               onclick="window.open(this.href, '_blank'); return false;">
+                Imprimir Documento
+            </a>
             <a href="${pageContext.request.contextPath}/fretes" class="btn btn-secondary">&larr; Voltar</a>
         </div>
     </div>

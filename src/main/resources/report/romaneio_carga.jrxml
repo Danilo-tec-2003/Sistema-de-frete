@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="romaneio_carga"
+              pageWidth="842"
+              pageHeight="595"
+              orientation="Landscape"
+              columnWidth="802"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="20"
+              bottomMargin="20"
+              whenNoDataType="AllSectionsNoDetail"
+              uuid="4bb7a3e5-bc3f-42d8-a46a-6c4d97f1e7fa">
+
+    <property name="net.sf.jasperreports.default.pdf.encoding" value="Cp1252"/>
+
+    <parameter name="TITULO" class="java.lang.String"/>
+    <parameter name="DATA_GERACAO" class="java.lang.String"/>
+    <parameter name="USUARIO" class="java.lang.String"/>
+    <parameter name="MOTORISTA_NOME" class="java.lang.String"/>
+    <parameter name="MOTORISTA_CPF" class="java.lang.String"/>
+    <parameter name="MOTORISTA_CNH" class="java.lang.String"/>
+    <parameter name="VEICULO_PLACAS" class="java.lang.String"/>
+    <parameter name="DATA_ROMANEIO" class="java.lang.String"/>
+    <parameter name="TOTAL_FRETES" class="java.lang.Integer"/>
+    <parameter name="TOTAL_PESO" class="java.math.BigDecimal"/>
+    <parameter name="TOTAL_VOLUMES" class="java.lang.Integer"/>
+    <parameter name="TOTAL_VALOR" class="java.math.BigDecimal"/>
+
+    <field name="numero" class="java.lang.String"/>
+    <field name="nomeRemetente" class="java.lang.String"/>
+    <field name="nomeDestinatario" class="java.lang.String"/>
+    <field name="destino" class="java.lang.String"/>
+    <field name="pesoKg" class="java.math.BigDecimal"/>
+    <field name="volumes" class="java.lang.Integer"/>
+    <field name="valorTotal" class="java.math.BigDecimal"/>
+
+    <title>
+        <band height="116">
+            <rectangle>
+                <reportElement x="0" y="0" width="802" height="100" backcolor="#172033" uuid="f1f10980-f368-4389-905a-d4ec32b8a1e8"/>
+                <graphicElement>
+                    <pen lineColor="#6DC52A"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="18" y="10" width="120" height="14" forecolor="#6DC52A" uuid="01dbf43a-a2a2-4a02-9c70-320cf37b71b0"/>
+                <textElement><font size="9" isBold="true"/></textElement>
+                <text><![CDATA[FiscalMove FMS]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="18" y="27" width="320" height="24" forecolor="#FFFFFF" uuid="b82236d8-a541-40f6-8492-ed3a2edcfaf4"/>
+                <textElement><font size="18" isBold="true"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA[$P{TITULO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="18" y="56" width="310" height="16" forecolor="#AAB7CC" uuid="5c676f34-e5d1-4dd1-ae48-1a4cb8637f74"/>
+                <textElement><font size="9"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA["Data operacional: " + $P{DATA_ROMANEIO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="18" y="76" width="360" height="16" forecolor="#AAB7CC" uuid="b1a35542-60f6-4fc2-b09a-cfd694274c8c"/>
+                <textElement><font size="9"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA["Gerado em " + $P{DATA_GERACAO} + " por " + $P{USUARIO}]]></textFieldExpression>
+            </textField>
+            <staticText><reportElement x="420" y="14" width="70" height="14" forecolor="#6DC52A" uuid="0f948cc0-a219-446d-bb7c-23b3b2f83fe8"/><textElement><font size="9" isBold="true"/></textElement><text><![CDATA[Motorista]]></text></staticText>
+            <textField><reportElement x="492" y="14" width="290" height="14" forecolor="#FFFFFF" uuid="592b4ae9-0853-470c-9de5-06c6d9d8fbc6"/><textElement><font size="9" isBold="true"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$P{MOTORISTA_NOME}]]></textFieldExpression></textField>
+            <staticText><reportElement x="420" y="34" width="70" height="14" forecolor="#6DC52A" uuid="39491cec-a43e-44bd-8ef2-ed13dd15e0d6"/><textElement><font size="9" isBold="true"/></textElement><text><![CDATA[CPF]]></text></staticText>
+            <textField><reportElement x="492" y="34" width="290" height="14" forecolor="#AAB7CC" uuid="67551d98-b124-4925-8779-ed98dbec071f"/><textElement><font size="9"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$P{MOTORISTA_CPF}]]></textFieldExpression></textField>
+            <staticText><reportElement x="420" y="54" width="70" height="14" forecolor="#6DC52A" uuid="d65e29fb-02b7-44b2-b7b7-18df0e32b5d5"/><textElement><font size="9" isBold="true"/></textElement><text><![CDATA[CNH]]></text></staticText>
+            <textField><reportElement x="492" y="54" width="290" height="14" forecolor="#AAB7CC" uuid="3c084c1f-2985-4949-8c52-5087d4790d5f"/><textElement><font size="9"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$P{MOTORISTA_CNH}]]></textFieldExpression></textField>
+            <staticText><reportElement x="420" y="74" width="70" height="14" forecolor="#6DC52A" uuid="5b24e57e-1746-42d8-9966-6286110cd355"/><textElement><font size="9" isBold="true"/></textElement><text><![CDATA[Veiculo(s)]]></text></staticText>
+            <textField><reportElement x="492" y="74" width="290" height="14" forecolor="#AAB7CC" uuid="4c4f922a-8d14-4eec-854a-ad262d4d4ee1"/><textElement><font size="9"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$P{VEICULO_PLACAS}]]></textFieldExpression></textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="26">
+            <rectangle>
+                <reportElement x="0" y="0" width="802" height="22" backcolor="#EAF7E2" mode="Opaque" uuid="d8e61f1b-4b7b-4013-9163-09e1bf952d0e"/>
+                <graphicElement><pen lineColor="#CFE6C2"/></graphicElement>
+            </rectangle>
+            <staticText><reportElement x="8" y="4" width="84" height="14" forecolor="#172033" uuid="e1e19a81-ae8d-465a-bdbf-e161e0e54f8f"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Frete]]></text></staticText>
+            <staticText><reportElement x="100" y="4" width="170" height="14" forecolor="#172033" uuid="33c9f817-cd07-4960-90bb-48d7dc60e7a1"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Remetente]]></text></staticText>
+            <staticText><reportElement x="278" y="4" width="170" height="14" forecolor="#172033" uuid="9b0aab14-c34c-47b7-8b98-67ec54935587"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Destinatario]]></text></staticText>
+            <staticText><reportElement x="456" y="4" width="130" height="14" forecolor="#172033" uuid="21dcd7fc-53c3-4afe-90ed-262adca601ff"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Destino]]></text></staticText>
+            <staticText><reportElement x="596" y="4" width="70" height="14" forecolor="#172033" uuid="8ee728b8-f0c9-4f68-9840-250d76953714"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[Peso kg]]></text></staticText>
+            <staticText><reportElement x="676" y="4" width="50" height="14" forecolor="#172033" uuid="c7e06691-6723-4a5b-9b19-e0cdb51c58c9"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[Volumes]]></text></staticText>
+            <staticText><reportElement x="736" y="4" width="60" height="14" forecolor="#172033" uuid="159f493c-7245-427a-bf78-565759c7a1b0"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[Valor]]></text></staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="25">
+            <line><reportElement x="0" y="24" width="802" height="1" forecolor="#DDE5EF" uuid="64a81e0d-d794-411a-a01c-86bfed5933ea"/></line>
+            <textField><reportElement x="8" y="5" width="84" height="14" uuid="4996dd55-8680-427d-a821-1da58f51c08a"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{numero}]]></textFieldExpression></textField>
+            <textField><reportElement x="100" y="5" width="170" height="14" uuid="cb2a9919-31d5-4996-ac8f-41264101a452"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{nomeRemetente}]]></textFieldExpression></textField>
+            <textField><reportElement x="278" y="5" width="170" height="14" uuid="f8279b71-2791-4fcb-85e6-e350b3656efe"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{nomeDestinatario}]]></textFieldExpression></textField>
+            <textField><reportElement x="456" y="5" width="130" height="14" uuid="b8d9d839-7ebe-41a7-a277-61eef824c8ca"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{destino}]]></textFieldExpression></textField>
+            <textField pattern="#,##0.00"><reportElement x="596" y="5" width="70" height="14" uuid="ca9a49a1-45ea-4218-8ca3-e23fc315be43"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{pesoKg}]]></textFieldExpression></textField>
+            <textField><reportElement x="676" y="5" width="50" height="14" uuid="487742be-b8be-4e5a-a3a9-b7ed75d3e58b"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.lang.Integer"><![CDATA[$F{volumes}]]></textFieldExpression></textField>
+            <textField pattern="#,##0.00"><reportElement x="736" y="5" width="60" height="14" uuid="8d4746ff-1f16-476b-87df-27d96f3482c5"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{valorTotal}]]></textFieldExpression></textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="18">
+            <staticText><reportElement x="0" y="2" width="260" height="12" forecolor="#666666" uuid="169dbfac-32e7-4335-8540-c15c1b195cf9"/><textElement><font size="8"/></textElement><text><![CDATA[Romaneio impresso para conferencia de carga]]></text></staticText>
+            <textField><reportElement x="690" y="2" width="112" height="12" forecolor="#666666" uuid="365e79ba-c389-45a8-8417-5b1a7932413c"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA["Pagina " + $V{PAGE_NUMBER}]]></textFieldExpression></textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="86">
+            <line><reportElement x="0" y="4" width="802" height="1" forecolor="#6DC52A" uuid="a60fd265-818f-4bfc-8d76-cc28099b8e54"/></line>
+            <staticText><reportElement x="0" y="14" width="80" height="16" forecolor="#172033" uuid="d21f0e43-e88b-4c74-af39-c1cd4717528e"/><textElement><font size="9" isBold="true"/></textElement><text><![CDATA[Totais]]></text></staticText>
+            <textField><reportElement x="100" y="14" width="130" height="16" uuid="349ba1be-7373-4fc2-9721-edbe3a31c7ff"/><textElement><font size="9"/></textElement><textFieldExpression class="java.lang.String"><![CDATA["Fretes: " + $P{TOTAL_FRETES}]]></textFieldExpression></textField>
+            <textField pattern="#,##0.00 kg"><reportElement x="240" y="14" width="130" height="16" uuid="219484fc-af4a-458f-98a3-93efda1be2b2"/><textElement><font size="9"/></textElement><textFieldExpression class="java.math.BigDecimal"><![CDATA[$P{TOTAL_PESO}]]></textFieldExpression></textField>
+            <textField><reportElement x="380" y="14" width="130" height="16" uuid="d444ec14-e457-44ed-bf90-d34d550f2e29"/><textElement><font size="9"/></textElement><textFieldExpression class="java.lang.String"><![CDATA["Volumes: " + $P{TOTAL_VOLUMES}]]></textFieldExpression></textField>
+            <textField pattern="R$ #,##0.00"><reportElement x="520" y="14" width="120" height="16" uuid="99a25ffb-6317-4f54-a9e1-948eea6788fa"/><textElement><font size="9"/></textElement><textFieldExpression class="java.math.BigDecimal"><![CDATA[$P{TOTAL_VALOR}]]></textFieldExpression></textField>
+            <line><reportElement x="20" y="66" width="250" height="1" forecolor="#555555" uuid="e79a094f-e11c-4ba1-a0b7-00b478720f9d"/></line>
+            <line><reportElement x="530" y="66" width="250" height="1" forecolor="#555555" uuid="6473cca0-800a-4133-a0cd-c9e941366b7a"/></line>
+            <staticText><reportElement x="20" y="70" width="250" height="12" forecolor="#555555" uuid="b55b7d05-773f-44ac-b7b1-b59509fc34eb"/><textElement textAlignment="Center"><font size="8"/></textElement><text><![CDATA[Assinatura do motorista]]></text></staticText>
+            <staticText><reportElement x="530" y="70" width="250" height="12" forecolor="#555555" uuid="28a976d7-e0f0-4815-94c3-1c3b8107d94d"/><textElement textAlignment="Center"><font size="8"/></textElement><text><![CDATA[Conferencia operacional]]></text></staticText>
+        </band>
+    </summary>
+</jasperReport>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="fretes_cliente"
+              pageWidth="842"
+              pageHeight="595"
+              orientation="Landscape"
+              columnWidth="802"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="20"
+              bottomMargin="20"
+              whenNoDataType="AllSectionsNoDetail"
+              uuid="9fbce64a-94a4-4fcf-a570-78c7e70526f0">
+
+    <property name="net.sf.jasperreports.default.pdf.encoding" value="Cp1252"/>
+
+    <parameter name="TITULO" class="java.lang.String"/>
+    <parameter name="CLIENTE_NOME" class="java.lang.String"/>
+    <parameter name="PERIODO" class="java.lang.String"/>
+    <parameter name="DATA_GERACAO" class="java.lang.String"/>
+    <parameter name="USUARIO" class="java.lang.String"/>
+    <parameter name="TOTAL_FRETES" class="java.lang.Integer"/>
+    <parameter name="TOTAL_VALOR" class="java.math.BigDecimal"/>
+
+    <field name="numero" class="java.lang.String"/>
+    <field name="dataEmissao" class="java.lang.String"/>
+    <field name="papelCliente" class="java.lang.String"/>
+    <field name="contraparte" class="java.lang.String"/>
+    <field name="origem" class="java.lang.String"/>
+    <field name="destino" class="java.lang.String"/>
+    <field name="motorista" class="java.lang.String"/>
+    <field name="statusDescricao" class="java.lang.String"/>
+    <field name="valorTotal" class="java.math.BigDecimal"/>
+
+    <title>
+        <band height="92">
+            <rectangle>
+                <reportElement x="0" y="0" width="802" height="78" backcolor="#172033" uuid="f7f903c0-62bf-4460-a647-8092577c701d"/>
+                <graphicElement><pen lineColor="#6DC52A"/></graphicElement>
+            </rectangle>
+            <textField>
+                <reportElement x="18" y="13" width="320" height="24" forecolor="#FFFFFF" uuid="f945e694-d2de-4b20-89ef-ce2e61f9f101"/>
+                <textElement><font size="18" isBold="true"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA[$P{TITULO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="18" y="43" width="430" height="15" forecolor="#AAB7CC" uuid="d11a529a-ce91-4048-81a5-b7cb47ac3d30"/>
+                <textElement><font size="9"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA[$P{CLIENTE_NOME} + " | " + $P{PERIODO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="560" y="16" width="224" height="16" forecolor="#AAB7CC" uuid="8729c3f9-f31b-4fdb-9b8a-34916e879070"/>
+                <textElement textAlignment="Right"><font size="9"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA["Gerado em " + $P{DATA_GERACAO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="560" y="37" width="224" height="16" forecolor="#AAB7CC" uuid="77addde7-c414-4e83-8df1-dd91c5f30238"/>
+                <textElement textAlignment="Right"><font size="9"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA["Usuario: " + $P{USUARIO}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="26">
+            <rectangle>
+                <reportElement x="0" y="0" width="802" height="22" backcolor="#EAF7E2" mode="Opaque" uuid="648a7b18-6a28-4500-bf1d-b2cf4fb9d19e"/>
+                <graphicElement><pen lineColor="#CFE6C2"/></graphicElement>
+            </rectangle>
+            <staticText><reportElement x="6" y="4" width="76" height="14" forecolor="#172033" uuid="f4a6ffde-1526-4e60-a972-2869c2cf573d"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Frete]]></text></staticText>
+            <staticText><reportElement x="88" y="4" width="66" height="14" forecolor="#172033" uuid="503a05f1-bf21-4fa2-80d5-f003a05f9e7a"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Emissao]]></text></staticText>
+            <staticText><reportElement x="160" y="4" width="76" height="14" forecolor="#172033" uuid="b54a55e2-13ca-4aac-ad3c-950d49decd9b"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Papel]]></text></staticText>
+            <staticText><reportElement x="242" y="4" width="148" height="14" forecolor="#172033" uuid="9401730a-3d02-402a-b8c1-98fa4dec24a5"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Contraparte]]></text></staticText>
+            <staticText><reportElement x="396" y="4" width="98" height="14" forecolor="#172033" uuid="db91aaf7-707a-4247-89bb-fb209c859e7a"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Origem]]></text></staticText>
+            <staticText><reportElement x="500" y="4" width="98" height="14" forecolor="#172033" uuid="c31e1ec0-854d-48cb-be70-fe5cdfb06a42"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Destino]]></text></staticText>
+            <staticText><reportElement x="604" y="4" width="88" height="14" forecolor="#172033" uuid="da2725bd-ce20-45c2-ad7c-73ad791dd767"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Motorista]]></text></staticText>
+            <staticText><reportElement x="698" y="4" width="58" height="14" forecolor="#172033" uuid="f37a2c4a-c442-4244-9076-b1d6ee55b653"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Status]]></text></staticText>
+            <staticText><reportElement x="760" y="4" width="38" height="14" forecolor="#172033" uuid="1757a8c5-f84c-4e81-83c0-15e8c854bbd4"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[Valor]]></text></staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="24">
+            <line><reportElement x="0" y="23" width="802" height="1" forecolor="#DDE5EF" uuid="04308092-a1bb-4279-a26d-f41c15fbfe0b"/></line>
+            <textField><reportElement x="6" y="4" width="76" height="14" uuid="ab56a480-4803-4c44-8788-f27e0ee9e1a4"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{numero}]]></textFieldExpression></textField>
+            <textField><reportElement x="88" y="4" width="66" height="14" uuid="a9f2355e-beb3-4ac7-ab56-ffb1b886fa90"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{dataEmissao}]]></textFieldExpression></textField>
+            <textField><reportElement x="160" y="4" width="76" height="14" uuid="41efbda8-91b2-44dd-a537-2f49171d60f0"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{papelCliente}]]></textFieldExpression></textField>
+            <textField><reportElement x="242" y="4" width="148" height="14" uuid="2aa951f6-c34f-4dc4-9aac-0c9d8b968f2e"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{contraparte}]]></textFieldExpression></textField>
+            <textField><reportElement x="396" y="4" width="98" height="14" uuid="734104d0-aa85-404a-a14c-b7dba6c66e72"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{origem}]]></textFieldExpression></textField>
+            <textField><reportElement x="500" y="4" width="98" height="14" uuid="39bc8ac5-a334-4756-943c-cbb34290569c"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{destino}]]></textFieldExpression></textField>
+            <textField><reportElement x="604" y="4" width="88" height="14" uuid="40d364c7-93e9-43a0-a4a1-f3f6925acbd2"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{motorista}]]></textFieldExpression></textField>
+            <textField><reportElement x="698" y="4" width="58" height="14" uuid="db45e380-41a7-4169-bf30-b042363ed4f8"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{statusDescricao}]]></textFieldExpression></textField>
+            <textField pattern="#,##0.00"><reportElement x="760" y="4" width="38" height="14" uuid="b9d0cce0-1388-40b9-aa23-6803829fc2d4"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{valorTotal}]]></textFieldExpression></textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="18">
+            <staticText><reportElement x="0" y="2" width="260" height="12" forecolor="#666666" uuid="f83ebf39-971d-4d03-b819-44b78a42d964"/><textElement><font size="8"/></textElement><text><![CDATA[Extrato de fretes por cliente]]></text></staticText>
+            <textField><reportElement x="690" y="2" width="112" height="12" forecolor="#666666" uuid="dc93073c-c7d3-4463-997b-e6237cfecf71"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA["Pagina " + $V{PAGE_NUMBER}]]></textFieldExpression></textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="34">
+            <line><reportElement x="0" y="3" width="802" height="1" forecolor="#6DC52A" uuid="db7e3332-b5c7-4d3f-8f95-9fa98bccbe35"/></line>
+            <textField><reportElement x="0" y="12" width="220" height="16" forecolor="#172033" uuid="9e61fd0a-b01c-4416-a9d0-4b958ebd0223"/><textElement><font size="9" isBold="true"/></textElement><textFieldExpression class="java.lang.String"><![CDATA["Total de fretes: " + $P{TOTAL_FRETES}]]></textFieldExpression></textField>
+            <textField pattern="R$ #,##0.00"><reportElement x="240" y="12" width="140" height="16" forecolor="#172033" uuid="16093b70-d632-41f6-935a-a4e0440d2b2b"/><textElement><font size="9" isBold="true"/></textElement><textFieldExpression class="java.math.BigDecimal"><![CDATA[$P{TOTAL_VALOR}]]></textFieldExpression></textField>
+        </band>
+    </summary>
+</jasperReport>

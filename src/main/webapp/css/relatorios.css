@@ -1,0 +1,107 @@
+.relatorios-page {
+  display: grid;
+  gap: 22px;
+}
+
+.relatorios-hero {
+  padding: 26px;
+  border: 1px solid rgba(109, 197, 42, 0.22);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at top right, rgba(109, 197, 42, 0.18), transparent 34%),
+    linear-gradient(135deg, rgba(26, 32, 53, 0.98), rgba(15, 17, 23, 0.98));
+  box-shadow: var(--shadow);
+}
+
+.relatorios-hero h1,
+.relatorio-card h2 {
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.relatorios-hero h1 {
+  font-size: 2rem;
+  line-height: 1.05;
+  margin: 6px 0 8px;
+}
+
+.relatorios-hero p,
+.relatorio-desc,
+.relatorio-card-header p {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.eyebrow {
+  color: var(--green);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.relatorio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.relatorio-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 100%;
+}
+
+.relatorio-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.relatorio-sigla {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius);
+  background: var(--green-dim);
+  border: 1px solid rgba(109, 197, 42, 0.24);
+  color: var(--green);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
+.relatorio-card h2 {
+  font-size: 1.28rem;
+  line-height: 1;
+}
+
+.relatorio-card-header p {
+  margin-top: 4px;
+  font-size: 0.78rem;
+}
+
+.relatorio-form {
+  display: grid;
+  gap: 13px;
+}
+
+.relatorio-card form {
+  margin-top: auto;
+}
+
+@media (max-width: 1120px) {
+  .relatorio-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .relatorios-hero,
+  .relatorio-grid {
+    grid-template-columns: 1fr;
+  }
+}

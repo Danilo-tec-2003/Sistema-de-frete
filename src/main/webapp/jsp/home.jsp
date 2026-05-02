@@ -137,6 +137,14 @@
                 </div>
             </a>
 
+            <a href="${pageContext.request.contextPath}/relatorios" class="card-link">
+                <div class="card card-menu">
+                    <div class="card-icon">📊</div>
+                    <h3>Relatórios</h3>
+                    <p>Consultas operacionais e documentos para impressão</p>
+                </div>
+            </a>
+
         </div>
 
         <!-- Info strip -->

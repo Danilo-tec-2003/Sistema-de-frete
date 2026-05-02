@@ -66,6 +66,12 @@
             <span class="nav-label">Fretes</span>
         </a>
 
+        <a href="${pageContext.request.contextPath}/relatorios"
+           class="nav-item ${pageContext.request.servletPath.contains('/relatorios') ? 'active' : ''}">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Relatórios</span>
+        </a>
+
         <div class="nav-section-label" style="margin-top:10px;">Cadastros</div>
 
         <a href="${pageContext.request.contextPath}/clientes"

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="desempenho_motoristas"
+              pageWidth="842"
+              pageHeight="595"
+              orientation="Landscape"
+              columnWidth="802"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="20"
+              bottomMargin="20"
+              whenNoDataType="AllSectionsNoDetail"
+              uuid="0cc0d977-ea4e-4e3f-a097-6f675b8705e8">
+
+    <property name="net.sf.jasperreports.default.pdf.encoding" value="Cp1252"/>
+
+    <parameter name="TITULO" class="java.lang.String"/>
+    <parameter name="PERIODO" class="java.lang.String"/>
+    <parameter name="DATA_GERACAO" class="java.lang.String"/>
+    <parameter name="USUARIO" class="java.lang.String"/>
+    <parameter name="TOTAL_ENTREGAS" class="java.lang.Integer"/>
+    <parameter name="TOTAL_NO_PRAZO" class="java.lang.Integer"/>
+    <parameter name="TOTAL_VALOR" class="java.math.BigDecimal"/>
+
+    <field name="motorista" class="java.lang.String"/>
+    <field name="cpf" class="java.lang.String"/>
+    <field name="entregas" class="java.lang.Integer"/>
+    <field name="entregasNoPrazo" class="java.lang.Integer"/>
+    <field name="entregasAtrasadas" class="java.lang.Integer"/>
+    <field name="percentualNoPrazo" class="java.math.BigDecimal"/>
+    <field name="mediaDiasAtraso" class="java.math.BigDecimal"/>
+    <field name="pesoTotalKg" class="java.math.BigDecimal"/>
+    <field name="volumesTotal" class="java.lang.Integer"/>
+    <field name="valorTotal" class="java.math.BigDecimal"/>
+
+    <title>
+        <band height="92">
+            <rectangle>
+                <reportElement x="0" y="0" width="802" height="78" backcolor="#172033" uuid="08756feb-aa34-4cdf-94f6-ea09f228fb54"/>
+                <graphicElement><pen lineColor="#6DC52A"/></graphicElement>
+            </rectangle>
+            <textField>
+                <reportElement x="18" y="13" width="340" height="24" forecolor="#FFFFFF" uuid="cd2dcefc-e119-4d89-85c4-052813ba58e4"/>
+                <textElement><font size="18" isBold="true"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA[$P{TITULO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="18" y="43" width="430" height="15" forecolor="#AAB7CC" uuid="e6f325c5-a0c4-4d2e-aeb3-5d50758ed5ef"/>
+                <textElement><font size="9"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA[$P{PERIODO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="560" y="16" width="224" height="16" forecolor="#AAB7CC" uuid="a2614987-0f4e-4202-a158-c7e3554e25a4"/>
+                <textElement textAlignment="Right"><font size="9"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA["Gerado em " + $P{DATA_GERACAO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="560" y="37" width="224" height="16" forecolor="#AAB7CC" uuid="b7cfa047-f4bd-4d66-a4f4-e459af0175cc"/>
+                <textElement textAlignment="Right"><font size="9"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA["Usuario: " + $P{USUARIO}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="26">
+            <rectangle>
+                <reportElement x="0" y="0" width="802" height="22" backcolor="#EAF7E2" mode="Opaque" uuid="b460bb85-bf59-47d7-b31b-bd33df076ee1"/>
+                <graphicElement><pen lineColor="#CFE6C2"/></graphicElement>
+            </rectangle>
+            <staticText><reportElement x="6" y="4" width="144" height="14" forecolor="#172033" uuid="b8d42821-00c1-43b0-bb9b-1e12c3157f83"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Motorista]]></text></staticText>
+            <staticText><reportElement x="156" y="4" width="82" height="14" forecolor="#172033" uuid="c14c9073-33e8-4821-8522-a8f0793cd01b"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[CPF]]></text></staticText>
+            <staticText><reportElement x="244" y="4" width="56" height="14" forecolor="#172033" uuid="b2327340-fdf1-4a1c-a54f-9400b97d2a41"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[Entregas]]></text></staticText>
+            <staticText><reportElement x="306" y="4" width="62" height="14" forecolor="#172033" uuid="8a726828-c6cd-46e9-9a23-15a9564a5df7"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[No prazo]]></text></staticText>
+            <staticText><reportElement x="374" y="4" width="56" height="14" forecolor="#172033" uuid="0372dd79-f6f7-4636-8e62-d1fd53f98b5d"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[Atrasos]]></text></staticText>
+            <staticText><reportElement x="436" y="4" width="70" height="14" forecolor="#172033" uuid="db700a0f-37b0-4868-b148-29fbf52fd294"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[% prazo]]></text></staticText>
+            <staticText><reportElement x="512" y="4" width="70" height="14" forecolor="#172033" uuid="20b25f99-7536-4357-ba4e-a34095e7db66"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[Med. atraso]]></text></staticText>
+            <staticText><reportElement x="588" y="4" width="72" height="14" forecolor="#172033" uuid="f939e62f-6ce9-4cd5-862c-7b04695827e6"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[Peso kg]]></text></staticText>
+            <staticText><reportElement x="666" y="4" width="54" height="14" forecolor="#172033" uuid="cb83eae9-5d72-42e6-8339-b623f95a288d"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[Volumes]]></text></staticText>
+            <staticText><reportElement x="726" y="4" width="72" height="14" forecolor="#172033" uuid="c670af3e-adb3-4d0d-bc38-04043711026f"/><textElement textAlignment="Right"><font size="8" isBold="true"/></textElement><text><![CDATA[Valor]]></text></staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="24">
+            <line><reportElement x="0" y="23" width="802" height="1" forecolor="#DDE5EF" uuid="b07566bd-139d-4d1e-a55b-5023945ea199"/></line>
+            <textField><reportElement x="6" y="4" width="144" height="14" uuid="f3ef16c8-d0a8-48fa-bd53-b5effdb8a6fd"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{motorista}]]></textFieldExpression></textField>
+            <textField><reportElement x="156" y="4" width="82" height="14" uuid="963dd49f-8613-411b-b9fb-4aff40e65528"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{cpf}]]></textFieldExpression></textField>
+            <textField><reportElement x="244" y="4" width="56" height="14" uuid="1f14e809-efca-4543-b2d9-1494e7567af5"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.lang.Integer"><![CDATA[$F{entregas}]]></textFieldExpression></textField>
+            <textField><reportElement x="306" y="4" width="62" height="14" uuid="898c8c93-0ba7-496b-b01a-2afc377c9895"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.lang.Integer"><![CDATA[$F{entregasNoPrazo}]]></textFieldExpression></textField>
+            <textField><reportElement x="374" y="4" width="56" height="14" uuid="660cbfbf-de51-48d6-b6bb-c9f55828f04a"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.lang.Integer"><![CDATA[$F{entregasAtrasadas}]]></textFieldExpression></textField>
+            <textField pattern="#,##0.00'%'"><reportElement x="436" y="4" width="70" height="14" uuid="092f87f3-faba-4c07-9b4f-7235229a1475"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{percentualNoPrazo}]]></textFieldExpression></textField>
+            <textField pattern="#,##0.00"><reportElement x="512" y="4" width="70" height="14" uuid="e36074b9-1851-4bf8-9223-ad1828be3f99"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{mediaDiasAtraso}]]></textFieldExpression></textField>
+            <textField pattern="#,##0.00"><reportElement x="588" y="4" width="72" height="14" uuid="42c5e230-73a7-4444-9e8c-293a2e34588e"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{pesoTotalKg}]]></textFieldExpression></textField>
+            <textField><reportElement x="666" y="4" width="54" height="14" uuid="b86a839e-f734-4f13-9d9b-6357b854d272"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.lang.Integer"><![CDATA[$F{volumesTotal}]]></textFieldExpression></textField>
+            <textField pattern="#,##0.00"><reportElement x="726" y="4" width="72" height="14" uuid="536991a9-460b-4060-a6ef-39ac51edcc98"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{valorTotal}]]></textFieldExpression></textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="18">
+            <staticText><reportElement x="0" y="2" width="280" height="12" forecolor="#666666" uuid="5c839edc-3552-4917-bfa7-7852dc34d7b7"/><textElement><font size="8"/></textElement><text><![CDATA[Indicadores de entregas concluidas por motorista]]></text></staticText>
+            <textField><reportElement x="690" y="2" width="112" height="12" forecolor="#666666" uuid="01a4c227-50be-4a25-9d3e-0cb499f75998"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA["Pagina " + $V{PAGE_NUMBER}]]></textFieldExpression></textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="34">
+            <line><reportElement x="0" y="3" width="802" height="1" forecolor="#6DC52A" uuid="88b052f4-77a7-43e1-bdcf-43e12cdb9d9a"/></line>
+            <textField><reportElement x="0" y="12" width="170" height="16" forecolor="#172033" uuid="4ac06cf9-a982-46d9-bcae-3170102d4cea"/><textElement><font size="9" isBold="true"/></textElement><textFieldExpression class="java.lang.String"><![CDATA["Entregas: " + $P{TOTAL_ENTREGAS}]]></textFieldExpression></textField>
+            <textField><reportElement x="190" y="12" width="170" height="16" forecolor="#172033" uuid="f9ba7c9e-2cde-4a96-bf37-ef52a95da757"/><textElement><font size="9" isBold="true"/></textElement><textFieldExpression class="java.lang.String"><![CDATA["No prazo: " + $P{TOTAL_NO_PRAZO}]]></textFieldExpression></textField>
+            <textField pattern="R$ #,##0.00"><reportElement x="380" y="12" width="140" height="16" forecolor="#172033" uuid="5361ff9b-3502-444e-8e57-09125a02587a"/><textElement><font size="9" isBold="true"/></textElement><textFieldExpression class="java.math.BigDecimal"><![CDATA[$P{TOTAL_VALOR}]]></textFieldExpression></textField>
+        </band>
+    </summary>
+</jasperReport>

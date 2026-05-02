@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="ocorrencias_periodo"
+              pageWidth="842"
+              pageHeight="595"
+              orientation="Landscape"
+              columnWidth="802"
+              leftMargin="20"
+              rightMargin="20"
+              topMargin="20"
+              bottomMargin="20"
+              whenNoDataType="AllSectionsNoDetail"
+              uuid="e2b830c8-0281-46a5-9814-a9d8d4df3e5c">
+
+    <property name="net.sf.jasperreports.default.pdf.encoding" value="Cp1252"/>
+
+    <parameter name="TITULO" class="java.lang.String"/>
+    <parameter name="PERIODO" class="java.lang.String"/>
+    <parameter name="DATA_GERACAO" class="java.lang.String"/>
+    <parameter name="USUARIO" class="java.lang.String"/>
+    <parameter name="TOTAL_OCORRENCIAS" class="java.lang.Integer"/>
+
+    <field name="numeroFrete" class="java.lang.String"/>
+    <field name="dataHora" class="java.lang.String"/>
+    <field name="tipoDescricao" class="java.lang.String"/>
+    <field name="localizacao" class="java.lang.String"/>
+    <field name="descricao" class="java.lang.String"/>
+    <field name="motorista" class="java.lang.String"/>
+    <field name="placa" class="java.lang.String"/>
+    <field name="statusFrete" class="java.lang.String"/>
+    <field name="recebedor" class="java.lang.String"/>
+
+    <title>
+        <band height="92">
+            <rectangle>
+                <reportElement x="0" y="0" width="802" height="78" backcolor="#172033" uuid="12efddc4-c285-43c9-a062-a820178bffda"/>
+                <graphicElement><pen lineColor="#6DC52A"/></graphicElement>
+            </rectangle>
+            <textField>
+                <reportElement x="18" y="13" width="340" height="24" forecolor="#FFFFFF" uuid="e089994c-b780-4524-987a-898a63e36e4e"/>
+                <textElement><font size="18" isBold="true"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA[$P{TITULO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="18" y="43" width="430" height="15" forecolor="#AAB7CC" uuid="ac23ed29-8485-4b55-966d-e1bb96b6ee14"/>
+                <textElement><font size="9"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA[$P{PERIODO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="560" y="16" width="224" height="16" forecolor="#AAB7CC" uuid="e3f184b4-3de7-4777-8f9b-d92c983b2827"/>
+                <textElement textAlignment="Right"><font size="9"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA["Gerado em " + $P{DATA_GERACAO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="560" y="37" width="224" height="16" forecolor="#AAB7CC" uuid="13166c9c-6e8b-4960-a8a4-d16065b7d43f"/>
+                <textElement textAlignment="Right"><font size="9"/></textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA["Usuario: " + $P{USUARIO}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="26">
+            <rectangle>
+                <reportElement x="0" y="0" width="802" height="22" backcolor="#EAF7E2" mode="Opaque" uuid="34c21a27-5f72-4f80-98e3-ebc6a246fc6a"/>
+                <graphicElement><pen lineColor="#CFE6C2"/></graphicElement>
+            </rectangle>
+            <staticText><reportElement x="6" y="4" width="76" height="14" forecolor="#172033" uuid="6dde0b9d-68c4-4efc-8097-b9c3d3a3236e"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Frete]]></text></staticText>
+            <staticText><reportElement x="88" y="4" width="88" height="14" forecolor="#172033" uuid="459f67a6-8c09-4746-b5e2-cd0af4f95947"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Data/hora]]></text></staticText>
+            <staticText><reportElement x="182" y="4" width="104" height="14" forecolor="#172033" uuid="941ce5d7-f748-423b-b31c-1c8ad71bfe59"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Ocorrencia]]></text></staticText>
+            <staticText><reportElement x="292" y="4" width="92" height="14" forecolor="#172033" uuid="d0a80d3c-97c7-4f00-b172-3a9ecb361837"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Local]]></text></staticText>
+            <staticText><reportElement x="390" y="4" width="166" height="14" forecolor="#172033" uuid="f5b94526-4b6b-409e-b4b4-4bde60945b19"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Descricao]]></text></staticText>
+            <staticText><reportElement x="562" y="4" width="88" height="14" forecolor="#172033" uuid="ff0587e4-90f6-48a1-b0b4-57f9983d3979"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Motorista]]></text></staticText>
+            <staticText><reportElement x="656" y="4" width="46" height="14" forecolor="#172033" uuid="2b53443e-98c0-42d4-85d5-fee320730d35"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Placa]]></text></staticText>
+            <staticText><reportElement x="708" y="4" width="90" height="14" forecolor="#172033" uuid="2a794b76-612c-4263-88d7-425805b6da62"/><textElement><font size="8" isBold="true"/></textElement><text><![CDATA[Status]]></text></staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="28">
+            <line><reportElement x="0" y="27" width="802" height="1" forecolor="#DDE5EF" uuid="12169751-97e2-43cd-b161-aa9f3029249e"/></line>
+            <textField><reportElement x="6" y="5" width="76" height="14" uuid="385662e6-99c8-4d6b-a421-967492cfca25"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{numeroFrete}]]></textFieldExpression></textField>
+            <textField><reportElement x="88" y="5" width="88" height="14" uuid="5dfd0d4d-a835-4e42-a810-a0efe1f2390f"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{dataHora}]]></textFieldExpression></textField>
+            <textField><reportElement x="182" y="5" width="104" height="14" uuid="d35613aa-7ebc-4d07-83bc-8d72e2a342a3"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{tipoDescricao}]]></textFieldExpression></textField>
+            <textField><reportElement x="292" y="5" width="92" height="14" uuid="6206f953-0783-479b-8eef-96bd77a618d6"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{localizacao}]]></textFieldExpression></textField>
+            <textField isBlankWhenNull="true"><reportElement x="390" y="5" width="166" height="18" uuid="68d10961-5eca-42db-a98f-a4bfb20a3d9d"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{descricao} != null && !$F{descricao}.trim().isEmpty() ? $F{descricao} : $F{recebedor}]]></textFieldExpression></textField>
+            <textField><reportElement x="562" y="5" width="88" height="14" uuid="e37dd7a0-0a78-4d52-b905-9e25f71ef070"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{motorista}]]></textFieldExpression></textField>
+            <textField><reportElement x="656" y="5" width="46" height="14" uuid="f9593af6-19fd-4531-b3b1-e41857c33e9e"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{placa}]]></textFieldExpression></textField>
+            <textField><reportElement x="708" y="5" width="90" height="14" uuid="1df1fb7a-62c3-44be-8d66-cfa4a7b76089"/><textElement><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA[$F{statusFrete}]]></textFieldExpression></textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="18">
+            <staticText><reportElement x="0" y="2" width="260" height="12" forecolor="#666666" uuid="a35147d8-08fb-4998-98c2-b124aeec84a5"/><textElement><font size="8"/></textElement><text><![CDATA[Historico de ocorrencias de frete]]></text></staticText>
+            <textField><reportElement x="690" y="2" width="112" height="12" forecolor="#666666" uuid="b53440f2-e79d-45ed-9bf4-1321a0cf8df5"/><textElement textAlignment="Right"><font size="8"/></textElement><textFieldExpression class="java.lang.String"><![CDATA["Pagina " + $V{PAGE_NUMBER}]]></textFieldExpression></textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="34">
+            <line><reportElement x="0" y="3" width="802" height="1" forecolor="#6DC52A" uuid="dba7217b-7fe4-441f-81b7-cbb288a96428"/></line>
+            <textField><reportElement x="0" y="12" width="260" height="16" forecolor="#172033" uuid="3867e680-201d-4081-aaeb-4940495d2e6c"/><textElement><font size="9" isBold="true"/></textElement><textFieldExpression class="java.lang.String"><![CDATA["Total de ocorrencias: " + $P{TOTAL_OCORRENCIAS}]]></textFieldExpression></textField>
+        </band>
+    </summary>
+</jasperReport>
