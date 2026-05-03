@@ -71,11 +71,15 @@
                             <option value="">Selecione...</option>
                             <c:forEach var="t" items="${tipos}">
                                 <option value="${t.codigo}"
+                                    data-min="${t.capacidadeMinimaKg}"
+                                    data-max="${t.capacidadeMaximaKg}"
+                                    data-cnh="${t.cnhMinima.codigo}"
                                     <c:if test="${veiculo.tipo == t}">selected</c:if>>
-                                    ${t.descricao}
+                                    ${t.descricao} — CNH ${t.cnhMinima.codigo}
                                 </option>
                             </c:forEach>
                         </select>
+                        <small class="campo-hint" id="hint-tipo-veiculo"></small>
                     </div>
                     <div class="form-group">
                         <label for="status">Status *</label>
@@ -94,7 +98,7 @@
                 <hr class="divider">
                 <h3 style="margin-bottom:16px;font-family:'Rajdhani',sans-serif;font-size:1rem;
                            font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">
-                    Capacidade
+                    Capacidade Operacional
                 </h3>
 
                 <div class="form-row cols-3">
@@ -102,13 +106,18 @@
                         <label for="taraKg">Tara (kg) *</label>
                         <input type="text" id="taraKg" name="taraKg"
                                value="${veiculo.taraKg}" class="form-control"
-                               placeholder="8.000,00" data-mask="decimal" data-max-digits="9" required>
+                               placeholder="8.000,00 kg" data-mask="capacity" data-max-digits="9" required>
                     </div>
                     <div class="form-group">
-                        <label for="capacidadeKg">Capacidade de Carga (kg) *</label>
+                        <label for="capacidadeKg">
+                            Capacidade de Carga (kg) *
+                            <span class="tooltip" data-tooltip="Limites operacionais de referência do sistema. A capacidade real pode variar conforme modelo, eixo e documentação.">?</span>
+                        </label>
                         <input type="text" id="capacidadeKg" name="capacidadeKg"
                                value="${veiculo.capacidadeKg}" class="form-control"
-                               placeholder="14.000,00" data-mask="decimal" data-max-digits="9" required>
+                               placeholder="14.000,00 kg" data-mask="capacity" data-max-digits="9" required>
+                        <small class="campo-hint" id="hint-capacidade-veiculo"></small>
+                        <span class="msg-erro-campo" id="erro-capacidade-veiculo"></span>
                     </div>
                     <div class="form-group">
                         <label for="volumeM3">Volume (m³) *</label>
@@ -126,5 +135,73 @@
         </div>
     </div>
 </div>
+<script>
+(function () {
+    var tipo = document.getElementById('tipo');
+    var capacidade = document.getElementById('capacidadeKg');
+    var hintTipo = document.getElementById('hint-tipo-veiculo');
+    var hintCap = document.getElementById('hint-capacidade-veiculo');
+    var erroCap = document.getElementById('erro-capacidade-veiculo');
+
+    function parseNumero(valor) {
+        if (!valor) return 0;
+        return parseFloat(String(valor)
+            .replace('kg', '')
+            .replace(/\s/g, '')
+            .replace(/\./g, '')
+            .replace(',', '.')) || 0;
+    }
+
+    function fmt(valor) {
+        return Number(valor || 0).toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function optionSelecionada() {
+        return tipo.options[tipo.selectedIndex];
+    }
+
+    function atualizarHints() {
+        var opt = optionSelecionada();
+        var min = parseFloat(opt ? opt.getAttribute('data-min') : 0);
+        var max = parseFloat(opt ? opt.getAttribute('data-max') : 0);
+        var cnh = opt ? opt.getAttribute('data-cnh') : '';
+
+        if (min && max) {
+            hintTipo.textContent = 'CNH mínima: ' + cnh + '. Capacidade de referência: '
+                + fmt(min) + ' kg a ' + fmt(max) + ' kg.';
+            hintCap.textContent = 'Capacidade máxima sugerida para este tipo: ' + fmt(max) + ' kg.';
+        } else {
+            hintTipo.textContent = '';
+            hintCap.textContent = '';
+        }
+        validarCapacidade();
+    }
+
+    function validarCapacidade() {
+        var opt = optionSelecionada();
+        var min = parseFloat(opt ? opt.getAttribute('data-min') : 0);
+        var max = parseFloat(opt ? opt.getAttribute('data-max') : 0);
+        var valor = parseNumero(capacidade.value);
+
+        if (valor > 0 && min && max && (valor < min || valor > max)) {
+            erroCap.textContent = 'Informe capacidade entre ' + fmt(min) + ' kg e ' + fmt(max) + ' kg para este tipo.';
+            erroCap.classList.add('visivel');
+            capacidade.classList.add('campo-erro');
+            return;
+        }
+        erroCap.classList.remove('visivel');
+        capacidade.classList.remove('campo-erro');
+    }
+
+    if (tipo && capacidade) {
+        tipo.addEventListener('change', atualizarHints);
+        capacidade.addEventListener('input', validarCapacidade);
+        atualizarHints();
+    }
+})();
+</script>
 </body>
 </html>

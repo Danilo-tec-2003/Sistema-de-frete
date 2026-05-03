@@ -66,7 +66,7 @@ public class VeiculoBO {
             throw e;
         } catch (SQLException e) {
             LOG.severe("Erro ao salvar veículo: " + e.getMessage());
-            throw new NegocioException("Erro ao salvar veículo. Tente novamente.", e);
+            throw new NegocioException(mensagemSalvarVeiculo(e), e);
         }
     }
 
@@ -75,6 +75,10 @@ public class VeiculoBO {
             if (dao.estaEmViagem(id)) {
                 throw new CadastroException(
                     "Não é possível excluir este veículo pois há frete Em Trânsito vinculado a ele.");
+            }
+            if (dao.possuiFretes(id)) {
+                throw new CadastroException(
+                    "Não é possível excluir este veículo pois ele possui fretes vinculados ao histórico.");
             }
             dao.excluir(id);
         } catch (CadastroException e) {
@@ -122,9 +126,15 @@ public class VeiculoBO {
     
         if (v.getCapacidadeKg() == null || v.getCapacidadeKg().compareTo(BigDecimal.ZERO) <= 0)
             throw new CadastroException("O campo Capacidade de Carga (kg) é obrigatório e deve ser maior que zero.");
-    
-        if (v.getCapacidadeKg().compareTo(v.getTaraKg()) < 0)
-            throw new CadastroException("A Capacidade de Carga não pode ser menor que a Tara do veículo.");
+
+        if (!v.getTipo().permiteCapacidade(v.getCapacidadeKg())) {
+            throw new CadastroException(
+                "A capacidade informada excede ou fica abaixo do limite de referência para "
+                + v.getTipo().getDescricao() + ". Faixa aceita: "
+                + v.getTipo().getFaixaCapacidadeDescricao() + ". "
+                + "Estes limites são referências operacionais do sistema e podem variar conforme "
+                + "modelo, eixo e documentação do veículo.");
+        }
     
         if (v.getVolumeM3() == null || v.getVolumeM3().compareTo(BigDecimal.ZERO) <= 0)
             throw new CadastroException("O campo Volume (m³) é obrigatório e deve ser maior que zero.");
@@ -141,5 +151,16 @@ public class VeiculoBO {
                 throw new CadastroException("Erro ao verificar status do frete vinculado.");
             }
         }
+    }
+
+    private String mensagemSalvarVeiculo(SQLException e) {
+        String detalhe = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+        if ("23505".equals(e.getSQLState())) {
+            if (detalhe.contains("placa")) {
+                return "A placa informada já está cadastrada para outro veículo.";
+            }
+            return "Já existe um veículo cadastrado com estes dados.";
+        }
+        return "Erro ao salvar veículo. Tente novamente.";
     }
 }

@@ -72,7 +72,7 @@ public class ClienteBO {
             throw e;
         } catch (SQLException e) {
             LOG.severe("Erro ao salvar cliente: " + e.getMessage());
-            throw new NegocioException("Erro ao salvar cliente. Tente novamente.", e);
+            throw new NegocioException(mensagemSalvarCliente(e), e);
         }
     }
 
@@ -159,5 +159,13 @@ public class ClienteBO {
 
     private String somenteDigitos(String s) {
         return s == null ? "" : s.replaceAll("[^0-9]", "");
+    }
+
+    private String mensagemSalvarCliente(SQLException e) {
+        String detalhe = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+        if ("23505".equals(e.getSQLState()) && detalhe.contains("cnpj")) {
+            return "O CPF/CNPJ informado já está cadastrado para outro cliente.";
+        }
+        return "Erro ao salvar cliente. Tente novamente.";
     }
 }

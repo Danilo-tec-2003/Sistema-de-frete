@@ -1,8 +1,13 @@
 package br.com.gw.frete;
 
+import br.com.gw.Enums.CategoriaCNH;
 import br.com.gw.Enums.StatusFrete;
+import br.com.gw.Enums.StatusFiscal;
 import br.com.gw.Enums.StatusVeiculo;
+import br.com.gw.Enums.TipoDestinatario;
 import br.com.gw.Enums.TipoOcorrencia;
+import br.com.gw.Enums.TipoOperacao;
+import br.com.gw.Enums.TipoVeiculo;
 import br.com.gw.cliente.Cliente;
 import br.com.gw.motorista.Motorista;
 import br.com.gw.nucleo.utils.ConexaoUtil;
@@ -42,8 +47,10 @@ public class FreteDAO {
             "  valor_frete, aliquota_icms, valor_icms, " +
             "  aliquota_ibs, valor_ibs, aliquota_cbs, valor_cbs, " +
             "  valor_total, status, data_emissao, data_prev_entrega, " +
+            "  tipo_operacao, tipo_destinatario, cfop, motivo_cfop, " +
+            "  status_fiscal, regra_fiscal_aplicada, total_tributos, valor_total_estimado, " +
             "  observacao, created_by, updated_by" +
-            ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) " +
+            ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) " +
             "RETURNING idfrete";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -71,6 +78,14 @@ public class FreteDAO {
             ps.setString    (i++, String.valueOf(f.getStatus().getCodigo()));
             ps.setDate      (i++, Date.valueOf(f.getDataEmissao()));
             ps.setDate      (i++, Date.valueOf(f.getDataPrevEntrega()));
+            ps.setString    (i++, f.getTipoOperacao() == null ? null : f.getTipoOperacao().name());
+            ps.setString    (i++, f.getTipoDestinatario() == null ? null : f.getTipoDestinatario().name());
+            ps.setString    (i++, f.getCfop());
+            ps.setString    (i++, f.getMotivoCfop());
+            ps.setString    (i++, f.getStatusFiscal() == null ? StatusFiscal.PENDENTE.name() : f.getStatusFiscal().name());
+            ps.setString    (i++, f.getRegraFiscalAplicada());
+            ps.setBigDecimal(i++, f.getTotalTributos());
+            ps.setBigDecimal(i++, f.getValorTotalEstimado());
             ps.setString    (i++, f.getObservacao());
             ps.setString    (i++, f.getCreatedBy());
             ps.setString    (i  , f.getCreatedBy());   // updated_by = created_by na inserção
@@ -170,8 +185,8 @@ public class FreteDAO {
             "SELECT f.*, " +
             "  rem.razao_social  AS remetente_nome,  rem.cnpj  AS remetente_cnpj, " +
             "  dest.razao_social AS destinatario_nome, dest.cnpj AS destinatario_cnpj, " +
-            "  m.nome AS motorista_nome, m.cpf AS motorista_cpf, m.cnh_validade, " +
-            "  v.placa AS veiculo_placa, v.tipo AS veiculo_tipo " +
+            "  m.nome AS motorista_nome, m.cpf AS motorista_cpf, m.cnh_categoria, m.cnh_validade, " +
+            "  v.placa AS veiculo_placa, v.tipo AS veiculo_tipo, v.capacidade_kg AS veiculo_capacidade_kg " +
             "FROM frete f " +
             "JOIN cliente   rem  ON f.id_remetente    = rem.idcliente " +
             "JOIN cliente   dest ON f.id_destinatario = dest.idcliente " +
@@ -287,6 +302,28 @@ public class FreteDAO {
         }
     }
 
+    public int contarAtrasados() throws SQLException {
+        final String sql =
+            "SELECT COUNT(*) FROM frete " +
+            "WHERE status IN ('E','S','T','N') AND data_prev_entrega < CURRENT_DATE";
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        }
+    }
+
+    public int contarEntreguesHoje() throws SQLException {
+        final String sql =
+            "SELECT COUNT(*) FROM frete " +
+            "WHERE status = 'R' AND data_entrega::date = CURRENT_DATE";
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        }
+    }
+
     /** Verifica se o veículo tem frete ativo (status E, S ou T). */
     public boolean veiculoTemFreteAtivo(int idVeiculo, int excluirIdFrete) throws SQLException {
         final String sql =
@@ -376,6 +413,8 @@ public class FreteDAO {
         m.setId(rs.getInt("id_motorista"));
         m.setNome(rs.getString("motorista_nome"));
         m.setCpf(rs.getString("motorista_cpf"));
+        String cnhCat = rs.getString("cnh_categoria");
+        if (cnhCat != null) m.setCnhCategoria(CategoriaCNH.fromCodigo(cnhCat));
         Date cnhVal = rs.getDate("cnh_validade");
         if (cnhVal != null) m.setCnhValidade(cnhVal.toLocalDate());
         f.setMotorista(m);
@@ -383,6 +422,9 @@ public class FreteDAO {
         Veiculo v = new Veiculo();
         v.setId(rs.getInt("id_veiculo"));
         v.setPlaca(rs.getString("veiculo_placa"));
+        String veiculoTipo = rs.getString("veiculo_tipo");
+        if (veiculoTipo != null) v.setTipo(TipoVeiculo.fromCodigo(veiculoTipo));
+        v.setCapacidadeKg(rs.getBigDecimal("veiculo_capacidade_kg"));
         f.setVeiculo(v);
 
         return f;
@@ -452,6 +494,24 @@ public class FreteDAO {
         try { f.setValorIbs   (getBDNotNull(rs, "valor_ibs"));    } catch (SQLException ignored) {}
         try { f.setAliquotaCbs(getBDNotNull(rs, "aliquota_cbs")); } catch (SQLException ignored) {}
         try { f.setValorCbs   (getBDNotNull(rs, "valor_cbs"));    } catch (SQLException ignored) {}
+        try { f.setTotalTributos(getBDNotNull(rs, "total_tributos")); } catch (SQLException ignored) {}
+        try { f.setValorTotalEstimado(getBDNotNull(rs, "valor_total_estimado")); } catch (SQLException ignored) {}
+
+        try {
+            String tipoOperacao = rs.getString("tipo_operacao");
+            if (tipoOperacao != null) f.setTipoOperacao(TipoOperacao.valueOf(tipoOperacao));
+        } catch (SQLException | IllegalArgumentException ignored) {}
+        try {
+            String tipoDestinatario = rs.getString("tipo_destinatario");
+            if (tipoDestinatario != null) f.setTipoDestinatario(TipoDestinatario.valueOf(tipoDestinatario));
+        } catch (SQLException | IllegalArgumentException ignored) {}
+        try {
+            String statusFiscal = rs.getString("status_fiscal");
+            if (statusFiscal != null) f.setStatusFiscal(StatusFiscal.valueOf(statusFiscal));
+        } catch (SQLException | IllegalArgumentException ignored) {}
+        try { f.setCfop(rs.getString("cfop")); } catch (SQLException ignored) {}
+        try { f.setMotivoCfop(rs.getString("motivo_cfop")); } catch (SQLException ignored) {}
+        try { f.setRegraFiscalAplicada(rs.getString("regra_fiscal_aplicada")); } catch (SQLException ignored) {}
 
         BigDecimal peso = rs.getBigDecimal("peso_kg");
         if (peso != null) f.setPesoKg(peso);

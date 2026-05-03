@@ -1,14 +1,12 @@
 package br.com.gw.nucleo.utils;
 
-import javax.naming.InitialContext;
-import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
  * Utilitário central de conexão.
- * O DataSource é guardado no ServletContext pelo AppContextListener.
+ * O DataSource é inicializado pelo AppContextListener.
  * Todos os BOs obtêm conexão daqui — nunca criam DriverManager diretamente.
  */
 public class ConexaoUtil {
@@ -19,7 +17,6 @@ public class ConexaoUtil {
 
     private ConexaoUtil() {}
 
-    /** Chamado pelo AppContextListener na inicialização da aplicação. */
     public static void setDataSource(DataSource ds) {
         dataSource = ds;
     }

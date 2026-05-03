@@ -48,6 +48,9 @@ public class CadastroUsuarioBO {
 
         } catch (SQLException e) {
             LOG.severe("Erro ao cadastrar usuário: " + e.getMessage());
+            if ("23505".equals(e.getSQLState())) {
+                throw new NegocioException("Este login já está em uso. Escolha outro.");
+            }
             throw new NegocioException("Erro interno ao criar conta. Tente novamente.");
         }
     }

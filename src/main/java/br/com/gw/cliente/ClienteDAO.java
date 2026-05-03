@@ -46,6 +46,15 @@ public class ClienteDAO {
         }
     }
 
+    public int contarAtivos() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM cliente WHERE is_ativo = TRUE";
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        }
+    }
+
     public Cliente buscarPorId(int id) throws SQLException {
         String sql = "SELECT * FROM cliente WHERE idcliente = ?";
         try (Connection conn = ConexaoUtil.getConexao();
@@ -62,7 +71,7 @@ public class ClienteDAO {
     }
 
     public boolean existeDocumentoFiscal(String documentoFiscal, int ignorarId) throws SQLException {
-        String sql = "SELECT 1 FROM cliente WHERE cnpj = ? AND idcliente <> ?";
+        String sql = "SELECT 1 FROM cliente WHERE cnpj = ? AND idcliente <> ? AND is_ativo = TRUE";
         try (Connection conn = ConexaoUtil.getConexao();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, documentoFiscal.replaceAll("[^0-9]", ""));
@@ -121,7 +130,6 @@ public class ClienteDAO {
         }
     }
 
-    // ...existing code...
     public List<Cliente> listarAtivos() throws SQLException {
         List<Cliente> lista = new ArrayList<>();
         String sql = "SELECT idcliente, razao_social, nome_fantasia, cnpj, inscricao_est, tipo, logradouro, numero_end, complemento, bairro, municipio, uf, cep, telefone, email, is_ativo FROM cliente WHERE is_ativo = TRUE ORDER BY razao_social";
@@ -134,7 +142,6 @@ public class ClienteDAO {
         }
         return lista;
     }
-// ...existing code...
 
     private void preencherStatement(PreparedStatement ps, Cliente c) throws SQLException {
         ps.setString(1,  c.getRazaoSocial());

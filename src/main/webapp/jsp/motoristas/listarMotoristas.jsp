@@ -99,7 +99,7 @@
                                                class="btn btn-secondary btn-sm">Editar</a>
                                             <a href="${pageContext.request.contextPath}/motoristas?acao=excluir&id=${m.id}"
                                                class="btn btn-danger btn-sm"
-                                               onclick="return confirm('Excluir motorista ${m.nome}?')">Excluir</a>
+                                               data-confirm="Excluir motorista ${m.nome}?">Excluir</a>
                                         </td>
                                     </tr>
                                 </c:forEach>

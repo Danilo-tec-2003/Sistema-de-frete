@@ -1,6 +1,11 @@
 package br.com.gw.nucleo;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,15 +49,14 @@ public class AuthFilter implements Filter {
         }
     }
 
-// ✅ SUBSTITUIR o método completo
     private boolean isRecursoPublico(String uri, String ctx) {
         return uri.equals(ctx + "/login")
-            || uri.equals(ctx + "/cadastroUsuario")   // ← linha que falta
+            || uri.equals(ctx + "/cadastroUsuario")
             || uri.startsWith(ctx + "/css/")
             || uri.startsWith(ctx + "/js/")
-            || uri.startsWith(ctx + "/img/")    
+            || uri.startsWith(ctx + "/img/")
             || uri.endsWith(".ico");
-}
+    }
 
     @Override
     public void destroy() {}

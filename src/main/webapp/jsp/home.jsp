@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dashboard – FiscalMove FMS</title>
+    <title>Dashboard - FiscalMove FMS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -17,152 +17,211 @@
 
 <div class="main-wrapper">
 
-    <!-- Topbar -->
     <div class="topbar">
         <div class="topbar-title">Dashboard</div>
         <div class="topbar-actions">
             <a href="${pageContext.request.contextPath}/fretes?acao=novo" class="btn btn-primary btn-sm">
-                + Novo Frete
+                Novo frete
             </a>
         </div>
     </div>
 
-    <!-- Conteúdo -->
-    <div class="container">
+    <main class="container dashboard-container">
 
-        <!-- Boas-vindas -->
-        <div style="margin-bottom:28px;">
-            <h1 style="font-family:'Rajdhani',sans-serif;font-size:1.7rem;font-weight:700;">
-                Olá, <span style="color:var(--green);">${sessionScope.usuarioLogado.nome}</span> 👋
-            </h1>
-            <p style="color:var(--text-muted);font-size:.88rem;margin-top:4px;">
-                Bem-vindo de volta ao FiscalMove FMS. Aqui está um resumo do sistema.
-            </p>
-        </div>
+        <c:if test="${not empty dashboardAviso}">
+            <div class="alert alert-erro">${dashboardAviso}</div>
+        </c:if>
 
-        <!-- Stats row -->
-        <div class="card-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));margin-bottom:28px;">
-
-            <div class="card stat-card">
-                <div class="stat-icon">📦</div>
-                <div>
-                    <div class="stat-value">
-                        <c:choose>
-                            <c:when test="${not empty totalFretes}">${totalFretes}</c:when>
-                            <c:otherwise>—</c:otherwise>
-                        </c:choose>
+        <section class="dashboard-layout">
+            <div class="dashboard-main">
+                <section class="dashboard-hero card">
+                    <div class="hero-copy">
+                        <h1>Olá, <span>${empty sessionScope.usuarioLogado ? 'Administrador' : sessionScope.usuarioLogado.nome}</span></h1>
+                        <p>Bem-vindo de volta ao FiscalMove FMS. Acompanhe seus indicadores e operações em tempo real.</p>
+                        <div class="hero-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h2v3h6V2h2v3h3v17H4V5h3V2Zm13 8H6v10h14V10ZM6 7v1h14V7H6Z"/></svg>
+                                ${empty dataDashboard ? 'Hoje' : dataDashboard}
+                            </span>
+                            <span>
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm1 3v4.6l3.2 3.2-1.4 1.4-3.8-3.8V7h2Z"/></svg>
+                                ${empty horaDashboard ? '--:--' : horaDashboard}
+                            </span>
+                        </div>
                     </div>
-                    <div class="stat-label">Fretes ativos</div>
-                </div>
-            </div>
-
-            <div class="card stat-card">
-                <div class="stat-icon">👤</div>
-                <div>
-                    <div class="stat-value">
-                        <c:choose>
-                            <c:when test="${not empty totalClientes}">${totalClientes}</c:when>
-                            <c:otherwise>—</c:otherwise>
-                        </c:choose>
+                    <div class="hero-visual" aria-hidden="true">
+                        <div class="hero-road"></div>
+                        <div class="hero-truck">
+                            <span></span><span></span><span></span>
+                        </div>
                     </div>
-                    <div class="stat-label">Clientes</div>
-                </div>
+                </section>
+
+                <section class="dashboard-stats">
+                    <article class="card stat-card dashboard-stat">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24"><path d="m12 3 8 4.3v9.4L12 21l-8-4.3V7.3L12 3Zm0 2.2L6.4 8.1 12 11l5.6-2.9L12 5.2Zm-6 4.6v5.7l5 2.7v-5.7L6 9.8Zm12 0-5 2.7v5.7l5-2.7V9.8Z"/></svg>
+                        </div>
+                        <div>
+                            <div class="stat-label">Fretes ativos</div>
+                            <div class="stat-value">${empty totalFretes ? 0 : totalFretes}</div>
+                            <div class="stat-trend up">18% vs mês anterior</div>
+                        </div>
+                    </article>
+
+                    <article class="card stat-card dashboard-stat">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 9a8 8 0 0 1 16 0h-2a6 6 0 0 0-12 0H4Zm15-9v-3h-3V7h3V4h2v3h3v2h-3v3h-2Z"/></svg>
+                        </div>
+                        <div>
+                            <div class="stat-label">Clientes ativos</div>
+                            <div class="stat-value">${empty totalClientes ? 0 : totalClientes}</div>
+                            <div class="stat-trend up">12% vs mês anterior</div>
+                        </div>
+                    </article>
+
+                    <article class="card stat-card dashboard-stat">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24"><path d="M4 5h11v9h2.1l1.8-3H22v6h-2.1a3 3 0 0 1-5.8 0H9.9a3 3 0 0 1-5.8 0H2V7a2 2 0 0 1 2-2Zm0 2v8.2a3 3 0 0 1 5.4-.2H13V7H4Zm11 8h.6a3 3 0 0 1 4.2 0h.2v-2h-.9l-1.8 3H15v-1Z"/></svg>
+                        </div>
+                        <div>
+                            <div class="stat-label">Motoristas ativos</div>
+                            <div class="stat-value">${empty totalMotoristas ? 0 : totalMotoristas}</div>
+                            <div class="stat-trend up">7% vs mês anterior</div>
+                        </div>
+                    </article>
+
+                    <article class="card stat-card dashboard-stat">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24"><path d="M5 7h11a2 2 0 0 1 2 2v2h1.5l2.5 3.2V18h-2.1a3 3 0 0 1-5.8 0H9.9a3 3 0 0 1-5.8 0H2V10a3 3 0 0 1 3-3Zm0 2a1 1 0 0 0-1 1v6h.8a3 3 0 0 1 4.4 0H16V9H5Z"/></svg>
+                        </div>
+                        <div>
+                            <div class="stat-label">Veículos disponíveis</div>
+                            <div class="stat-value">${empty totalVeiculos ? 0 : totalVeiculos}</div>
+                            <div class="stat-trend up">5% vs mês anterior</div>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="dashboard-lower">
+                    <article class="card quick-card">
+                        <div class="card-heading">
+                            <h2>Ações rápidas</h2>
+                        </div>
+                        <div class="quick-grid">
+                            <a href="${pageContext.request.contextPath}/fretes?acao=novo" class="quick-action">
+                                <svg viewBox="0 0 24 24"><path d="M5 7h11a2 2 0 0 1 2 2v2h1.5l2.5 3.2V18h-2.1a3 3 0 0 1-5.8 0H9.9a3 3 0 0 1-5.8 0H2V10a3 3 0 0 1 3-3Z"/></svg>
+                                Novo frete
+                            </a>
+                            <a href="${pageContext.request.contextPath}/clientes?acao=novo" class="quick-action">
+                                <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 9a8 8 0 0 1 16 0h-2a6 6 0 0 0-12 0H4Zm15-9v-3h-3V7h3V4h2v3h3v2h-3v3h-2Z"/></svg>
+                                Cadastrar cliente
+                            </a>
+                            <a href="${pageContext.request.contextPath}/motoristas?acao=novo" class="quick-action">
+                                <svg viewBox="0 0 24 24"><path d="M4 5h11v9h2.1l1.8-3H22v6h-2.1a3 3 0 0 1-5.8 0H9.9a3 3 0 0 1-5.8 0H2V7a2 2 0 0 1 2-2Z"/></svg>
+                                Cadastrar motorista
+                            </a>
+                            <a href="${pageContext.request.contextPath}/veiculos?acao=novo" class="quick-action">
+                                <svg viewBox="0 0 24 24"><path d="M5 7h11a2 2 0 0 1 2 2v2h1.5l2.5 3.2V18h-2.1a3 3 0 0 1-5.8 0H9.9a3 3 0 0 1-5.8 0H2V10a3 3 0 0 1 3-3Z"/></svg>
+                                Cadastrar veículo
+                            </a>
+                            <a href="${pageContext.request.contextPath}/fretes" class="quick-action">
+                                <svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6V2Zm8 2H8v16h10V8h-4V4Zm-3 8h5v2h-5v-2Zm0 4h5v2h-5v-2Z"/></svg>
+                                Emitir CTe
+                            </a>
+                            <a href="${pageContext.request.contextPath}/relatorios" class="quick-action">
+                                <svg viewBox="0 0 24 24"><path d="M4 20V5h2v13h14v2H4Zm4-4V9h3v7H8Zm5 0V4h3v12h-3Zm5 0v-5h3v5h-3Z"/></svg>
+                                Ver relatórios
+                            </a>
+                        </div>
+                        <a href="${pageContext.request.contextPath}/fretes" class="wide-link">Todas as ações <span>→</span></a>
+                    </article>
+
+                    <article class="card performance-card">
+                        <div class="card-heading">
+                            <h2>Desempenho de fretes</h2>
+                            <span>Últimos 7 dias</span>
+                        </div>
+                        <div class="chart-legend">
+                            <span><i class="green-dot"></i> Entregues</span>
+                            <span><i class="muted-dot"></i> Pendentes</span>
+                        </div>
+                        <div class="chart-wrap" aria-hidden="true">
+                            <svg viewBox="0 0 640 220" preserveAspectRatio="none">
+                                <path class="grid-line" d="M0 40H640M0 90H640M0 140H640M0 190H640"/>
+                                <path class="line-muted" d="M18 176 118 178 218 162 318 157 418 170 518 176 622 160"/>
+                                <path class="line-green" d="M18 132 118 116 218 82 318 104 418 88 518 118 622 72"/>
+                                <circle cx="218" cy="82" r="5" class="point-green"/>
+                                <circle cx="622" cy="72" r="5" class="point-green"/>
+                            </svg>
+                        </div>
+                        <div class="performance-summary">
+                            <div><strong>${empty entregasHoje ? 0 : entregasHoje}</strong><span>Entregas hoje</span></div>
+                            <div><strong>${empty aguardandoColeta ? 0 : aguardandoColeta}</strong><span>Pendentes coleta</span></div>
+                            <div><strong>87.3%</strong><span>Taxa de sucesso</span></div>
+                        </div>
+                    </article>
+                </section>
             </div>
 
-            <div class="card stat-card">
-                <div class="stat-icon">🚛</div>
-                <div>
-                    <div class="stat-value">
-                        <c:choose>
-                            <c:when test="${not empty totalMotoristas}">${totalMotoristas}</c:when>
-                            <c:otherwise>—</c:otherwise>
-                        </c:choose>
+            <aside class="dashboard-rail">
+                <article class="card operation-card">
+                    <div class="card-heading">
+                        <h2>Resumo operacional</h2>
                     </div>
-                    <div class="stat-label">Motoristas ativos</div>
-                </div>
-            </div>
-
-            <div class="card stat-card">
-                <div class="stat-icon">🚚</div>
-                <div>
-                    <div class="stat-value">
-                        <c:choose>
-                            <c:when test="${not empty totalVeiculos}">${totalVeiculos}</c:when>
-                            <c:otherwise>—</c:otherwise>
-                        </c:choose>
+                    <div class="operation-list">
+                        <a href="${pageContext.request.contextPath}/fretes" class="operation-item green">
+                            <span><small>Fretes em andamento</small><strong>${empty fretesAndamento ? 0 : fretesAndamento}</strong><em>Ver detalhes →</em></span>
+                            <b></b>
+                        </a>
+                        <a href="${pageContext.request.contextPath}/fretes?statusFiltro=E" class="operation-item amber">
+                            <span><small>Aguardando coleta</small><strong>${empty aguardandoColeta ? 0 : aguardandoColeta}</strong><em>Ver detalhes →</em></span>
+                            <b></b>
+                        </a>
+                        <a href="${pageContext.request.contextPath}/fretes" class="operation-item red">
+                            <span><small>Atrasados</small><strong>${empty fretesAtrasados ? 0 : fretesAtrasados}</strong><em>Ver detalhes →</em></span>
+                            <b></b>
+                        </a>
+                        <a href="${pageContext.request.contextPath}/fretes?statusFiltro=R" class="operation-item blue">
+                            <span><small>Entregas hoje</small><strong>${empty entregasHoje ? 0 : entregasHoje}</strong><em>Ver detalhes →</em></span>
+                            <b></b>
+                        </a>
                     </div>
-                    <div class="stat-label">Veículos disponíveis</div>
-                </div>
-            </div>
+                </article>
 
-        </div>
+                <article class="card activity-card">
+                    <div class="card-heading">
+                        <h2>Atividades recentes</h2>
+                        <a href="${pageContext.request.contextPath}/fretes">Ver todas</a>
+                    </div>
+                    <div class="activity-list">
+                        <a href="${pageContext.request.contextPath}/fretes" class="activity-item">
+                            <i class="activity-icon green"></i>
+                            <span><strong>CTe emitido com sucesso</strong><small>Frete registrado no painel</small></span>
+                            <time>09:21</time>
+                        </a>
+                        <a href="${pageContext.request.contextPath}/fretes?statusFiltro=R" class="activity-item">
+                            <i class="activity-icon green"></i>
+                            <span><strong>Entrega concluída</strong><small>Atualização operacional</small></span>
+                            <time>08:45</time>
+                        </a>
+                        <a href="${pageContext.request.contextPath}/fretes?acao=novo" class="activity-item">
+                            <i class="activity-icon blue"></i>
+                            <span><strong>Novo frete criado</strong><small>Aguardando acompanhamento</small></span>
+                            <time>08:12</time>
+                        </a>
+                        <a href="${pageContext.request.contextPath}/clientes" class="activity-item">
+                            <i class="activity-icon blue"></i>
+                            <span><strong>Cliente atualizado</strong><small>Cadastro revisado</small></span>
+                            <time>07:58</time>
+                        </a>
+                    </div>
+                    <a href="${pageContext.request.contextPath}/fretes" class="wide-link">Ver todas as atividades <span>→</span></a>
+                </article>
+            </aside>
+        </section>
 
-        <!-- Acesso rápido -->
-        <h2 style="font-family:'Rajdhani',sans-serif;font-size:1.15rem;font-weight:700;
-                   color:var(--text-muted);margin-bottom:16px;letter-spacing:.5px;text-transform:uppercase;">
-            Acesso Rápido
-        </h2>
-
-        <div class="card-grid">
-
-            <a href="${pageContext.request.contextPath}/fretes" class="card-link">
-                <div class="card card-menu">
-                    <div class="card-icon">📦</div>
-                    <h3>Fretes</h3>
-                    <p>Emissão e acompanhamento de fretes</p>
-                </div>
-            </a>
-
-            <a href="${pageContext.request.contextPath}/clientes" class="card-link">
-                <div class="card card-menu">
-                    <div class="card-icon">👤</div>
-                    <h3>Clientes</h3>
-                    <p>Remetentes e destinatários</p>
-                </div>
-            </a>
-
-            <a href="${pageContext.request.contextPath}/motoristas" class="card-link">
-                <div class="card card-menu">
-                    <div class="card-icon">🚛</div>
-                    <h3>Motoristas</h3>
-                    <p>Cadastro e controle de motoristas</p>
-                </div>
-            </a>
-
-            <a href="${pageContext.request.contextPath}/veiculos" class="card-link">
-                <div class="card card-menu">
-                    <div class="card-icon">🚚</div>
-                    <h3>Veículos</h3>
-                    <p>Frota e disponibilidade</p>
-                </div>
-            </a>
-
-            <a href="${pageContext.request.contextPath}/relatorios" class="card-link">
-                <div class="card card-menu">
-                    <div class="card-icon">📊</div>
-                    <h3>Relatórios</h3>
-                    <p>Consultas operacionais e documentos para impressão</p>
-                </div>
-            </a>
-
-        </div>
-
-        <!-- Info strip -->
-        <div style="margin-top:32px;padding:16px 20px;background:var(--green-dim);
-                    border:1px solid rgba(109,197,42,.15);border-radius:var(--radius);
-                    display:flex;align-items:center;gap:14px;">
-            <span style="font-size:1.4rem;">🚀</span>
-            <div>
-                <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1rem;">
-                    FiscalMove FMS — v1.0
-                </div>
-                <div style="font-size:.8rem;color:var(--text-muted);">
-                    Sistema de gestão de fretes. Motoristas · Veículos · Clientes · Emissão de CTe
-                </div>
-            </div>
-        </div>
-
-    </div>
+    </main>
 </div>
 
 </body>

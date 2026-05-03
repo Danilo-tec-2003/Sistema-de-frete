@@ -101,7 +101,15 @@
                     </small>
                 </dd>
                 <dt>Veículo</dt>
-                <dd>${frete.veiculo.placa}</dd>
+                <dd>${frete.veiculo.placa}
+                    <c:if test="${not empty frete.veiculo.tipo}">
+                        <small class="text-muted">— ${frete.veiculo.tipo.descricao}</small>
+                    </c:if>
+                </dd>
+                <dt>Tipo Operação</dt>
+                <dd>${frete.tipoOperacaoDescricao}</dd>
+                <dt>Tipo Destinatário</dt>
+                <dd>${frete.tipoDestinatarioDescricao}</dd>
             </dl>
         </div>
 
@@ -140,6 +148,47 @@
                     <dt>Volumes</dt>
                     <dd>${frete.volumes}</dd>
                 </c:if>
+            </dl>
+        </div>
+
+        <%-- Bloco: Resumo Fiscal --%>
+        <div class="card detalhe-bloco fiscal-summary">
+            <h3 class="secao-titulo">Resumo Fiscal</h3>
+            <dl class="dados-lista">
+                <dt>CFOP</dt>
+                <dd>${frete.cfop}</dd>
+
+                <dt>Status Fiscal</dt>
+                <dd><span class="badge badge-fiscal-${frete.statusFiscal}">${frete.statusFiscalDescricao}</span></dd>
+
+                <dt>Regra Fiscal</dt>
+                <dd>${frete.regraFiscalAplicada}</dd>
+
+                <dt>Motivo CFOP</dt>
+                <dd>${frete.motivoCfop}</dd>
+
+                <dt>ICMS</dt>
+                <dd>${frete.aliquotaIcms}% /
+                    <fmt:formatNumber value="${frete.valorIcms}" type="currency" currencySymbol="R$ "/>
+                </dd>
+
+                <dt>IBS</dt>
+                <dd>${frete.aliquotaIbs}% /
+                    <fmt:formatNumber value="${frete.valorIbs}" type="currency" currencySymbol="R$ "/>
+                </dd>
+
+                <dt>CBS</dt>
+                <dd>${frete.aliquotaCbs}% /
+                    <fmt:formatNumber value="${frete.valorCbs}" type="currency" currencySymbol="R$ "/>
+                </dd>
+
+                <dt>Total Tributos</dt>
+                <dd><fmt:formatNumber value="${frete.totalTributos}" type="currency" currencySymbol="R$ "/></dd>
+
+                <dt class="destaque">Total Estimado</dt>
+                <dd class="destaque">
+                    <fmt:formatNumber value="${frete.valorTotalEstimado}" type="currency" currencySymbol="R$ "/>
+                </dd>
             </dl>
         </div>
 
@@ -316,7 +365,7 @@
                                placeholder="Informe o motivo do cancelamento">
                     </div>
                     <button type="submit" class="btn btn-danger"
-                            onclick="return confirm('Confirma o cancelamento do frete ${frete.numero}?')">
+                            data-confirm="Confirma o cancelamento do frete ${frete.numero}?">
                         Cancelar Frete
                     </button>
                 </form>

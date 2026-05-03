@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/componentes.css">
 </head>
 <body>
 <%@ include file="/jsp/NavBar.jsp" %>
@@ -50,7 +51,7 @@
                 <select id="statusFiltro" name="statusFiltro" class="form-control">
                     <option value="">Todos</option>
                     <c:forEach var="s" items="${statusList}">
-                        <option value="${s.codigo}" <c:if test="${statusFiltro == s.codigo}">selected</c:if>>
+                        <option value="${s.codigoString}" <c:if test="${statusFiltro eq s.codigoString}">selected</c:if>>
                             ${s.descricao}
                         </option>
                     </c:forEach>

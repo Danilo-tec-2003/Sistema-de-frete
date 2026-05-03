@@ -84,16 +84,19 @@
                         <label for="cnhNumero">Número da CNH *</label>
                         <input type="text" id="cnhNumero" name="cnhNumero"
                                value="${motorista.cnhNumero}" class="form-control"
-                               required maxlength="20" data-allow="alphanum">
+                               required maxlength="11" inputmode="numeric"
+                               placeholder="00000000000"
+                               data-mask="cnh" data-validate="cnh">
+                        <small class="campo-hint">Informe somente os 11 dígitos da CNH.</small>
                     </div>
                     <div class="form-group">
                         <label for="cnhCategoria">Categoria *</label>
                         <select id="cnhCategoria" name="cnhCategoria" class="form-control" required>
                             <option value="">Selecione...</option>
                             <c:forEach var="cat" items="${categorias}">
-                                <option value="${cat}"
+                                <option value="${cat.codigo}"
                                     <c:if test="${motorista.cnhCategoria == cat}">selected</c:if>>
-                                    ${cat}
+                                    ${cat.descricao}
                                 </option>
                             </c:forEach>
                         </select>
@@ -101,7 +104,9 @@
                     <div class="form-group">
                         <label for="cnhValidade">Validade *</label>
                         <input type="date" id="cnhValidade" name="cnhValidade"
-                               value="${motorista.cnhValidade}" class="form-control" required>
+                               value="${motorista.cnhValidade}" class="form-control"
+                               min="${minCnhValidade}" required>
+                        <small class="campo-hint">Motorista ativo com CNH vencida não pode ser usado em fretes.</small>
                     </div>
                 </div>
 

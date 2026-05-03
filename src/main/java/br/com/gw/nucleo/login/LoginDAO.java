@@ -46,7 +46,6 @@ public class LoginDAO {
     }
     
 
-    // -----------------------------------------------------------------------
     private static String sha256(String texto) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -60,17 +59,16 @@ public class LoginDAO {
         }
     }
 
-// ✅ SUBSTITUIR o método inserirUsuario por este:
-        public void inserirUsuario(Usuario u) throws SQLException {
-            String sql = "INSERT INTO usuario (nome, login, senha, is_ativo) VALUES (?, ?, ?, true)";
-            try (Connection conn = ConexaoUtil.getConexao();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, u.getNome());
-                ps.setString(2, u.getLogin());
-                ps.setString(3, sha256(u.getSenha())); // ← hash aqui, igual ao buscar
-                ps.executeUpdate();
-            }
+    public void inserirUsuario(Usuario u) throws SQLException {
+        String sql = "INSERT INTO usuario (nome, login, senha, is_ativo) VALUES (?, ?, ?, true)";
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, u.getNome());
+            ps.setString(2, u.getLogin());
+            ps.setString(3, sha256(u.getSenha()));
+            ps.executeUpdate();
         }
+    }
     
     public boolean loginJaExiste(String login) throws SQLException {
         String sql = "SELECT 1 FROM usuario WHERE login = ?";

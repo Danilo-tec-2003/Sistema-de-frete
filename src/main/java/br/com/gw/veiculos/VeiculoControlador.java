@@ -66,14 +66,21 @@ public class VeiculoControlador extends HttpServlet {
             throws ServletException, IOException {
 
         req.setCharacterEncoding("UTF-8");
-        Veiculo v = montarDoRequest(req);
+        Veiculo v = null;
 
         try {
+            v = montarDoRequest(req);
             bo.salvar(v);
             String msg = v.getId() == 0
                 ? "Ve%C3%ADculo+cadastrado+com+sucesso."
                 : "Ve%C3%ADculo+atualizado+com+sucesso.";
             resp.sendRedirect(req.getContextPath() + "/veiculos?sucesso=" + msg);
+        } catch (IllegalArgumentException e) {
+            req.setAttribute("erro", "Revise os dados do veículo. Há um valor inválido no formulário.");
+            req.setAttribute("veiculo",    v);
+            req.setAttribute("tipos",      TipoVeiculo.values());
+            req.setAttribute("statusList", StatusVeiculo.values());
+            req.getRequestDispatcher("/jsp/veiculos/FormVeiculos.jsp").forward(req, resp);
         } catch (NegocioException e) {
             req.setAttribute("erro",       e.getMessage());
             req.setAttribute("veiculo",    v);
@@ -133,7 +140,16 @@ public class VeiculoControlador extends HttpServlet {
         try {
             if (s == null || s.trim().isEmpty()) return null;
             // remove pontos de milhar, troca vírgula decimal por ponto
-            String limpo = s.trim().replaceAll("\\.", "").replace(",", ".");
+            String limpo = s.trim()
+                .replace("R$", "")
+                .replace("kg", "")
+                .replace("%", "")
+                .replaceAll("[^0-9,\\.\\-]", "");
+            if (limpo.contains(",")) {
+                limpo = limpo.replaceAll("\\.", "").replace(",", ".");
+            } else if (limpo.matches("\\d{1,3}(\\.\\d{3})+")) {
+                limpo = limpo.replaceAll("\\.", "");
+            }
             return new BigDecimal(limpo);
         } catch (NumberFormatException e) { return null; }
     }

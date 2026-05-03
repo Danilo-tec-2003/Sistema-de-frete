@@ -39,6 +39,15 @@ public class VeiculoDAO {
         }
     }
 
+    public int contarDisponiveis() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM veiculo WHERE status = ?";
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, String.valueOf(StatusVeiculo.DISPONIVEL.getCodigo()));
+            try (ResultSet rs = ps.executeQuery()) { return rs.next() ? rs.getInt(1) : 0; }
+        }
+    }
+
     public Veiculo buscarPorId(int id) throws SQLException {
         String sql = "SELECT * FROM veiculo WHERE idveiculo = ?";
         try (Connection conn = ConexaoUtil.getConexao();
@@ -60,6 +69,15 @@ public class VeiculoDAO {
 
     public boolean estaEmViagem(int idVeiculo) throws SQLException {
         String sql = "SELECT 1 FROM frete WHERE id_veiculo = ? AND status = 'T' LIMIT 1";
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idVeiculo);
+            try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
+        }
+    }
+
+    public boolean possuiFretes(int idVeiculo) throws SQLException {
+        String sql = "SELECT 1 FROM frete WHERE id_veiculo = ? LIMIT 1";
         try (Connection conn = ConexaoUtil.getConexao();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idVeiculo);
@@ -132,7 +150,9 @@ public class VeiculoDAO {
         ps.setString(2, v.getRntrc());
         if (v.getAnoFabricacao() != null) ps.setInt(3, v.getAnoFabricacao());
         else ps.setNull(3, Types.SMALLINT);
-        ps.setString(4, v.getTipo() == null ? "K" : String.valueOf(v.getTipo().getCodigo()));
+        ps.setString(4, v.getTipo() == null
+            ? String.valueOf(TipoVeiculo.CAMINHAO_TRUCK.getCodigo())
+            : String.valueOf(v.getTipo().getCodigo()));
         ps.setBigDecimal(5, v.getTaraKg());
         ps.setBigDecimal(6, v.getCapacidadeKg());
         ps.setBigDecimal(7, v.getVolumeM3());

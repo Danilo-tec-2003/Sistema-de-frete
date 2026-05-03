@@ -22,6 +22,7 @@ public enum StatusFrete {
     }
 
     public char   getCodigo()    { return codigo; }
+    public String getCodigoString() { return String.valueOf(codigo); }
     public String getDescricao() { return descricao; }
 
     /** Converte o CHAR(1) vindo do banco para o enum. */

@@ -7,6 +7,7 @@
   display: none;
   color: #ff8f8a;
   font-size: 0.8rem;
+  margin-top: 4px;
 }
 
 .msg-erro-campo.visivel {
@@ -29,4 +30,43 @@
   border-radius: var(--radius-sm);
   background: rgba(46, 184, 230, 0.08);
   color: #cdefff;
+}
+
+#alerta-validacao {
+  display: none;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid rgba(232, 64, 58, 0.28);
+  border-left: 3px solid var(--danger);
+  border-radius: 6px;
+  background: rgba(232, 64, 58, 0.1);
+}
+
+#alerta-validacao.visivel {
+  display: block;
+}
+
+#alerta-validacao ul {
+  margin: 8px 0 0 16px;
+  padding: 0;
+}
+
+#alerta-validacao li {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+.aviso-igual {
+  display: none;
+  margin-top: 4px;
+  padding: 6px 10px;
+  border: 1px solid rgba(245, 166, 35, 0.28);
+  border-radius: 4px;
+  background: rgba(245, 166, 35, 0.1);
+  color: #ffd08a;
+  font-size: 0.82rem;
+}
+
+.aviso-igual.visivel {
+  display: block;
 }

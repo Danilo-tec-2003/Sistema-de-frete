@@ -1,6 +1,9 @@
 package br.com.gw.frete;
 
 import br.com.gw.Enums.StatusFrete;
+import br.com.gw.Enums.StatusFiscal;
+import br.com.gw.Enums.TipoDestinatario;
+import br.com.gw.Enums.TipoOperacao;
 import br.com.gw.cliente.Cliente;
 import br.com.gw.motorista.Motorista;
 import br.com.gw.veiculos.Veiculo;
@@ -64,6 +67,16 @@ public class Frete {
     private BigDecimal   valorCbs      = BigDecimal.ZERO;
 
     private BigDecimal   valorTotal    = BigDecimal.ZERO;
+
+    /* ---- Preparação fiscal para integração futura ---- */
+    private TipoOperacao      tipoOperacao;
+    private TipoDestinatario  tipoDestinatario;
+    private String            cfop                 = "Não calculado";
+    private String            motivoCfop           = "Aguardando integração fiscal";
+    private StatusFiscal      statusFiscal         = StatusFiscal.PENDENTE;
+    private String            regraFiscalAplicada  = "Aguardando integração";
+    private BigDecimal        totalTributos        = BigDecimal.ZERO;
+    private BigDecimal        valorTotalEstimado   = BigDecimal.ZERO;
 
     /* ---- Datas ---- */
     private LocalDate     dataEmissao;
@@ -139,28 +152,52 @@ public class Frete {
     public void        setVolumes(Integer volumes)     { this.volumes = volumes; }
 
     public BigDecimal  getValorFrete()                       { return valorFrete; }
-    public void        setValorFrete(BigDecimal valorFrete)  { this.valorFrete = valorFrete; }
+    public void        setValorFrete(BigDecimal valorFrete)  { this.valorFrete = valorFrete != null ? valorFrete : BigDecimal.ZERO; }
 
     public BigDecimal  getAliquotaIcms()                           { return aliquotaIcms; }
-    public void        setAliquotaIcms(BigDecimal aliquotaIcms)    { this.aliquotaIcms = aliquotaIcms; }
+    public void        setAliquotaIcms(BigDecimal aliquotaIcms)    { this.aliquotaIcms = aliquotaIcms != null ? aliquotaIcms : BigDecimal.ZERO; }
 
     public BigDecimal  getValorIcms()                        { return valorIcms; }
-    public void        setValorIcms(BigDecimal valorIcms)    { this.valorIcms = valorIcms; }
+    public void        setValorIcms(BigDecimal valorIcms)    { this.valorIcms = valorIcms != null ? valorIcms : BigDecimal.ZERO; }
 
     public BigDecimal  getAliquotaIbs()                          { return aliquotaIbs; }
-    public void        setAliquotaIbs(BigDecimal aliquotaIbs)   { this.aliquotaIbs = aliquotaIbs; }
+    public void        setAliquotaIbs(BigDecimal aliquotaIbs)   { this.aliquotaIbs = aliquotaIbs != null ? aliquotaIbs : BigDecimal.ZERO; }
 
     public BigDecimal  getValorIbs()                       { return valorIbs; }
-    public void        setValorIbs(BigDecimal valorIbs)    { this.valorIbs = valorIbs; }
+    public void        setValorIbs(BigDecimal valorIbs)    { this.valorIbs = valorIbs != null ? valorIbs : BigDecimal.ZERO; }
 
     public BigDecimal  getAliquotaCbs()                          { return aliquotaCbs; }
-    public void        setAliquotaCbs(BigDecimal aliquotaCbs)   { this.aliquotaCbs = aliquotaCbs; }
+    public void        setAliquotaCbs(BigDecimal aliquotaCbs)   { this.aliquotaCbs = aliquotaCbs != null ? aliquotaCbs : BigDecimal.ZERO; }
 
     public BigDecimal  getValorCbs()                       { return valorCbs; }
-    public void        setValorCbs(BigDecimal valorCbs)    { this.valorCbs = valorCbs; }
+    public void        setValorCbs(BigDecimal valorCbs)    { this.valorCbs = valorCbs != null ? valorCbs : BigDecimal.ZERO; }
 
     public BigDecimal  getValorTotal()                         { return valorTotal; }
-    public void        setValorTotal(BigDecimal valorTotal)    { this.valorTotal = valorTotal; }
+    public void        setValorTotal(BigDecimal valorTotal)    { this.valorTotal = valorTotal != null ? valorTotal : BigDecimal.ZERO; }
+
+    public TipoOperacao getTipoOperacao() { return tipoOperacao; }
+    public void setTipoOperacao(TipoOperacao tipoOperacao) { this.tipoOperacao = tipoOperacao; }
+
+    public TipoDestinatario getTipoDestinatario() { return tipoDestinatario; }
+    public void setTipoDestinatario(TipoDestinatario tipoDestinatario) { this.tipoDestinatario = tipoDestinatario; }
+
+    public String getCfop() { return cfop; }
+    public void setCfop(String cfop) { this.cfop = cfop != null ? cfop : "Não calculado"; }
+
+    public String getMotivoCfop() { return motivoCfop; }
+    public void setMotivoCfop(String motivoCfop) { this.motivoCfop = motivoCfop != null ? motivoCfop : "Aguardando integração fiscal"; }
+
+    public StatusFiscal getStatusFiscal() { return statusFiscal; }
+    public void setStatusFiscal(StatusFiscal statusFiscal) { this.statusFiscal = statusFiscal != null ? statusFiscal : StatusFiscal.PENDENTE; }
+
+    public String getRegraFiscalAplicada() { return regraFiscalAplicada; }
+    public void setRegraFiscalAplicada(String regraFiscalAplicada) { this.regraFiscalAplicada = regraFiscalAplicada != null ? regraFiscalAplicada : "Aguardando integração"; }
+
+    public BigDecimal getTotalTributos() { return totalTributos; }
+    public void setTotalTributos(BigDecimal totalTributos) { this.totalTributos = totalTributos != null ? totalTributos : BigDecimal.ZERO; }
+
+    public BigDecimal getValorTotalEstimado() { return valorTotalEstimado; }
+    public void setValorTotalEstimado(BigDecimal valorTotalEstimado) { this.valorTotalEstimado = valorTotalEstimado != null ? valorTotalEstimado : BigDecimal.ZERO; }
 
     public LocalDate      getDataEmissao()                         { return dataEmissao; }
     public void           setDataEmissao(LocalDate dataEmissao)    { this.dataEmissao = dataEmissao; }
@@ -285,5 +322,17 @@ public class Frete {
 
     public String getDataEntregaFormatada() {
         return dataEntrega != null ? dataEntrega.format(FMT_DATA_HORA) : "";
+    }
+
+    public String getTipoOperacaoDescricao() {
+        return tipoOperacao != null ? tipoOperacao.getDescricao() : "";
+    }
+
+    public String getTipoDestinatarioDescricao() {
+        return tipoDestinatario != null ? tipoDestinatario.getDescricao() : "";
+    }
+
+    public String getStatusFiscalDescricao() {
+        return statusFiscal != null ? statusFiscal.getDescricao() : StatusFiscal.PENDENTE.getDescricao();
     }
 }

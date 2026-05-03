@@ -1,5 +1,5 @@
 -- ============================================================
--- 02_ddl_indexes.sql
+-- 02_indexes.sql
 -- ÍNDICES — Otimizações para filtros e JOINs frequentes
 -- ============================================================
 
@@ -12,10 +12,12 @@ CREATE INDEX IF NOT EXISTS idx_cli_is_ativo     ON cliente(is_ativo);
 CREATE INDEX IF NOT EXISTS idx_mot_nome         ON motorista(nome);          -- filtro ILIKE no MotoristaDAO.listar()
 CREATE INDEX IF NOT EXISTS idx_mot_status       ON motorista(status);
 CREATE INDEX IF NOT EXISTS idx_mot_cpf          ON motorista(cpf);
+CREATE INDEX IF NOT EXISTS idx_mot_cnh_categoria ON motorista(cnh_categoria);
 
 -- ---- VEICULO ----
 CREATE INDEX IF NOT EXISTS idx_vei_placa        ON veiculo(placa);           -- filtro ILIKE no VeiculoDAO.listar()
 CREATE INDEX IF NOT EXISTS idx_vei_status       ON veiculo(status);
+CREATE INDEX IF NOT EXISTS idx_vei_tipo         ON veiculo(tipo);
 
 -- ---- FRETE ----
 CREATE INDEX IF NOT EXISTS idx_fre_status         ON frete(status);
@@ -25,6 +27,8 @@ CREATE INDEX IF NOT EXISTS idx_fre_id_remetente   ON frete(id_remetente);
 CREATE INDEX IF NOT EXISTS idx_fre_id_destinatario ON frete(id_destinatario);
 CREATE INDEX IF NOT EXISTS idx_fre_id_motorista   ON frete(id_motorista);
 CREATE INDEX IF NOT EXISTS idx_fre_id_veiculo     ON frete(id_veiculo);
+CREATE INDEX IF NOT EXISTS idx_fre_status_fiscal  ON frete(status_fiscal);
+CREATE INDEX IF NOT EXISTS idx_fre_tipo_operacao  ON frete(tipo_operacao);
 
 -- ---- OCORRENCIA_FRETE ----
 CREATE INDEX IF NOT EXISTS idx_occ_id_frete       ON ocorrencia_frete(id_frete);

@@ -94,7 +94,7 @@
                                                class="btn btn-secondary btn-sm">Editar</a>
                                             <a href="${pageContext.request.contextPath}/veiculos?acao=excluir&id=${v.id}"
                                                class="btn btn-danger btn-sm"
-                                               onclick="return confirm('Excluir veículo ${v.placa}?')">Excluir</a>
+                                               data-confirm="Excluir veículo ${v.placa}?">Excluir</a>
                                         </td>
                                     </tr>
                                 </c:forEach>

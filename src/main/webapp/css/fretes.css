@@ -139,6 +139,40 @@
   color: var(--text);
 }
 
+.fiscal-summary {
+  border-color: rgba(46, 184, 230, 0.18);
+  background:
+    linear-gradient(180deg, rgba(46, 184, 230, 0.045), rgba(46, 184, 230, 0.015)),
+    var(--card);
+}
+
+.fiscal-summary .form-row + .form-row {
+  margin-top: 14px;
+}
+
+.fiscal-action {
+  justify-content: flex-end;
+}
+
+.badge-fiscal-PENDENTE {
+  background: rgba(245, 166, 35, 0.12);
+  color: #ffd08a;
+  border: 1px solid rgba(245, 166, 35, 0.28);
+}
+
+.badge-fiscal-CALCULADO,
+.badge-fiscal-VALIDADO_CTE {
+  background: rgba(109, 197, 42, 0.16);
+  color: #d3ffae;
+  border: 1px solid rgba(109, 197, 42, 0.32);
+}
+
+.badge-fiscal-ERRO {
+  background: rgba(232, 64, 58, 0.12);
+  color: #ff9a95;
+  border: 1px solid rgba(232, 64, 58, 0.28);
+}
+
 .acoes-status {
   margin-bottom: 18px;
 }

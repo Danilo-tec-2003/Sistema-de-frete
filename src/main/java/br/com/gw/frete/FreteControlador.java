@@ -41,16 +41,6 @@ import java.util.logging.Logger;
  *  naoEntrega(POST) → registra não entrega
  *  cancelar (POST)  → cancela o frete
  *  ocorrencia(POST) → registra ocorrência avulsa
- *
- * CORREÇÕES APLICADAS:
- *  1. carregarDadosFormulario: removida paginação arbitrária de veículos (era limite=10).
- *     Agora carrega todos os veículos disponíveis (até 500 — ajuste conforme necessário).
- *  2. parseBD: trata formato brasileiro (1.500,50) além do padrão (1500.50).
- *  3. montarFreteDoRequest: suporta data no formato dd/MM/yyyy além de yyyy-MM-dd.
- *  4. montarFreteDoRequest: trim() em campos de texto antes de setar no objeto.
- *  5. emitir: mensagem de sucesso inclui rota para melhorar feedback.
- *  6. confirmarSaida / registrarEntrega: validações mínimas centralizadas aqui
- *     (antes apenas no BO — agora o controlador também responde rápido).
  */
 @WebServlet("/fretes")
 public class FreteControlador extends HttpServlet {
@@ -149,7 +139,7 @@ public class FreteControlador extends HttpServlet {
             throws NegocioException, ServletException, IOException {
 
         String filtro       = emptyToNull(req.getParameter("filtro"));
-        String statusFiltro = emptyToNull(req.getParameter("statusFiltro"));
+        String statusFiltro = normalizarStatusFiltro(req.getParameter("statusFiltro"));
         int pagina = Math.max(1, parsInt(req.getParameter("pagina")));
 
         List<Frete> fretes = bo.listar(filtro, statusFiltro, pagina);
@@ -218,7 +208,6 @@ public class FreteControlador extends HttpServlet {
         Frete f = montarFreteDoRequest(req);
         bo.emitir(f, usuario);
 
-        // CORREÇÃO: mensagem de sucesso inclui rota para confirmação visual
         setarSucesso(req, "Frete " + f.getNumero() + " emitido com sucesso! "
             + "Rota: " + f.getRota());
         resp.sendRedirect(req.getContextPath() + "/fretes");
@@ -231,7 +220,6 @@ public class FreteControlador extends HttpServlet {
         String municipioSaida = emptyToNull(req.getParameter("municipioSaida"));
         String ufSaida        = emptyToNull(req.getParameter("ufSaida"));
 
-        // Validação rápida no controlador — evita round-trip desnecessário ao BO
         if (municipioSaida == null)
             throw new CadastroException("Informe o Município de Saída.");
         if (ufSaida == null)
@@ -315,8 +303,13 @@ public class FreteControlador extends HttpServlet {
         oc.setIdFrete(idFrete);
 
         String tipoCod = emptyToNull(req.getParameter("tipoOcorrencia"));
-        if (tipoCod != null)
-            oc.setTipo(TipoOcorrencia.fromCodigo(tipoCod));
+        if (tipoCod != null) {
+            try {
+                oc.setTipo(TipoOcorrencia.fromCodigo(tipoCod));
+            } catch (IllegalArgumentException e) {
+                throw new CadastroException("Tipo de ocorrência inválido. Selecione uma opção da lista.");
+            }
+        }
 
         oc.setMunicipio          (emptyToNull(req.getParameter("municipio")));
         String ufOc = emptyToNull(req.getParameter("uf"));
@@ -342,7 +335,6 @@ public class FreteControlador extends HttpServlet {
         f.setIdMotorista   (parsInt(req.getParameter("idMotorista")));
         f.setIdVeiculo     (parsInt(req.getParameter("idVeiculo")));
 
-        // CORREÇÃO: trim() aplicado antes de setar — evita espaços acidentais
         f.setMunicipioOrigem (emptyToNull(req.getParameter("municipioOrigem")));
         f.setUfOrigem        (toUpper(req.getParameter("ufOrigem")));
         f.setMunicipioDestino(emptyToNull(req.getParameter("municipioDestino")));
@@ -352,23 +344,13 @@ public class FreteControlador extends HttpServlet {
         f.setPesoKg          (parseBD(req.getParameter("pesoKg")));
         f.setVolumes         (parsIntNull(req.getParameter("volumes")));
         f.setValorFrete      (parseBDOrZero(req.getParameter("valorFrete")));
-        f.setAliquotaIcms    (parseBDOrZero(req.getParameter("aliquotaIcms")));
-        f.setAliquotaIbs     (parseBDOrZero(req.getParameter("aliquotaIbs")));
-        f.setAliquotaCbs     (parseBDOrZero(req.getParameter("aliquotaCbs")));
 
-        // CORREÇÃO: suporte a formato yyyy-MM-dd (HTML date input) e dd/MM/yyyy
         String dp = req.getParameter("dataPrevEntrega");
         f.setDataPrevEntrega(parseLocalDate(dp));
 
         return f;
     }
 
-    /**
-     * CORREÇÃO: carrega TODOS os veículos disponíveis para o select do formulário.
-     * Antes usava paginação com limite=10, o que fazia alguns veículos não aparecerem.
-     * O limite de LIMITE_SELECT (500) é suficiente para operações normais.
-     * Se o sistema tiver mais de 500 veículos ativos, implemente busca AJAX.
-     */
     private void carregarDadosFormulario(HttpServletRequest req) throws SQLException {
         List<Cliente>   clientes   = clienteDAO.listarAtivos();
         List<Motorista> motoristas = motoDAO.listarDisponiveisParaFrete();
@@ -415,25 +397,21 @@ public class FreteControlador extends HttpServlet {
         catch (NumberFormatException e) { return null; }
     }
 
-    /**
-     * CORREÇÃO: trata ambos os formatos decimais.
-     *
-     * Regra: se o valor contém vírgula, assume formato brasileiro.
-     *  - "1.500,50"  → remove pontos de milhar, troca vírgula por ponto → "1500.50"
-     *  - "1500,50"   → troca vírgula por ponto → "1500.50"
-     *  - "1500.50"   → sem vírgula, mantém como está → "1500.50"
-     *  - "1.500"     → ambíguo, mas sem vírgula e com ponto assumimos ponto decimal → "1.500"
-     *
-     * Observação: <input type="number"> em geral submete com ponto decimal,
-     * mas usuários que copiam/colam de planilhas podem enviar vírgula.
-     */
+    /** Aceita números em formato brasileiro ou decimal técnico. */
     private BigDecimal parseBD(String v) {
         if (v == null || v.trim().isEmpty()) return null;
         try {
             String s = v.trim();
+            s = s.replace("R$", "")
+                 .replace("kg", "")
+                 .replace("%", "")
+                 .replaceAll("[^0-9,\\.\\-]", "");
             if (s.contains(",")) {
                 // Formato brasileiro: remove pontos de milhar, troca vírgula decimal por ponto
                 s = s.replace(".", "").replace(",", ".");
+            } else if (s.matches("\\d{1,3}(\\.\\d{3})+")) {
+                // "15.000" sem casas decimais deve ser 15000, não 15.000
+                s = s.replace(".", "");
             }
             return new BigDecimal(s);
         } catch (NumberFormatException e) {
@@ -447,10 +425,7 @@ public class FreteControlador extends HttpServlet {
         return bd != null ? bd : BigDecimal.ZERO;
     }
 
-    /**
-     * CORREÇÃO: aceita datas em yyyy-MM-dd (HTML date input) ou dd/MM/yyyy (digitado).
-     * Retorna null silenciosamente se inválido — o BO valida a nulidade.
-     */
+    /** Aceita datas em yyyy-MM-dd ou dd/MM/yyyy; o BO valida a obrigatoriedade. */
     private LocalDate parseLocalDate(String v) {
         if (v == null || v.trim().isEmpty()) return null;
         String s = v.trim();
@@ -473,15 +448,22 @@ public class FreteControlador extends HttpServlet {
         return s != null ? s.toUpperCase() : null;
     }
 
+    private String normalizarStatusFiltro(String valor) {
+        String s = emptyToNull(valor);
+        if (s == null || "TODOS".equalsIgnoreCase(s)) return null;
+
+        try {
+            if (s.length() == 1) {
+                return String.valueOf(StatusFrete.fromCodigo(s).getCodigo());
+            }
+            return String.valueOf(StatusFrete.valueOf(s.toUpperCase()).getCodigo());
+        } catch (IllegalArgumentException e) {
+            LOG.warning("Filtro de status inválido ignorado: " + valor);
+            return null;
+        }
+    }
+
     private String mensagemErroInesperado(Exception e) {
-        Throwable causa = e;
-        while (causa.getCause() != null && causa.getCause() != causa) {
-            causa = causa.getCause();
-        }
-        String msg = causa.getMessage();
-        if (msg == null || msg.trim().isEmpty()) {
-            return "Erro inesperado. Tente novamente.";
-        }
-        return "Erro inesperado: " + msg;
+        return "Erro inesperado. Tente novamente.";
     }
 }

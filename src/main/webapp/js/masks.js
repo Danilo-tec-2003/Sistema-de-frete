@@ -69,6 +69,10 @@ document.addEventListener('DOMContentLoaded', function () {
         return d.length > 5 ? d.replace(/(\d{5})(\d{0,3}).*/, '$1-$2') : d;
     }
 
+    function formatCnh(value) {
+        return digitsOnly(value).slice(0, 11);
+    }
+
     function formatPhone(value) {
         var d = digitsOnly(value).slice(0, 11);
         if (d.length > 10) return d.replace(/(\d{2})(\d{5})(\d{0,4}).*/, '($1) $2-$3');
@@ -90,6 +94,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var formattedInt = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         return decimalPart.length > 0 ? formattedInt + ',' + decimalPart : formattedInt;
+    }
+
+    function normalizarNumeroBr(value) {
+        var s = (value || '')
+            .replace('R$', '')
+            .replace(/kg/gi, '')
+            .replace('%', '')
+            .replace(/\s/g, '')
+            .replace(/[^0-9,.\-]/g, '');
+
+        if (s.indexOf(',') >= 0) {
+            return s.replace(/\./g, '').replace(',', '.');
+        }
+        if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
+            return s.replace(/\./g, '');
+        }
+        return s;
     }
 
     function isValidCpf(value) {
@@ -184,6 +205,13 @@ document.addEventListener('DOMContentLoaded', function () {
             setFieldError(el, 'Informe um CEP valido no formato 00000-000.');
             return false;
         }
+        if (validator === 'cnh') {
+            var cnhDigits = digitsOnly(value);
+            if (cnhDigits.length !== 11 || /^(\d)\1{10}$/.test(cnhDigits)) {
+                setFieldError(el, 'A CNH deve conter 11 digitos numericos.');
+                return false;
+            }
+        }
         if (validator === 'placa') {
             var plate = allowUpperCode(value, 7);
             if (!/^[A-Z]{3}[0-9]{4}$/.test(plate) && !/^[A-Z]{3}[0-9][A-Z][0-9]{2}$/.test(plate)) {
@@ -231,6 +259,7 @@ document.addEventListener('DOMContentLoaded', function () {
         attachSanitizer('[data-mask="cnpj"]', formatCnpj);
         attachSanitizer('[data-mask="cpf-cnpj"]', formatCpfCnpj);
         attachSanitizer('[data-mask="cep"]', formatCep);
+        attachSanitizer('[data-mask="cnh"]', formatCnh);
         attachSanitizer('[data-mask="telefone"]', formatPhone);
         attachSanitizer('[data-mask="placa"]', function (value) {
             return allowUpperCode(value, 7);
@@ -241,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function () {
         attachSanitizer('[data-mask="uf"]', function (value) {
             return allowUpperCode(value, 2);
         });
-        document.querySelectorAll('[data-mask="decimal"]').forEach(function (el) {
+        document.querySelectorAll('[data-mask="decimal"],[data-mask="money"],[data-mask="weight"],[data-mask="capacity"],[data-mask="percent"]').forEach(function (el) {
             el.addEventListener('input', function () {
                 var maxDigits = parseInt(el.getAttribute('data-max-digits'), 10) || 12;
                 el.value = formatDecimal(el.value, maxDigits);
@@ -283,6 +312,9 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('[data-mask="cep"]').forEach(function (el) {
             IMask(el, { mask: '00000-000' });
         });
+        document.querySelectorAll('[data-mask="cnh"]').forEach(function (el) {
+            IMask(el, { mask: '00000000000' });
+        });
         document.querySelectorAll('[data-mask="placa"]').forEach(function (el) {
             IMask(el, {
                 mask: [
@@ -307,6 +339,34 @@ document.addEventListener('DOMContentLoaded', function () {
                 min: 0
             });
         });
+        [
+            { selector: '[data-mask="money"]', prefix: 'R$ ', suffix: '' },
+            { selector: '[data-mask="weight"]', prefix: '', suffix: ' kg' },
+            { selector: '[data-mask="capacity"]', prefix: '', suffix: ' kg' },
+            { selector: '[data-mask="percent"]', prefix: '', suffix: '%' }
+        ].forEach(function (cfg) {
+            document.querySelectorAll(cfg.selector).forEach(function (el) {
+                if (el.value) {
+                    el.value = normalizarNumeroBr(el.value).replace('.', ',');
+                    if (cfg.prefix && el.value.indexOf(cfg.prefix) !== 0) el.value = cfg.prefix + el.value;
+                    if (cfg.suffix && el.value.indexOf(cfg.suffix) < 0) el.value = el.value + cfg.suffix;
+                }
+                IMask(el, {
+                    mask: cfg.prefix + 'num' + cfg.suffix,
+                    blocks: {
+                        num: {
+                            mask: Number,
+                            scale: 2,
+                            padFractionalZeros: true,
+                            normalizeZeros: true,
+                            thousandsSeparator: '.',
+                            radix: ',',
+                            min: 0
+                        }
+                    }
+                });
+            });
+        });
     } else {
         applyMasksWithoutIMask();
     }
@@ -321,7 +381,7 @@ document.addEventListener('DOMContentLoaded', function () {
         el.addEventListener('input', function () {
             var maxDigits = parseInt(el.getAttribute('data-max-digits'), 10);
             var raw = el.value;
-            if (el.getAttribute('data-mask') === 'decimal') {
+            if (['decimal', 'money', 'weight', 'capacity', 'percent'].indexOf(el.getAttribute('data-mask')) >= 0) {
                 var cleaned = raw.replace(/[^\d,.-]/g, '');
                 var digits = digitsOnly(cleaned);
                 if (digits.length > maxDigits) {
@@ -367,14 +427,86 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!validateField(el)) invalid = true;
             });
 
-            form.querySelectorAll('[data-mask="decimal"]').forEach(function (el) {
-                el.value = el.value.replace(/\./g, '').replace(',', '.');
+            form.querySelectorAll('[data-mask="decimal"],[data-mask="money"],[data-mask="weight"],[data-mask="capacity"],[data-mask="percent"]').forEach(function (el) {
+                el.value = normalizarNumeroBr(el.value);
             });
 
             if (invalid) {
                 e.preventDefault();
-                if (typeof form.reportValidity === 'function') form.reportValidity();
+                if (window.FiscalMoveUI && typeof window.FiscalMoveUI.showFormError === 'function') {
+                    window.FiscalMoveUI.showFormError(form, 'Revise os campos destacados antes de continuar.');
+                }
             }
+        });
+    });
+
+    document.querySelectorAll('[data-viacep], input[name="cep"], #cep').forEach(function (cepEl) {
+        if (cepEl.dataset.viacepBound === 'true') return;
+        cepEl.dataset.viacepBound = 'true';
+
+        var form = cepEl.closest('form') || document;
+        var status = document.createElement('small');
+        status.className = 'campo-hint viacep-status';
+        cepEl.parentElement.appendChild(status);
+
+        function campo(nome) {
+            return form.querySelector('[name="' + nome + '"]') || document.getElementById(nome);
+        }
+
+        function setStatus(msg, tipo) {
+            status.textContent = msg || '';
+            status.classList.remove('viacep-ok', 'viacep-erro', 'viacep-info');
+            if (tipo) status.classList.add('viacep-' + tipo);
+        }
+
+        cepEl.addEventListener('blur', function () {
+            var cep = digitsOnly(cepEl.value);
+            if (!cep) {
+                setStatus('');
+                return;
+            }
+            if (cep.length !== 8) {
+                setStatus('CEP inválido ou não encontrado.', 'erro');
+                setFieldError(cepEl, 'Informe um CEP válido no formato 00000-000.');
+                return;
+            }
+
+            setFieldError(cepEl, '');
+            setStatus('Consultando CEP...', 'info');
+
+            fetch('https://viacep.com.br/ws/' + cep + '/json/')
+                .then(function (res) {
+                    if (!res.ok) throw new Error('ViaCEP indisponível');
+                    return res.json();
+                })
+                .then(function (data) {
+                    if (data.erro) {
+                        setStatus('CEP inválido ou não encontrado.', 'erro');
+                        return;
+                    }
+
+                    var logradouro = campo('logradouro');
+                    var bairro = campo('bairro');
+                    var municipio = campo('municipio');
+                    var uf = campo('uf');
+
+                    if (logradouro && data.logradouro) logradouro.value = data.logradouro;
+                    if (bairro && data.bairro) bairro.value = data.bairro;
+                    if (municipio && data.localidade) municipio.value = data.localidade;
+                    if (uf && data.uf) uf.value = data.uf;
+
+                    [logradouro, bairro, municipio, uf].forEach(function (el) {
+                        if (el) {
+                            el.dispatchEvent(new Event('input', { bubbles: true }));
+                            el.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    });
+
+                    setStatus('Endereço preenchido pelo ViaCEP.', 'ok');
+                })
+                .catch(function () {
+                    setStatus('Não foi possível consultar o CEP no momento. Preencha o endereço manualmente.', 'erro');
+                });
         });
     });
 });

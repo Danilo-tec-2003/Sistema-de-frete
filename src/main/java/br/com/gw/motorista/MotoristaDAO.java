@@ -4,6 +4,7 @@ import br.com.gw.Enums.CategoriaCNH;
 import br.com.gw.Enums.StatusMotorista;
 import br.com.gw.Enums.TipoVinculo;
 import br.com.gw.nucleo.utils.ConexaoUtil;
+import br.com.gw.nucleo.utils.ValidadorCNH;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -40,6 +41,15 @@ public class MotoristaDAO {
         }
     }
 
+    public int contarAtivos() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM motorista WHERE status = ?";
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, String.valueOf(StatusMotorista.ATIVO.getCodigo()));
+            try (ResultSet rs = ps.executeQuery()) { return rs.next() ? rs.getInt(1) : 0; }
+        }
+    }
+
     public Motorista buscarPorId(int id) throws SQLException {
         String sql = "SELECT * FROM motorista WHERE idmotorista = ?";
         try (Connection conn = ConexaoUtil.getConexao();
@@ -55,6 +65,25 @@ public class MotoristaDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, cpf.replaceAll("[^0-9]", ""));
             ps.setInt(2, ignorarId);
+            try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
+        }
+    }
+
+    public boolean existeCnh(String cnhNumero, int ignorarId) throws SQLException {
+        String sql = "SELECT 1 FROM motorista WHERE cnh_numero = ? AND idmotorista <> ?";
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, limparCnh(cnhNumero));
+            ps.setInt(2, ignorarId);
+            try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
+        }
+    }
+
+    public boolean possuiFretes(int idMotorista) throws SQLException {
+        String sql = "SELECT 1 FROM frete WHERE id_motorista = ? LIMIT 1";
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idMotorista);
             try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
         }
     }
@@ -119,7 +148,7 @@ public class MotoristaDAO {
         String sql =
             "SELECT * FROM motorista m " +
             "WHERE m.status = ? " +
-            "  AND (m.cnh_validade IS NULL OR m.cnh_validade >= CURRENT_DATE) " +
+            "  AND m.cnh_validade >= CURRENT_DATE " +
             "  AND NOT EXISTS (" +
             "      SELECT 1 FROM frete f " +
             "      WHERE f.id_motorista = m.idmotorista " +
@@ -143,8 +172,8 @@ public class MotoristaDAO {
         ps.setString(2, m.getCpf() == null ? null : m.getCpf().replaceAll("[^0-9]",""));
         ps.setObject(3, m.getDataNascimento()); 
         ps.setString(4, m.getTelefone());
-        ps.setString(5, m.getCnhNumero());
-        ps.setString(6, m.getCnhCategoria() == null ? "B" : String.valueOf(m.getCnhCategoria().getCodigo()));
+        ps.setString(5, ValidadorCNH.somenteDigitos(m.getCnhNumero()));
+        ps.setString(6, m.getCnhCategoria() == null ? "B" : m.getCnhCategoria().getCodigo());
         ps.setObject(7, m.getCnhValidade());
         ps.setString(8, m.getTipoVinculo() == null ? "F" : String.valueOf(m.getTipoVinculo().getCodigo()));
         ps.setString(9, m.getStatus() == null ? "A" : String.valueOf(m.getStatus().getCodigo()));
@@ -168,5 +197,9 @@ public class MotoristaDAO {
         String stat = rs.getString("status");
         if (stat != null) m.setStatus(StatusMotorista.fromCodigo(stat));
         return m;
+    }
+
+    private String limparCnh(String cnhNumero) {
+        return cnhNumero == null ? null : ValidadorCNH.somenteDigitos(cnhNumero);
     }
 }

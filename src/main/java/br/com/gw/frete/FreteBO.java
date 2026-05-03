@@ -1,9 +1,15 @@
 package br.com.gw.frete;
 
+import br.com.gw.Enums.CategoriaCNH;
 import br.com.gw.Enums.StatusFrete;
+import br.com.gw.Enums.StatusFiscal;
 import br.com.gw.Enums.StatusMotorista;
 import br.com.gw.Enums.StatusVeiculo;
+import br.com.gw.Enums.TipoDestinatario;
 import br.com.gw.Enums.TipoOcorrencia;
+import br.com.gw.Enums.TipoOperacao;
+import br.com.gw.cliente.Cliente;
+import br.com.gw.cliente.ClienteDAO;
 import br.com.gw.motorista.Motorista;
 import br.com.gw.motorista.MotoristaDAO;
 import br.com.gw.nucleo.utils.ConexaoUtil;
@@ -15,7 +21,7 @@ import br.com.gw.veiculos.Veiculo;
 import br.com.gw.veiculos.VeiculoDAO;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.text.Normalizer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -35,16 +41,6 @@ import java.util.logging.Logger;
  *  EMITIDO → SAIDA_CONFIRMADA → EM_TRANSITO → ENTREGUE
  *                                           → NAO_ENTREGUE
  *  Qualquer estado aberto → CANCELADO (com motivo)
- *
- * CORREÇÕES APLICADAS:
- *  1. Adicionada lista UFS_VALIDAS — validação das UFs contra os 27 estados/DF.
- *  2. validarCamposObrigatorios: valida UF contra lista; valida descricaoCarga (obrigatório).
- *  3. validarValores: peso não pode ser zero (apenas nulo é aceito para omissão);
- *     adicionado limite máximo de peso de razoabilidade (200.000 kg).
- *  4. Adicionado validarPesoVsVeiculo: compara pesoKg com capacidadeKg do veículo.
- *     Se o veículo não tiver capacidade cadastrada, apenas loga — não bloqueia.
- *  5. emitir: chama validarPesoVsVeiculo após validar veículo.
- *  6. validarDatas: adicionada verificação de dataPrevEntrega não superior a 1 ano.
  */
 public class FreteBO {
 
@@ -57,10 +53,7 @@ public class FreteBO {
     /** Antecedência máxima para data prevista de entrega: 1 ano. */
     private static final int         MAX_DIAS_PREV_ENTREGA = 365;
 
-    /**
-     * CORREÇÃO: lista imutável de UFs brasileiras válidas.
-     * Evita aceitar estados fantasma como "XX", "BR", etc.
-     */
+    /** UFs brasileiras aceitas para origem, destino e ocorrências. */
     private static final Set<String> UFS_VALIDAS = Collections.unmodifiableSet(
         new HashSet<>(Arrays.asList(
             "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA",
@@ -72,6 +65,7 @@ public class FreteBO {
     private final FreteDAO     dao      = new FreteDAO();
     private final MotoristaDAO motoDAO  = new MotoristaDAO();
     private final VeiculoDAO   veicDAO  = new VeiculoDAO();
+    private final ClienteDAO   cliDAO   = new ClienteDAO();
 
     /** Transições de status permitidas: chave = status atual, valor = próximos válidos. */
     private static final java.util.Map<StatusFrete, Set<StatusFrete>> TRANSICOES;
@@ -149,8 +143,7 @@ public class FreteBO {
      *  5. Veículo DISPONIVEL (status D)
      *  6. Veículo sem outro frete ativo em aberto
      *  7. Motorista sem outro frete ativo em aberto
-     *  8. NOVO: Peso da carga não ultrapassa capacidade do veículo
-     *  9. Cálculo automático do ICMS/IBS/CBS se apenas alíquota informada
+     *  8. Peso da carga não ultrapassa capacidade do veículo
      *
      * Transação JDBC: número gerado + INSERT frete em atomicidade.
      */
@@ -158,16 +151,15 @@ public class FreteBO {
         validarCamposObrigatorios(f);
         validarDatas(f);
         validarValores(f);
+        prepararDadosOperacionaisEFiscais(f);
         validarMotorista(f.getIdMotorista(), 0);
         validarVeiculo(f.getIdVeiculo(), 0);
-        // CORREÇÃO: valida peso vs capacidade APÓS validar que o veículo existe
+        validarCompatibilidadeMotoristaVeiculo(f.getIdMotorista(), f.getIdVeiculo());
         validarPesoVsVeiculo(f);
 
         f.setStatus(StatusFrete.EMITIDO);
         f.setDataEmissao(LocalDate.now());
         f.setCreatedBy(usuario);
-
-        calcularImpostos(f);
 
         Connection conn = null;
         try {
@@ -450,7 +442,6 @@ public class FreteBO {
             throw new CadastroException("Selecione o Remetente.");
         if (f.getIdDestinatario() == 0)
             throw new CadastroException("Selecione o Destinatário.");
-        // MANTIDO: regra de negócio crítica — remetente ≠ destinatário
         if (f.getIdRemetente() == f.getIdDestinatario())
             throw new CadastroException(
                 "Remetente e Destinatário não podem ser o mesmo cliente.");
@@ -466,7 +457,6 @@ public class FreteBO {
             throw new CadastroException("A UF de Origem é obrigatória.");
         if (f.getUfOrigem().trim().length() != 2)
             throw new CadastroException("UF de Origem inválida — informe exatamente 2 letras.");
-        // CORREÇÃO: valida contra lista oficial de estados
         if (!UFS_VALIDAS.contains(f.getUfOrigem().trim().toUpperCase()))
             throw new CadastroException(
                 "UF de Origem inválida: \"" + f.getUfOrigem() + "\". "
@@ -479,13 +469,11 @@ public class FreteBO {
             throw new CadastroException("A UF de Destino é obrigatória.");
         if (f.getUfDestino().trim().length() != 2)
             throw new CadastroException("UF de Destino inválida — informe exatamente 2 letras.");
-        // CORREÇÃO: valida contra lista oficial de estados
         if (!UFS_VALIDAS.contains(f.getUfDestino().trim().toUpperCase()))
             throw new CadastroException(
                 "UF de Destino inválida: \"" + f.getUfDestino() + "\". "
                 + "Use a sigla oficial do estado (ex: SP, RJ, MG).");
 
-        // Carga — CORREÇÃO: descricaoCarga agora é obrigatória
         if (f.getDescricaoCarga() == null || f.getDescricaoCarga().trim().isEmpty())
             throw new CadastroException(
                 "A Descrição da Carga é obrigatória. "
@@ -501,14 +489,12 @@ public class FreteBO {
         LocalDate hoje = LocalDate.now();
 
         if (f.getDataPrevEntrega() != null) {
-            // MANTIDO: data prevista não pode ser passado
             if (f.getDataPrevEntrega().isBefore(hoje))
                 throw new CadastroException(
                     "A Data Prevista de Entrega não pode ser anterior à data de hoje ("
                     + hoje.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     + ").");
 
-            // CORREÇÃO: limite de 1 ano no futuro evita cadastros com data errada (ex: 2034 ao invés de 2024)
             LocalDate limiteMaximo = hoje.plusDays(MAX_DIAS_PREV_ENTREGA);
             if (f.getDataPrevEntrega().isAfter(limiteMaximo))
                 throw new CadastroException(
@@ -518,24 +504,23 @@ public class FreteBO {
     }
 
     private void validarValores(Frete f) throws CadastroException {
-        // CORREÇÃO: peso zero não faz sentido — apenas null é aceito para omissão
-        if (f.getPesoKg() != null) {
-            if (f.getPesoKg().compareTo(BigDecimal.ZERO) <= 0)
-                throw new CadastroException(
-                    "O Peso da Carga deve ser maior que zero. "
-                    + "Se o peso não for conhecido, deixe o campo em branco.");
-            // CORREÇÃO: limite de razoabilidade
-            if (f.getPesoKg().compareTo(PESO_MAXIMO_KG) > 0)
-                throw new CadastroException(
-                    "O Peso da Carga informado (" + f.getPesoKg() + " kg) "
-                    + "excede o limite máximo permitido de "
-                    + PESO_MAXIMO_KG.toPlainString() + " kg. Verifique os dados.");
-        }
+        if (f.getPesoKg() == null)
+            throw new CadastroException("O Peso da Carga é obrigatório.");
 
-        if (f.getVolumes() != null && f.getVolumes() <= 0)
+        if (f.getPesoKg().compareTo(BigDecimal.ZERO) <= 0)
+            throw new CadastroException("O Peso da Carga deve ser maior que zero.");
+
+        if (f.getPesoKg().compareTo(PESO_MAXIMO_KG) > 0)
             throw new CadastroException(
-                "O número de Volumes deve ser maior que zero. "
-                + "Se não houver volumes definidos, deixe o campo em branco.");
+                "O Peso da Carga informado (" + f.getPesoKg() + " kg) "
+                + "excede o limite máximo permitido de "
+                + PESO_MAXIMO_KG.toPlainString() + " kg. Verifique os dados.");
+
+        if (f.getVolumes() == null)
+            throw new CadastroException("O número de Volumes é obrigatório.");
+
+        if (f.getVolumes() <= 0)
+            throw new CadastroException("O número de Volumes deve ser maior que zero.");
 
         if (f.getAliquotaIcms() != null) {
             if (f.getAliquotaIcms().compareTo(BigDecimal.ZERO) < 0)
@@ -559,19 +544,25 @@ public class FreteBO {
                     "O motorista " + m.getNome() + " não está Ativo "
                     + "(status atual: " + m.getStatus().getDescricao() + "). "
                     + "Regularize o cadastro antes de emitir o frete.");
-            if (m.getCnhValidade() != null && m.getCnhValidade().isBefore(LocalDate.now()))
+            if (m.getCnhCategoria() == null)
+                throw new FreteException(
+                    "O motorista " + m.getNome()
+                    + " não possui categoria de CNH informada no cadastro.");
+            if (m.getCnhValidade() == null)
+                throw new FreteException(
+                    "O motorista " + m.getNome()
+                    + " não possui validade da CNH informada no cadastro.");
+            if (m.getCnhValidade().isBefore(LocalDate.now()))
                 throw new FreteException(
                     "A CNH do motorista " + m.getNome() + " está vencida desde "
                     + m.getCnhValidade().format(
                         java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     + ". Regularize antes de emitir o frete.");
-            // CORREÇÃO: aviso de CNH próxima do vencimento (30 dias)
             if (m.getCnhValidade() != null
                     && m.getCnhValidade().isBefore(LocalDate.now().plusDays(30))
                     && m.getCnhValidade().isAfter(LocalDate.now())) {
                 LOG.warning("CNH do motorista " + m.getNome()
                     + " vence em " + m.getCnhValidade() + " (menos de 30 dias).");
-                // Não bloqueia, mas o controlador pode exibir aviso ao usuário
             }
             if (dao.motoristaTemFreteAtivo(idMotorista, excluirIdFrete))
                 throw new FreteException(
@@ -580,6 +571,30 @@ public class FreteBO {
         } catch (SQLException e) {
             LOG.severe("Erro ao validar motorista: " + e.getMessage());
             throw new NegocioException("Erro ao validar dados do motorista.", e);
+        }
+    }
+
+    private void validarCompatibilidadeMotoristaVeiculo(int idMotorista, int idVeiculo)
+            throws NegocioException {
+        try {
+            Motorista m = motoDAO.buscarPorId(idMotorista);
+            Veiculo v = veicDAO.buscarPorId(idVeiculo);
+
+            if (m == null || v == null || v.getTipo() == null) return;
+
+            CategoriaCNH cnhMotorista = m.getCnhCategoria();
+            CategoriaCNH cnhExigida = v.getTipo().getCnhMinima();
+
+            if (cnhMotorista == null || !cnhMotorista.atende(cnhExigida)) {
+                throw new FreteException(
+                    "O motorista selecionado não possui categoria de CNH compatível com o veículo. "
+                    + "Motorista: " + (cnhMotorista == null ? "não informada" : cnhMotorista.getCodigo())
+                    + ". Veículo " + v.getPlaca() + " (" + v.getTipo().getDescricao()
+                    + ") exige categoria mínima " + cnhExigida.getCodigo() + ".");
+            }
+        } catch (SQLException e) {
+            LOG.severe("Erro ao validar compatibilidade motorista x veículo: " + e.getMessage());
+            throw new NegocioException("Erro ao validar compatibilidade entre motorista e veículo.", e);
         }
     }
 
@@ -603,35 +618,27 @@ public class FreteBO {
         }
     }
 
-    /**
-     * CORREÇÃO: valida se o peso da carga não ultrapassa a capacidade do veículo.
-     * Se o veículo não tiver capacidade cadastrada (null ou 0), apenas loga um aviso
-     * sem bloquear a operação — permite cadastros legados incompletos.
-     */
     private void validarPesoVsVeiculo(Frete f) throws NegocioException {
-        if (f.getPesoKg() == null || f.getPesoKg().compareTo(BigDecimal.ZERO) == 0) return;
+        if (f.getPesoKg() == null || f.getPesoKg().compareTo(BigDecimal.ZERO) <= 0) return;
         try {
             Veiculo v = veicDAO.buscarPorId(f.getIdVeiculo());
             if (v == null) return;
 
             BigDecimal capacidade = v.getCapacidadeKg();
-            if (capacidade == null || capacidade.compareTo(BigDecimal.ZERO) == 0) {
-                LOG.warning("Veículo " + v.getPlaca()
-                    + " sem capacidade cadastrada — verificação de peso ignorada.");
-                return;
-            }
+            if (capacidade == null || capacidade.compareTo(BigDecimal.ZERO) <= 0)
+                throw new FreteException(
+                    "O veículo " + v.getPlaca()
+                    + " não possui capacidade de carga válida cadastrada.");
 
             if (f.getPesoKg().compareTo(capacidade) > 0) {
                 throw new FreteException(
-                    "Peso da carga (" + f.getPesoKg().toPlainString() + " kg) excede "
-                    + "a capacidade máxima do veículo " + v.getPlaca()
-                    + " (" + capacidade.toPlainString() + " kg). "
-                    + "Selecione um veículo com maior capacidade ou revise o peso informado.");
+                    "O peso da carga excede a capacidade do veículo selecionado. "
+                    + "Capacidade: " + capacidade.toPlainString() + " kg. "
+                    + "Peso informado: " + f.getPesoKg().toPlainString() + " kg.");
             }
         } catch (SQLException e) {
-            // Não bloqueia a operação — log de aviso é suficiente
-            LOG.warning("Não foi possível verificar capacidade do veículo (id="
-                + f.getIdVeiculo() + "): " + e.getMessage());
+            LOG.severe("Erro ao verificar capacidade do veículo: " + e.getMessage());
+            throw new NegocioException("Erro ao verificar capacidade do veículo.", e);
         }
     }
 
@@ -671,48 +678,65 @@ public class FreteBO {
     }
 
     /* =========================================================
-       CÁLCULO AUTOMÁTICO DE IMPOSTOS (HALF_EVEN = ABNT NBR 5891)
+       PREPARAÇÃO FISCAL
        ========================================================= */
 
-    private void calcularImpostos(Frete f) {
-        BigDecimal cem = new BigDecimal("100");
+    private void prepararDadosOperacionaisEFiscais(Frete f) throws NegocioException {
+        f.setTipoOperacao(calcularTipoOperacao(f));
+        f.setTipoDestinatario(inferirTipoDestinatario(f.getIdDestinatario()));
 
-        if (f.getAliquotaIcms() != null
-                && f.getAliquotaIcms().compareTo(BigDecimal.ZERO) > 0
-                && (f.getValorIcms() == null
-                    || f.getValorIcms().compareTo(BigDecimal.ZERO) == 0)) {
-            f.setValorIcms(
-                f.getValorFrete()
-                 .multiply(f.getAliquotaIcms())
-                 .divide(cem, 2, RoundingMode.HALF_EVEN));
+        f.setAliquotaIcms(BigDecimal.ZERO);
+        f.setValorIcms(BigDecimal.ZERO);
+        f.setAliquotaIbs(BigDecimal.ZERO);
+        f.setValorIbs(BigDecimal.ZERO);
+        f.setAliquotaCbs(BigDecimal.ZERO);
+        f.setValorCbs(BigDecimal.ZERO);
+        f.setTotalTributos(BigDecimal.ZERO);
+        f.setValorTotal(f.getValorFrete());
+        f.setValorTotalEstimado(f.getValorFrete());
+        f.setCfop("Não calculado");
+        f.setMotivoCfop("Aguardando integração fiscal");
+        f.setRegraFiscalAplicada("Aguardando integração");
+        f.setStatusFiscal(StatusFiscal.PENDENTE);
+    }
+
+    private TipoOperacao calcularTipoOperacao(Frete f) {
+        String ufOrigem = normalizarTexto(f.getUfOrigem());
+        String ufDestino = normalizarTexto(f.getUfDestino());
+        String municipioOrigem = normalizarTexto(f.getMunicipioOrigem());
+        String municipioDestino = normalizarTexto(f.getMunicipioDestino());
+
+        if (!ufOrigem.equals(ufDestino)) return TipoOperacao.INTERESTADUAL;
+        if (!municipioOrigem.equals(municipioDestino)) return TipoOperacao.ESTADUAL;
+        return TipoOperacao.MUNICIPAL;
+    }
+
+    private TipoDestinatario inferirTipoDestinatario(int idDestinatario) throws NegocioException {
+        try {
+            Cliente destinatario = cliDAO.buscarPorId(idDestinatario);
+            if (destinatario == null)
+                throw new CadastroException("Destinatário não encontrado.");
+
+            String documento = destinatario.getDocumentoFiscal() == null
+                ? ""
+                : destinatario.getDocumentoFiscal().replaceAll("[^0-9]", "");
+
+            if (documento.length() == 11) return TipoDestinatario.PESSOA_FISICA;
+            if (documento.length() == 14) return TipoDestinatario.PESSOA_JURIDICA;
+
+            throw new CadastroException(
+                "Documento fiscal do destinatário inválido. Revise o cadastro do cliente.");
+        } catch (SQLException e) {
+            LOG.severe("Erro ao inferir tipo de destinatário: " + e.getMessage());
+            throw new NegocioException("Erro ao validar dados fiscais do destinatário.", e);
         }
+    }
 
-        if (f.getAliquotaIbs() != null
-                && f.getAliquotaIbs().compareTo(BigDecimal.ZERO) > 0
-                && (f.getValorIbs() == null
-                    || f.getValorIbs().compareTo(BigDecimal.ZERO) == 0)) {
-            f.setValorIbs(
-                f.getValorFrete()
-                 .multiply(f.getAliquotaIbs())
-                 .divide(cem, 2, RoundingMode.HALF_EVEN));
-        }
-
-        if (f.getAliquotaCbs() != null
-                && f.getAliquotaCbs().compareTo(BigDecimal.ZERO) > 0
-                && (f.getValorCbs() == null
-                    || f.getValorCbs().compareTo(BigDecimal.ZERO) == 0)) {
-            f.setValorCbs(
-                f.getValorFrete()
-                 .multiply(f.getAliquotaCbs())
-                 .divide(cem, 2, RoundingMode.HALF_EVEN));
-        }
-
-        BigDecimal total = f.getValorFrete()
-            .add(f.getValorIcms()  != null ? f.getValorIcms()  : BigDecimal.ZERO)
-            .add(f.getValorIbs()   != null ? f.getValorIbs()   : BigDecimal.ZERO)
-            .add(f.getValorCbs()   != null ? f.getValorCbs()   : BigDecimal.ZERO)
-            .setScale(2, RoundingMode.HALF_EVEN);
-        f.setValorTotal(total);
+    private String normalizarTexto(String valor) {
+        if (valor == null) return "";
+        String semAcento = Normalizer.normalize(valor.trim(), Normalizer.Form.NFD)
+            .replaceAll("\\p{M}", "");
+        return semAcento.toUpperCase();
     }
 
     /* =========================================================

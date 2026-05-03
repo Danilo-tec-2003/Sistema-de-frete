@@ -3,6 +3,7 @@ package br.com.gw.motorista;
 import br.com.gw.Enums.StatusMotorista;
 import br.com.gw.nucleo.exception.CadastroException;
 import br.com.gw.nucleo.exception.NegocioException;
+import br.com.gw.nucleo.utils.ValidadorCNH;
 import br.com.gw.nucleo.utils.ValidadorCPF;
 import br.com.gw.nucleo.utils.ValidadorUtil;
 
@@ -56,13 +57,17 @@ public class MotoristaBO {
                 throw new CadastroException(
                     "O CPF " + m.getCpf() + " já está cadastrado para outro motorista.");
             }
+            if (dao.existeCnh(m.getCnhNumero(), m.getId())) {
+                throw new CadastroException(
+                    "A CNH " + m.getCnhNumero() + " já está cadastrada para outro motorista.");
+            }
             if (m.getId() == 0) dao.inserir(m);
             else                dao.atualizar(m);
         } catch (CadastroException e) {
             throw e;
         } catch (SQLException e) {
             LOG.severe("Erro ao salvar motorista: " + e.getMessage());
-            throw new NegocioException("Erro ao salvar motorista. Tente novamente.", e);
+            throw new NegocioException(mensagemSalvarMotorista(e), e);
         }
     }
 
@@ -71,6 +76,10 @@ public class MotoristaBO {
             if (dao.possuiFreteAtivo(id)) {
                 throw new CadastroException(
                     "Não é possível excluir este motorista pois ele possui fretes em andamento.");
+            }
+            if (dao.possuiFretes(id)) {
+                throw new CadastroException(
+                    "Não é possível excluir este motorista pois ele possui fretes vinculados ao histórico.");
             }
             dao.excluir(id);
         } catch (CadastroException e) {
@@ -118,17 +127,18 @@ public class MotoristaBO {
         // ── CNH ───────────────────────────────────────────────────────────────
         if (m.getCnhNumero() == null || m.getCnhNumero().trim().isEmpty())
             throw new CadastroException("O número da CNH é obrigatório.");
-    
-        if (m.getCnhNumero().replaceAll("[^0-9]", "").length() < 9)
-            throw new CadastroException("O número da CNH deve conter pelo menos 9 dígitos.");
+
+        if (!ValidadorCNH.temFormatoValido(m.getCnhNumero()))
+            throw new CadastroException("A CNH deve conter 11 dígitos numéricos.");
     
         if (m.getCnhCategoria() == null)
             throw new CadastroException("A categoria da CNH é obrigatória.");
     
         if (m.getCnhValidade() == null)
             throw new CadastroException("A validade da CNH é obrigatória.");
-    
-        // CNH vencida: avisa mas não bloqueia o cadastro (bloqueio acontece no FreteBO)
+
+        if (!ValidadorCNH.isValidadeVigente(m.getCnhValidade()))
+            throw new CadastroException("A CNH do motorista está vencida.");
     
         // ── Vínculo e status ──────────────────────────────────────────────────
         if (m.getTipoVinculo() == null)
@@ -136,6 +146,9 @@ public class MotoristaBO {
     
         if (m.getStatus() == null)
             throw new CadastroException("O status é obrigatório.");
+
+        if (m.getStatus() == StatusMotorista.ATIVO && m.isCnhVencida())
+            throw new CadastroException("Motorista ativo não pode permanecer com CNH vencida.");
     
         // ── Regra de negócio: inativação com frete ativo ──────────────────────
         if (m.getId() > 0 && m.getStatus() != StatusMotorista.ATIVO) {
@@ -149,5 +162,19 @@ public class MotoristaBO {
                 throw new CadastroException("Erro ao verificar fretes ativos do motorista.");
             }
         }
+    }
+
+    private String mensagemSalvarMotorista(SQLException e) {
+        String detalhe = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+        if ("23505".equals(e.getSQLState())) {
+            if (detalhe.contains("cnh")) {
+                return "A CNH informada já está cadastrada para outro motorista.";
+            }
+            if (detalhe.contains("cpf")) {
+                return "O CPF informado já está cadastrado para outro motorista.";
+            }
+            return "Já existe um motorista cadastrado com estes dados.";
+        }
+        return "Erro ao salvar motorista. Tente novamente.";
     }
 }

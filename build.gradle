@@ -26,4 +26,5 @@ dependencies {
 gretty {
     servletContainer = 'tomcat9' 
     contextPath = '/SISTEMA-FRETES' 
+    httpPort = project.hasProperty('httpPort') ? project.property('httpPort') as int : 8080
 }

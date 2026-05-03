@@ -12,40 +12,9 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/validacoes.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/componentes.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/fretes.css">
     <script src="https://cdn.jsdelivr.net/npm/imask@7.6.1/dist/imask.min.js"></script>
     <script src="${pageContext.request.contextPath}/js/masks.js" defer></script>
-    <style>
-        /* Estilos inline para validação — mover para validacoes.css após revisão */
-        .campo-erro { border-color: #e53e3e !important; }
-        .msg-erro-campo {
-            color: #e53e3e;
-            font-size: 0.78rem;
-            margin-top: 4px;
-            display: none;
-        }
-        .msg-erro-campo.visivel { display: block; }
-        #alerta-validacao {
-            background:rgb(37, 93, 53);
-            border: 1px solidrgb(250, 250, 250);
-            border-radius: 6px;
-            padding: 12px 16px;
-            margin-bottom: 16px;
-            display: none;
-        }
-        #alerta-validacao.visivel { display: block; }
-        #alerta-validacao ul { margin: 8px 0 0 16px; padding: 0; }
-        #alerta-validacao li { margin: 4px 0; font-size: 0.9rem; }
-        .aviso-igual {
-            background:rgb(37, 93, 53);
-            border: 1px solidrgb(250, 250, 250);
-            border-radius: 4px;
-            padding: 6px 10px;
-            font-size: 0.82rem;
-            margin-top: 4px;
-            display: none;
-        }
-        .aviso-igual.visivel { display: block; }
-    </style>
 </head>
 <body>
 <%@ include file="/jsp/NavBar.jsp" %>
@@ -71,7 +40,7 @@
 
         <%-- Alerta de validação frontend (preenchido via JS) --%>
         <div id="alerta-validacao" role="alert">
-            <strong>⚠ Corrija os seguintes itens antes de continuar:</strong>
+            <strong>Corrija os seguintes itens antes de continuar:</strong>
             <ul id="lista-erros-validacao"></ul>
         </div>
 
@@ -91,6 +60,7 @@
                             <option value="">Selecione o remetente...</option>
                             <c:forEach var="c" items="${clientes}">
                                 <option value="${c.id}"
+                                    data-documento="${c.documentoFiscal}"
                                     <c:if test="${frete.idRemetente == c.id}">selected</c:if>>
                                     ${c.razaoSocial}<c:if test="${not empty c.documentoFiscal}"> — ${c.documentoFiscalFormatado}</c:if>
                                 </option>
@@ -104,15 +74,15 @@
                             <option value="">Selecione o destinatário...</option>
                             <c:forEach var="c" items="${clientes}">
                                 <option value="${c.id}"
+                                    data-documento="${c.documentoFiscal}"
                                     <c:if test="${frete.idDestinatario == c.id}">selected</c:if>>
                                     ${c.razaoSocial}<c:if test="${not empty c.documentoFiscal}"> — ${c.documentoFiscalFormatado}</c:if>
                                 </option>
                             </c:forEach>
                         </select>
                         <span class="msg-erro-campo" id="err-destinatario">Selecione o destinatário.</span>
-                        <%-- CORREÇÃO: aviso imediato ao selecionar remetente == destinatário --%>
                         <div class="aviso-igual" id="aviso-rem-igual">
-                            ⚠ Remetente e Destinatário não podem ser o mesmo cliente.
+                            Remetente e Destinatário não podem ser o mesmo cliente.
                         </div>
                     </div>
                 </div>
@@ -124,8 +94,10 @@
                             <option value="">Selecione o motorista...</option>
                             <c:forEach var="m" items="${motoristas}">
                                 <option value="${m.id}"
+                                    data-cnh-categoria="${m.cnhCategoria.codigo}"
+                                    data-cnh-validade="${m.cnhValidade}"
                                     <c:if test="${frete.idMotorista == m.id}">selected</c:if>>
-                                    ${m.nome} — CPF: ${m.cpf}
+                                    ${m.nome} — CNH ${m.cnhCategoria.codigo}
                                 </option>
                             </c:forEach>
                         </select>
@@ -141,6 +113,8 @@
                             <c:forEach var="v" items="${veiculos}">
                                 <option value="${v.id}"
                                     data-capacidade="${v.capacidadeKg}"
+                                    data-tipo="${v.tipo.descricao}"
+                                    data-cnh-minima="${v.tipo.cnhMinima.codigo}"
                                     <c:if test="${frete.idVeiculo == v.id}">selected</c:if>>
                                     ${v.placa} — ${v.tipo.descricao}
                                     <c:if test="${not empty v.capacidadeKg}">
@@ -151,6 +125,7 @@
                         </select>
                         <small class="campo-hint">Somente veículos Disponíveis são listados.</small>
                         <span class="msg-erro-campo" id="err-veiculo">Selecione o veículo.</span>
+                        <span class="msg-erro-campo" id="err-compatibilidade"></span>
                     </div>
                 </div>
 
@@ -168,7 +143,6 @@
                     </div>
                     <div class="form-group">
                         <label for="ufOrigem">UF Origem <span class="obrigatorio">*</span></label>
-                        <%-- CORREÇÃO: select de UF em vez de input livre — elimina erros de digitação --%>
                         <select id="ufOrigem" name="ufOrigem" class="form-control">
                             <option value="">UF...</option>
                         </select>
@@ -193,12 +167,26 @@
                     </div>
                 </div>
 
+                <div class="form-row cols-2 readonly-grid">
+                    <div class="form-group">
+                        <label for="tipoOperacaoPreview">Tipo de Operação</label>
+                        <input type="text" id="tipoOperacaoPreview" class="form-control readonly-field"
+                               value="${frete.tipoOperacaoDescricao}" readonly>
+                        <small class="campo-hint">Calculado automaticamente com base na origem e destino.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="tipoDestinatarioPreview">Tipo de Destinatário</label>
+                        <input type="text" id="tipoDestinatarioPreview" class="form-control readonly-field"
+                               value="${frete.tipoDestinatarioDescricao}" readonly>
+                        <small class="campo-hint">Inferido automaticamente pelo CPF/CNPJ do destinatário.</small>
+                    </div>
+                </div>
+
                 <%-- ==============================================
                      CARGA
                      ============================================== --%>
                 <h3 class="secao-titulo">Carga</h3>
 
-                <%-- CORREÇÃO: campo descricaoCarga estava ausente no formulário original --%>
                 <div class="form-group">
                     <label for="descricaoCarga">
                         Descrição da Carga <span class="obrigatorio">*</span>
@@ -214,19 +202,20 @@
 
                 <div class="form-row cols-2">
                     <div class="form-group">
-                        <label for="pesoKg">Peso (kg)</label>
+                        <label for="pesoKg">Peso (kg) <span class="obrigatorio">*</span></label>
                         <input type="text" id="pesoKg" name="pesoKg"
                                value="${frete.pesoKg ne 0 ? frete.pesoKg : ''}"
-                               class="form-control" data-mask="decimal" data-max-digits="8"
-                               placeholder="Ex: 1500.00">
+                               class="form-control" data-mask="weight" data-max-digits="10"
+                               placeholder="Ex: 1.500,00 kg">
                         <small class="campo-hint" id="hint-capacidade"></small>
                         <span class="msg-erro-campo" id="err-peso"></span>
                     </div>
                     <div class="form-group">
-                        <label for="volumes">Volumes</label>
+                        <label for="volumes">Volumes <span class="obrigatorio">*</span></label>
                         <input type="text" id="volumes" name="volumes"
                                value="${frete.volumes}" class="form-control"
                                data-max-digits="6" inputmode="numeric" placeholder="Ex: 10">
+                        <span class="msg-erro-campo" id="err-volumes">Informe a quantidade de volumes.</span>
                     </div>
                 </div>
 
@@ -239,8 +228,8 @@
                         <label for="valorFrete">Valor do Frete (R$) <span class="obrigatorio">*</span></label>
                         <input type="text" id="valorFrete" name="valorFrete"
                                value="${frete.valorFrete ne 0 ? frete.valorFrete : ''}"
-                               class="form-control" data-mask="decimal" data-max-digits="10"
-                               placeholder="Ex: 2500.00">
+                               class="form-control" data-mask="money" data-max-digits="12"
+                               placeholder="Ex: R$ 2.500,00">
                         <span class="msg-erro-campo" id="err-valor">
                             O valor do frete deve ser maior que zero.
                         </span>
@@ -249,7 +238,6 @@
                         <label for="dataPrevEntrega">
                             Data Prev. Entrega <span class="obrigatorio">*</span>
                         </label>
-                        <%-- CORREÇÃO: min definido via JS para garantir data >= hoje --%>
                         <input type="date" id="dataPrevEntrega" name="dataPrevEntrega"
                                value="${frete.dataPrevEntregaIso}"
                                class="form-control">
@@ -259,36 +247,85 @@
                     </div>
                 </div>
 
-                <div class="form-row cols-3">
-                    <div class="form-group">
-                        <label for="aliquotaIcms">Alíquota ICMS (%)</label>
-                        <input type="text" id="aliquotaIcms" name="aliquotaIcms"
-                               value="${frete.aliquotaIcms ne 0 ? frete.aliquotaIcms : ''}"
-                               class="form-control" data-mask="decimal" data-max-digits="5"
-                               placeholder="0,00">
+                <h3 class="secao-titulo">Resumo Fiscal</h3>
+                <div class="fiscal-summary">
+                    <div class="form-row cols-3">
+                        <div class="form-group">
+                            <label for="cfopPreview">CFOP</label>
+                            <input type="text" id="cfopPreview" name="cfop" class="form-control readonly-field"
+                                   value="${empty frete.cfop ? 'Não calculado' : frete.cfop}" readonly>
+                            <small class="campo-hint">Aguardando integração fiscal.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="statusFiscalPreview">Status Fiscal</label>
+                            <input type="text" id="statusFiscalPreview" name="statusFiscal"
+                                   class="form-control readonly-field" value="${frete.statusFiscal}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="regraFiscalPreview">Regra Fiscal Aplicada</label>
+                            <input type="text" id="regraFiscalPreview" name="regraFiscalAplicada"
+                                   class="form-control readonly-field" value="Aguardando integração" readonly>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="aliquotaIbs">Alíquota IBS (%)</label>
-                        <input type="text" id="aliquotaIbs" name="aliquotaIbs"
-                               value="${frete.aliquotaIbs ne 0 ? frete.aliquotaIbs : ''}"
-                               class="form-control" data-mask="decimal" data-max-digits="5"
-                               placeholder="0,00">
-                    </div>
-                    <div class="form-group">
-                        <label for="aliquotaCbs">Alíquota CBS (%)</label>
-                        <input type="text" id="aliquotaCbs" name="aliquotaCbs"
-                               value="${frete.aliquotaCbs ne 0 ? frete.aliquotaCbs : ''}"
-                               class="form-control" data-mask="decimal" data-max-digits="5"
-                               placeholder="0,00">
-                    </div>
-                </div>
 
-                <div class="info-calculada" id="preview-valores" style="display:none">
-                    <strong>Preview de valores:</strong>
-                    <span id="preview-icms"></span>
-                    <span id="preview-ibs"></span>
-                    <span id="preview-cbs"></span>
-                    <span id="preview-total"></span>
+                    <div class="form-row cols-3">
+                        <div class="form-group">
+                            <label for="aliquotaIcmsPreview">Alíquota ICMS (%)</label>
+                            <input type="text" id="aliquotaIcmsPreview" class="form-control readonly-field"
+                                   value="0,00%" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="valorIcmsPreview">Valor ICMS (R$)</label>
+                            <input type="text" id="valorIcmsPreview" class="form-control readonly-field"
+                                   value="R$ 0,00" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="aliquotaIbsPreview">Alíquota IBS (%)</label>
+                            <input type="text" id="aliquotaIbsPreview" class="form-control readonly-field"
+                                   value="0,00%" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-row cols-3">
+                        <div class="form-group">
+                            <label for="valorIbsPreview">Valor IBS (R$)</label>
+                            <input type="text" id="valorIbsPreview" class="form-control readonly-field"
+                                   value="R$ 0,00" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="aliquotaCbsPreview">Alíquota CBS (%)</label>
+                            <input type="text" id="aliquotaCbsPreview" class="form-control readonly-field"
+                                   value="0,00%" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="valorCbsPreview">Valor CBS (R$)</label>
+                            <input type="text" id="valorCbsPreview" class="form-control readonly-field"
+                                   value="R$ 0,00" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-row cols-3">
+                        <div class="form-group">
+                            <label for="totalTributosPreview">Total de Tributos (R$)</label>
+                            <input type="text" id="totalTributosPreview" class="form-control readonly-field"
+                                   value="R$ 0,00" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="valorTotalEstimadoPreview">Valor Total Estimado (R$)</label>
+                            <input type="text" id="valorTotalEstimadoPreview" class="form-control readonly-field"
+                                   value="R$ 0,00" readonly>
+                        </div>
+                        <div class="form-group fiscal-action">
+                            <label>&nbsp;</label>
+                            <button type="button" class="btn btn-secondary" id="btnCalcularFiscal">
+                                Calcular Fiscal
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="info-calculada">
+                        Cálculo fiscal ainda não integrado. Campos preparados para o Motor Fiscal.
+                    </div>
                 </div>
 
                 <div class="form-group" style="margin-top:16px;">
@@ -311,16 +348,12 @@
 (function () {
     'use strict';
 
-    /* ──────────────────────────────────────────
-       LISTA DE UFs VÁLIDAS — populada nos selects
-       ────────────────────────────────────────── */
     var UFS = [
         'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA',
         'MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN',
         'RS','RO','RR','SC','SP','SE','TO'
     ];
 
-    /* Valores previamente selecionados (repopulação após erro do backend) */
     var ufOrigSalva  = '${frete.ufOrigem}';
     var ufDestSalva  = '${frete.ufDestino}';
 
@@ -337,9 +370,6 @@
     popularSelectUF('ufOrigem',  ufOrigSalva);
     popularSelectUF('ufDestino', ufDestSalva);
 
-    /* ──────────────────────────────────────────
-       DATA MÍNIMA = HOJE
-       ────────────────────────────────────────── */
     var hoje     = new Date();
     var anoHoje  = hoje.getFullYear();
     var mesHoje  = String(hoje.getMonth() + 1).padStart(2, '0');
@@ -349,70 +379,65 @@
     var dataEl = document.getElementById('dataPrevEntrega');
     dataEl.setAttribute('min', hojeStr);
 
-    /* ──────────────────────────────────────────
-       PREVIEW DE VALORES
-       ────────────────────────────────────────── */
     var freteInput = document.getElementById('valorFrete');
-    var aIcms      = document.getElementById('aliquotaIcms');
-    var aIbs       = document.getElementById('aliquotaIbs');
-    var aCbs       = document.getElementById('aliquotaCbs');
-    var preview    = document.getElementById('preview-valores');
+    var totalEstimadoInput = document.getElementById('valorTotalEstimadoPreview');
+    var btnCalcularFiscal = document.getElementById('btnCalcularFiscal');
 
     function parseNumeroLocal(valor) {
         if (!valor) return 0;
-        return parseFloat(String(valor).replace(/\./g, '').replace(',', '.')) || 0;
+        return parseFloat(String(valor)
+            .replace('R$', '')
+            .replace(/kg/gi, '')
+            .replace('%', '')
+            .replace(/\s/g, '')
+            .replace(/\./g, '')
+            .replace(',', '.')) || 0;
     }
 
-    function fmt(v) { return 'R$ ' + v.toFixed(2).replace('.', ','); }
+    function fmt(v) {
+        return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
 
-    function calcularPreview() {
+    function atualizarTotalEstimado() {
         var vf = parseNumeroLocal(freteInput.value);
-        if (vf <= 0) { preview.style.display = 'none'; return; }
-
-        var qi = parseNumeroLocal(aIcms.value);
-        var qb = parseNumeroLocal(aIbs.value);
-        var qc = parseNumeroLocal(aCbs.value);
-
-        var icms  = +(vf * qi / 100).toFixed(2);
-        var ibs   = +(vf * qb / 100).toFixed(2);
-        var cbs   = +(vf * qc / 100).toFixed(2);
-        var total = +(vf + icms + ibs + cbs).toFixed(2);
-
-        document.getElementById('preview-icms').textContent =
-            qi > 0 ? ' ICMS: '  + fmt(icms)  : '';
-        document.getElementById('preview-ibs').textContent =
-            qb > 0 ? ' | IBS: ' + fmt(ibs)   : '';
-        document.getElementById('preview-cbs').textContent =
-            qc > 0 ? ' | CBS: ' + fmt(cbs)   : '';
-        document.getElementById('preview-total').textContent =
-            ' | Total: ' + fmt(total);
-
-        preview.style.display = 'block';
+        totalEstimadoInput.value = fmt(vf);
     }
-    [freteInput, aIcms, aIbs, aCbs].forEach(function (el) {
-        if (el) el.addEventListener('input', calcularPreview);
-    });
-    calcularPreview(); // executar na carga para repopulação
+    freteInput.addEventListener('input', atualizarTotalEstimado);
+    atualizarTotalEstimado();
 
-    /* ──────────────────────────────────────────
-       CAPACIDADE DO VEÍCULO — hint de peso
-       ────────────────────────────────────────── */
+    btnCalcularFiscal.addEventListener('click', function () {
+        var mensagem = 'Funcionalidade preparada para futura integração com o Motor Fiscal.';
+        if (window.FiscalMoveUI && typeof window.FiscalMoveUI.showFormError === 'function') {
+            window.FiscalMoveUI.showFormError(document.getElementById('form-frete'), mensagem);
+        } else {
+            alert(mensagem);
+        }
+    });
+
     var selVeiculo   = document.getElementById('idVeiculo');
+    var selMotorista = document.getElementById('idMotorista');
     var hintCapac    = document.getElementById('hint-capacidade');
     var inputPeso    = document.getElementById('pesoKg');
     var errPeso      = document.getElementById('err-peso');
+    var errCompat    = document.getElementById('err-compatibilidade');
 
     function atualizarCapacidade() {
         var opt = selVeiculo.options[selVeiculo.selectedIndex];
         var cap = opt ? parseFloat(opt.getAttribute('data-capacidade')) : 0;
+        var cnhMinima = opt ? opt.getAttribute('data-cnh-minima') : '';
         if (cap > 0) {
-            hintCapac.textContent = 'Capacidade do veículo: ' + cap.toLocaleString('pt-BR') + ' kg';
+            hintCapac.textContent = 'Capacidade do veículo: ' + cap.toLocaleString('pt-BR')
+                + ' kg. CNH mínima: ' + cnhMinima + '.';
             inputPeso.setAttribute('max', cap);
         } else {
             hintCapac.textContent = '';
             inputPeso.removeAttribute('max');
         }
         validarPeso();
+        validarCompatibilidade();
     }
 
     function validarPeso() {
@@ -433,14 +458,62 @@
 
     selVeiculo.addEventListener('change', atualizarCapacidade);
     inputPeso.addEventListener('input', validarPeso);
-    atualizarCapacidade(); // executar na carga
+    atualizarCapacidade();
 
-    /* ──────────────────────────────────────────
-       CORREÇÃO: REMETENTE ≠ DESTINATÁRIO — feedback imediato
-       ────────────────────────────────────────── */
+    function nivelCnh(cnh) {
+        var codigo = (cnh || '').toUpperCase();
+        if (codigo === 'A') return 0;
+        if (codigo === 'B' || codigo === 'AB') return 1;
+        if (codigo === 'C' || codigo === 'AC') return 2;
+        if (codigo === 'D' || codigo === 'AD') return 3;
+        if (codigo === 'E' || codigo === 'AE') return 4;
+        return -1;
+    }
+
+    function possuiA(cnh) {
+        return (cnh || '').toUpperCase().indexOf('A') >= 0;
+    }
+
+    function cnhAtende(cnhMotorista, cnhExigida) {
+        if (!cnhMotorista || !cnhExigida) return true;
+        if (cnhExigida === 'A') return possuiA(cnhMotorista);
+        return nivelCnh(cnhMotorista) >= nivelCnh(cnhExigida);
+    }
+
+    function validarCompatibilidade() {
+        var optMotorista = selMotorista.options[selMotorista.selectedIndex];
+        var optVeiculo = selVeiculo.options[selVeiculo.selectedIndex];
+        var cnhMotorista = optMotorista ? optMotorista.getAttribute('data-cnh-categoria') : '';
+        var cnhMinima = optVeiculo ? optVeiculo.getAttribute('data-cnh-minima') : '';
+        var tipoVeiculo = optVeiculo ? optVeiculo.getAttribute('data-tipo') : '';
+
+        if (selMotorista.value && selVeiculo.value && !cnhAtende(cnhMotorista, cnhMinima)) {
+            errCompat.textContent = 'Motorista com CNH ' + cnhMotorista
+                + ' não pode conduzir veículo ' + tipoVeiculo
+                + ' que exige categoria ' + cnhMinima + '.';
+            errCompat.classList.add('visivel');
+            selMotorista.classList.add('campo-erro');
+            selVeiculo.classList.add('campo-erro');
+            return false;
+        }
+        errCompat.classList.remove('visivel');
+        selMotorista.classList.remove('campo-erro');
+        selVeiculo.classList.remove('campo-erro');
+        return true;
+    }
+
+    selMotorista.addEventListener('change', validarCompatibilidade);
+    selVeiculo.addEventListener('change', validarCompatibilidade);
+
     var selRem   = document.getElementById('idRemetente');
     var selDest  = document.getElementById('idDestinatario');
     var avisoIgual = document.getElementById('aviso-rem-igual');
+    var tipoOperacaoPreview = document.getElementById('tipoOperacaoPreview');
+    var tipoDestinatarioPreview = document.getElementById('tipoDestinatarioPreview');
+    var municipioOrigem = document.getElementById('municipioOrigem');
+    var municipioDestino = document.getElementById('municipioDestino');
+    var ufOrigem = document.getElementById('ufOrigem');
+    var ufDestino = document.getElementById('ufDestino');
 
     function verificarRemetenteDest() {
         var rem  = selRem.value;
@@ -456,9 +529,42 @@
     selRem.addEventListener('change', verificarRemetenteDest);
     selDest.addEventListener('change', verificarRemetenteDest);
 
-    /* ──────────────────────────────────────────
-       VALIDAÇÃO NO SUBMIT — inline, sem alert()
-       ────────────────────────────────────────── */
+    function normalizarTexto(valor) {
+        return (valor || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase();
+    }
+
+    function atualizarTipoOperacao() {
+        var ufo = normalizarTexto(ufOrigem.value);
+        var ufd = normalizarTexto(ufDestino.value);
+        var munO = normalizarTexto(municipioOrigem.value);
+        var munD = normalizarTexto(municipioDestino.value);
+
+        if (!ufo || !ufd || !munO || !munD) {
+            tipoOperacaoPreview.value = '';
+            return;
+        }
+
+        if (ufo !== ufd) tipoOperacaoPreview.value = 'Interestadual';
+        else if (munO !== munD) tipoOperacaoPreview.value = 'Estadual';
+        else tipoOperacaoPreview.value = 'Municipal';
+    }
+
+    function atualizarTipoDestinatario() {
+        var opt = selDest.options[selDest.selectedIndex];
+        var doc = opt ? (opt.getAttribute('data-documento') || '').replace(/\D/g, '') : '';
+        if (doc.length === 11) tipoDestinatarioPreview.value = 'Pessoa Física';
+        else if (doc.length === 14) tipoDestinatarioPreview.value = 'Pessoa Jurídica';
+        else tipoDestinatarioPreview.value = '';
+    }
+
+    [municipioOrigem, municipioDestino, ufOrigem, ufDestino].forEach(function (el) {
+        el.addEventListener('input', atualizarTipoOperacao);
+        el.addEventListener('change', atualizarTipoOperacao);
+    });
+    selDest.addEventListener('change', atualizarTipoDestinatario);
+    atualizarTipoOperacao();
+    atualizarTipoDestinatario();
+
     var form     = document.getElementById('form-frete');
     var alertaEl = document.getElementById('alerta-validacao');
     var listaEl  = document.getElementById('lista-erros-validacao');
@@ -479,10 +585,9 @@
     form.addEventListener('submit', function (e) {
         var erros = [];
 
-        /* Limpa erros anteriores */
         ['idRemetente','idDestinatario','idMotorista','idVeiculo',
          'municipioOrigem','ufOrigem','municipioDestino','ufDestino',
-         'descricaoCarga','valorFrete','dataPrevEntrega'].forEach(function (id) {
+         'descricaoCarga','pesoKg','volumes','valorFrete','dataPrevEntrega'].forEach(function (id) {
             var el = document.getElementById(id);
             if (el) el.classList.remove('campo-erro');
         });
@@ -490,7 +595,6 @@
             el.classList.remove('visivel');
         });
 
-        /* Selects obrigatórios */
         if (!selRem.value) {
             erros.push('Remetente é obrigatório');
             marcarErro('idRemetente', 'err-remetente');
@@ -499,7 +603,6 @@
             erros.push('Destinatário é obrigatório');
             marcarErro('idDestinatario', 'err-destinatario');
         }
-        /* CORREÇÃO: bloqueia submit se remetente == destinatário */
         if (selRem.value && selDest.value && selRem.value === selDest.value) {
             erros.push('Remetente e Destinatário não podem ser o mesmo cliente');
             marcarErro('idDestinatario', 'err-destinatario');
@@ -513,8 +616,10 @@
             erros.push('Veículo é obrigatório');
             marcarErro('idVeiculo', 'err-veiculo');
         }
+        if (!validarCompatibilidade()) {
+            erros.push('Motorista e veículo são incompatíveis pela categoria da CNH');
+        }
 
-        /* Campos de texto obrigatórios */
         if (!document.getElementById('municipioOrigem').value.trim()) {
             erros.push('Município de Origem é obrigatório');
             marcarErro('municipioOrigem', 'err-mun-orig');
@@ -532,20 +637,30 @@
             marcarErro('ufDestino', 'err-uf-dest');
         }
 
-        /* CORREÇÃO: descricaoCarga agora é validada no frontend também */
         if (!document.getElementById('descricaoCarga').value.trim()) {
             erros.push('Descrição da Carga é obrigatória');
             marcarErro('descricaoCarga', 'err-carga');
         }
 
-        /* Valor do frete */
+        var pesoValObrigatorio = parseNumeroLocal(inputPeso.value);
+        if (!pesoValObrigatorio || pesoValObrigatorio <= 0) {
+            erros.push('Peso da Carga deve ser maior que zero');
+            errPeso.textContent = 'Informe o peso da carga.';
+            marcarErro('pesoKg', 'err-peso');
+        }
+
+        var volumesVal = parseInt(document.getElementById('volumes').value, 10);
+        if (!volumesVal || volumesVal <= 0) {
+            erros.push('Volumes deve ser maior que zero');
+            marcarErro('volumes', 'err-volumes');
+        }
+
         var vf = parseNumeroLocal(document.getElementById('valorFrete').value);
         if (!vf || vf <= 0) {
             erros.push('Valor do Frete deve ser maior que zero');
             marcarErro('valorFrete', 'err-valor');
         }
 
-        /* Data prevista: obrigatória e não pode ser passado */
         var dataVal = dataEl.value;
         if (!dataVal) {
             erros.push('Data Prevista de Entrega é obrigatória');
@@ -556,7 +671,6 @@
             document.getElementById('err-data').classList.add('visivel');
         }
 
-        /* Peso vs capacidade do veículo */
         var capOpt = selVeiculo.options[selVeiculo.selectedIndex];
         var capVal = capOpt ? parseFloat(capOpt.getAttribute('data-capacidade')) : 0;
         var pesoVal = parseNumeroLocal(inputPeso.value);
@@ -564,7 +678,6 @@
             erros.push('Peso da carga excede a capacidade do veículo selecionado');
         }
 
-        /* Exibe erros ou prossegue */
         if (erros.length > 0) {
             e.preventDefault();
             listaEl.innerHTML = '';
@@ -574,7 +687,6 @@
                 listaEl.appendChild(li);
             });
             alertaEl.classList.add('visivel');
-            /* Rola para o topo do formulário */
             alertaEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
             alertaEl.classList.remove('visivel');

@@ -10,20 +10,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <script type="module" src="${pageContext.request.contextPath}/js/validacoes.js"></script>
 </head>
 <body class="login-page">
 
-<!-- Orb decorativo -->
-<div style="
-    position:fixed; bottom:-120px; right:-100px;
-    width:400px; height:400px; border-radius:50%;
-    background:radial-gradient(circle, rgba(109,197,42,.08) 0%, transparent 70%);
-    pointer-events:none;
-"></div>
-
 <div class="login-box">
 
-    <!-- Logo -->
     <div class="login-logo">
         <div class="brand-row">
             <div class="logo-icon">
@@ -38,7 +30,6 @@
         <p>Freight Management System</p>
     </div>
 
-    <!-- Alerta de erro -->
     <c:if test="${not empty erro}">
         <div class="alert alert-erro">${erro}</div>
     </c:if>
@@ -89,6 +80,8 @@
                 <input type="password" id="confirmaSenha" name="confirmaSenha"
                        class="form-control"
                        placeholder="Repita a senha"
+                       data-match="#senha"
+                       data-match-message="As senhas não coincidem."
                        required
                        style="padding-right:42px;">
                 <button type="button" id="toggleConfirma"
@@ -124,16 +117,6 @@ function toggleInput(btnId, inputId) {
 toggleInput('toggleSenha',    'senha');
 toggleInput('toggleConfirma', 'confirmaSenha');
 
-/* Validação client-side: senhas coincidem */
-document.getElementById('cadastroForm').addEventListener('submit', function (e) {
-    var s  = document.getElementById('senha').value;
-    var cs = document.getElementById('confirmaSenha').value;
-    if (s !== cs) {
-        e.preventDefault();
-        alert('As senhas não coincidem.');
-        document.getElementById('confirmaSenha').focus();
-    }
-});
 </script>
 </body>
 </html>

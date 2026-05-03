@@ -1,5 +1,5 @@
 -- ============================================================
--- 05_dml_seed_data.sql
+-- 03_seed_data.sql
 -- DADOS INICIAIS — Sistema de Gestão de Fretes GW
 --
 -- ⚠️  ATENÇÃO — senhas em SHA-256 (geradas pelo LoginDAO.sha256()):
@@ -12,8 +12,8 @@
 -- ⚠️  ATENÇÃO — tipo ocorrência: 'P'|'R'|'T'|'E'|'A'|'X'|'O' (TipoOcorrencia enum)
 -- ⚠️  ATENÇÃO — status motorista: 'A'|'I'|'S'  (StatusMotorista enum)
 -- ⚠️  ATENÇÃO — status veículo: 'D'|'V'|'M'  (StatusVeiculo enum)
--- ⚠️  ATENÇÃO — tipo veículo: 'K'=Truck | 'C'=Carreta | 'V'=Van | 'U'=Utilitário
--- ⚠️  ATENÇÃO — cnh_categoria: 'A'|'B'|'C'|'D'|'E'
+-- ⚠️  ATENÇÃO — tipo veículo: M/U/V/L/Q/O/K/C/B conforme TipoVeiculo.java
+-- ⚠️  ATENÇÃO — cnh_categoria: 'A'|'B'|'C'|'D'|'E'|'AB'|'AC'|'AD'|'AE'
 -- ⚠️  ATENÇÃO — tipo_vinculo: 'F'=Funcionário | 'G'=Agregado | 'T'=Terceiro
 -- ============================================================
 
@@ -72,7 +72,7 @@ VALUES
 -- ============================================================
 -- MOTORISTAS
 -- cpf: apenas dígitos (11 chars) — MotoristaDAO.preencher() remove a máscara
--- cnh_categoria: 'A'|'B'|'C'|'D'|'E'
+-- cnh_categoria: 'A'|'B'|'C'|'D'|'E'|'AB'|'AC'|'AD'|'AE'
 -- tipo_vinculo:  'F'=Funcionário | 'G'=Agregado | 'T'=Terceiro
 -- status:        'A'=Ativo | 'I'=Inativo | 'S'=Suspenso
 -- ============================================================
@@ -83,32 +83,33 @@ INSERT INTO motorista
 VALUES
 -- CNH válida, ativo
 ('Carlos Alberto Silva',   '52998224725', '1985-03-10', '(81) 99001-1111',
- 'CNH-00001', 'E', '2027-12-31', 'F', 'A'),
+ '10000000001', 'E', '2027-12-31', 'F', 'A'),
 
 ('Marcos Pereira Santos',  '37432720038', '1978-07-22', '(81) 99002-2222',
- 'CNH-00002', 'D', '2028-06-30', 'G', 'A'),
+ '10000000002', 'D', '2028-06-30', 'G', 'A'),
 
 ('João Carlos Souza',      '56854288027', '1990-11-05', '(81) 99003-3333',
- 'CNH-00003', 'E', '2026-09-15', 'F', 'A'),
+ '10000000003', 'E', '2026-09-15', 'F', 'A'),
 
 ('Francisco Oliveira',     '98765432100', '1982-04-18', '(84) 99004-4444',
- 'CNH-00004', 'D', '2027-03-20', 'T', 'A'),
+ '10000000004', 'D', '2027-03-20', 'T', 'A'),
 
 ('Paulo Almeida Costa',    '11144477735', '1975-12-01', '(71) 99005-5555',
- 'CNH-00005', 'E', '2029-11-30', 'G', 'A'),
+ '10000000005', 'E', '2029-11-30', 'G', 'A'),
 
 -- CNH vencida (bloqueia novos fretes, não impede cadastro)
 ('José Oliveira Lima',     '86822582900', '1970-06-14', '(83) 99006-6666',
- 'CNH-00006', 'C', '2024-03-01', 'T', 'A'),
+ '10000000006', 'C', '2024-03-01', 'T', 'A'),
 
 -- Suspenso (para testar regra de status)
 ('Luiz Gonzaga Ferreira',  '72338925073', '1988-09-22', '(87) 99007-7777',
- 'CNH-00007', 'E', '2027-07-10', 'F', 'S');
+ '10000000007', 'E', '2027-07-10', 'F', 'S');
 
 
 -- ============================================================
 -- VEICULOS
--- tipo:   'K'=Truck | 'C'=Carreta | 'V'=Van | 'U'=Utilitário
+-- tipo:   M=Moto | U=Carro Utilitário | V=Van | L=VUC | Q=Caminhão 3/4
+--         O=Caminhão Toco | K=Caminhão Truck | C=Carreta | B=Bitrem/Rodotrem
 -- status: 'D'=Disponível | 'V'=EmViagem | 'M'=EmManutenção
 -- placa:  Mercosul (ABC1D23) ou antigo (ABC1234)
 -- ============================================================
@@ -118,9 +119,9 @@ VALUES
 ('ABC1D23', 'RNTRC-00001', 2019, 'K', 8000.00,  14000.00,  90.000, 'D'),  -- Truck disponível
 ('XYZ2E45', 'RNTRC-00002', 2021, 'C', 7000.00,  25000.00, 120.000, 'D'),  -- Carreta disponível
 ('QWE3F67', 'RNTRC-00003', 2022, 'C', 7500.00,  28000.00, 135.000, 'D'),  -- Carreta disponível
-('RST4G89', 'RNTRC-00004', 2020, 'V', 2500.00,   3000.00,  18.000, 'D'),  -- Van disponível
-('MNO5H12', 'RNTRC-00005', 2018, 'U', 1200.00,   1500.00,   9.000, 'D'),  -- Utilitário disponível
-('DEF6789', 'RNTRC-00006', 2023, 'K', 8500.00,  16000.00,  95.000, 'V'),  -- Truck em viagem (sincronizado com frete EM_TRANSITO abaixo)
+('RST4G89', 'RNTRC-00004', 2020, 'L', 2500.00,   3000.00,  18.000, 'D'),  -- VUC disponível
+('MNO5H12', 'RNTRC-00005', 2018, 'U', 1200.00,    500.00,   9.000, 'D'),  -- Utilitário disponível
+('DEF6789', 'RNTRC-00006', 2023, 'K', 8500.00,  14000.00,  95.000, 'V'),  -- Truck em viagem (sincronizado com frete EM_TRANSITO abaixo)
 ('GHI1234', 'RNTRC-00007', 2017, 'C', 6500.00,  22000.00, 110.000, 'M');  -- Carreta em manutenção
 
 

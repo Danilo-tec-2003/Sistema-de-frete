@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 @WebServlet("/motoristas")
 public class MotoristaControlador extends HttpServlet {
@@ -29,6 +30,9 @@ public class MotoristaControlador extends HttpServlet {
             req.setAttribute("categorias", CategoriaCNH.values());
             req.setAttribute("vinculos",   TipoVinculo.values());
             req.setAttribute("statusList", StatusMotorista.values());
+            req.setAttribute("maxDataNascimento",
+                java.time.LocalDate.now().minusYears(18).toString());
+            req.setAttribute("minCnhValidade", java.time.LocalDate.now().toString());
             req.getRequestDispatcher("/jsp/motoristas/FormMotoristas.jsp").forward(req, resp);
             return;
         }
@@ -40,6 +44,9 @@ public class MotoristaControlador extends HttpServlet {
                 req.setAttribute("categorias", CategoriaCNH.values());
                 req.setAttribute("vinculos",   TipoVinculo.values());
                 req.setAttribute("statusList", StatusMotorista.values());
+                req.setAttribute("maxDataNascimento",
+                    java.time.LocalDate.now().minusYears(18).toString());
+                req.setAttribute("minCnhValidade", java.time.LocalDate.now().toString());
                 req.getRequestDispatcher("/jsp/motoristas/FormMotoristas.jsp").forward(req, resp);
             } catch (NegocioException e) {
                 req.setAttribute("erro", e.getMessage());
@@ -69,14 +76,25 @@ public class MotoristaControlador extends HttpServlet {
             throws ServletException, IOException {
 
         req.setCharacterEncoding("UTF-8");
-        Motorista m = montarDoRequest(req);
+        Motorista m = null;
 
         try {
+            m = montarDoRequest(req);
             bo.salvar(m);
             String msg = m.getId() == 0
                 ? "Motorista+cadastrado+com+sucesso."
                 : "Motorista+atualizado+com+sucesso.";
             resp.sendRedirect(req.getContextPath() + "/motoristas?sucesso=" + msg);
+        } catch (IllegalArgumentException | DateTimeParseException e) {
+            req.setAttribute("erro", "Revise os dados do motorista. Há um valor inválido no formulário.");
+            req.setAttribute("motorista",  m);
+            req.setAttribute("maxDataNascimento",
+            java.time.LocalDate.now().minusYears(18).toString());
+            req.setAttribute("categorias", CategoriaCNH.values());
+            req.setAttribute("vinculos",   TipoVinculo.values());
+            req.setAttribute("statusList", StatusMotorista.values());
+            req.setAttribute("minCnhValidade", java.time.LocalDate.now().toString());
+            req.getRequestDispatcher("/jsp/motoristas/FormMotoristas.jsp").forward(req, resp);
         } catch (NegocioException e) {
             req.setAttribute("erro",       e.getMessage());
             req.setAttribute("motorista",  m);
@@ -85,6 +103,7 @@ public class MotoristaControlador extends HttpServlet {
             req.setAttribute("categorias", CategoriaCNH.values());
             req.setAttribute("vinculos",   TipoVinculo.values());
             req.setAttribute("statusList", StatusMotorista.values());
+            req.setAttribute("minCnhValidade", java.time.LocalDate.now().toString());
             req.getRequestDispatcher("/jsp/motoristas/FormMotoristas.jsp").forward(req, resp);
         }
     }

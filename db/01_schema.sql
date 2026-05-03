@@ -1,5 +1,5 @@
 -- ============================================================
--- 01_ddl_tables.sql
+-- 01_schema.sql
 -- SISTEMA DE GESTÃO DE FRETES — DDL Tabelas e Sequências
 
 -- ============================================================
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS cliente (
 
 -- ============================================================
 -- MOTORISTA
--- cnh_categoria CHAR(1): A | B | C | D | E   → CategoriaCNH.java
+-- cnh_categoria VARCHAR(2): A | B | C | D | E | AB | AC | AD | AE → CategoriaCNH.java
 -- tipo_vinculo  CHAR(1): F=Funcionário | G=Agregado | T=Terceiro → TipoVinculo.java
 -- status        CHAR(1): A=Ativo | I=Inativo | S=Suspenso       → StatusMotorista.java
 -- ============================================================
@@ -74,8 +74,8 @@ CREATE TABLE IF NOT EXISTS motorista (
     cpf            VARCHAR(11)   NOT NULL, 
     data_nascimento DATE,
     telefone       VARCHAR(20),
-    cnh_numero     VARCHAR(20)   NOT NULL,
-    cnh_categoria  CHAR(1)       NOT NULL DEFAULT 'B',
+    cnh_numero     VARCHAR(11)   NOT NULL,
+    cnh_categoria  VARCHAR(2)    NOT NULL DEFAULT 'B',
     cnh_validade   DATE          NOT NULL,
     tipo_vinculo   CHAR(1)       NOT NULL DEFAULT 'F',
     status         CHAR(1)       NOT NULL DEFAULT 'A',
@@ -86,14 +86,17 @@ CREATE TABLE IF NOT EXISTS motorista (
     CONSTRAINT pk_motorista       PRIMARY KEY (idmotorista),
     CONSTRAINT uq_motorista_cpf   UNIQUE      (cpf),
     CONSTRAINT uq_motorista_cnh   UNIQUE      (cnh_numero),
-    CONSTRAINT ck_motorista_cat   CHECK (cnh_categoria IN ('A','B','C','D','E')),
+    CONSTRAINT ck_motorista_cnh_numero CHECK (cnh_numero ~ '^[0-9]{11}$'),
+    CONSTRAINT ck_motorista_cat   CHECK (cnh_categoria IN ('A','B','C','D','E','AB','AC','AD','AE')),
     CONSTRAINT ck_motorista_vinc  CHECK (tipo_vinculo  IN ('F','G','T')),
     CONSTRAINT ck_motorista_stat  CHECK (status         IN ('A','I','S'))
 );
 
 -- ============================================================
 -- VEICULO
--- tipo   CHAR(1): K=Truck | C=Carreta | V=Van | U=Utilitário → TipoVeiculo.java
+-- tipo CHAR(1):
+--   M=Moto | U=Carro Utilitário | V=Van | L=VUC | Q=Caminhão 3/4
+--   O=Caminhão Toco | K=Caminhão Truck | C=Carreta | B=Bitrem/Rodotrem
 -- status CHAR(1): D=Disponível | V=EmViagem | M=EmManutenção → StatusVeiculo.java
 -- ============================================================
 CREATE TABLE IF NOT EXISTS veiculo (
@@ -112,7 +115,20 @@ CREATE TABLE IF NOT EXISTS veiculo (
     updated_by     VARCHAR(60),
     CONSTRAINT pk_veiculo       PRIMARY KEY (idveiculo),
     CONSTRAINT uq_veiculo_placa UNIQUE      (placa),
-    CONSTRAINT ck_veiculo_tipo  CHECK (tipo   IN ('K','C','V','U')),
+    CONSTRAINT ck_veiculo_tipo  CHECK (tipo   IN ('M','U','V','L','Q','O','K','C','B')),
+    CONSTRAINT ck_veiculo_capacidade_pos CHECK (capacidade_kg IS NULL OR capacidade_kg > 0),
+    CONSTRAINT ck_veiculo_capacidade_tipo CHECK (
+        capacidade_kg IS NULL OR
+        (tipo = 'M' AND capacidade_kg BETWEEN 1 AND 30) OR
+        (tipo = 'U' AND capacidade_kg BETWEEN 50 AND 500) OR
+        (tipo = 'V' AND capacidade_kg BETWEEN 300 AND 1500) OR
+        (tipo = 'L' AND capacidade_kg BETWEEN 1000 AND 3000) OR
+        (tipo = 'Q' AND capacidade_kg BETWEEN 1500 AND 4000) OR
+        (tipo = 'O' AND capacidade_kg BETWEEN 3000 AND 6000) OR
+        (tipo = 'K' AND capacidade_kg BETWEEN 6000 AND 14000) OR
+        (tipo = 'C' AND capacidade_kg BETWEEN 14000 AND 30000) OR
+        (tipo = 'B' AND capacidade_kg BETWEEN 30000 AND 57000)
+    ),
     CONSTRAINT ck_veiculo_stat  CHECK (status IN ('D','V','M'))
 );
 
@@ -151,6 +167,14 @@ CREATE TABLE IF NOT EXISTS frete (
     aliquota_cbs      NUMERIC(5,2)   NOT NULL DEFAULT 0,
     valor_cbs         NUMERIC(12,2)  NOT NULL DEFAULT 0,
     valor_total       NUMERIC(12,2)  NOT NULL DEFAULT 0,
+    tipo_operacao     VARCHAR(20),
+    tipo_destinatario VARCHAR(20),
+    cfop              VARCHAR(20)    NOT NULL DEFAULT 'Não calculado',
+    motivo_cfop       VARCHAR(160)   NOT NULL DEFAULT 'Aguardando integração fiscal',
+    status_fiscal     VARCHAR(20)    NOT NULL DEFAULT 'PENDENTE',
+    regra_fiscal_aplicada VARCHAR(160) NOT NULL DEFAULT 'Aguardando integração',
+    total_tributos    NUMERIC(12,2)  NOT NULL DEFAULT 0,
+    valor_total_estimado NUMERIC(12,2) NOT NULL DEFAULT 0,
     status            CHAR(1)        NOT NULL DEFAULT 'E',
     data_emissao      DATE           NOT NULL DEFAULT CURRENT_DATE,
     data_prev_entrega DATE           NOT NULL,
@@ -168,6 +192,9 @@ CREATE TABLE IF NOT EXISTS frete (
     CONSTRAINT fk_frete_motorista    FOREIGN KEY (id_motorista)    REFERENCES motorista(idmotorista),
     CONSTRAINT fk_frete_veiculo      FOREIGN KEY (id_veiculo)      REFERENCES veiculo(idveiculo),
     CONSTRAINT ck_frete_status       CHECK (status IN ('E','S','T','R','N','C')),
+    CONSTRAINT ck_frete_tipo_operacao CHECK (tipo_operacao IS NULL OR tipo_operacao IN ('MUNICIPAL','ESTADUAL','INTERESTADUAL')),
+    CONSTRAINT ck_frete_tipo_destinatario CHECK (tipo_destinatario IS NULL OR tipo_destinatario IN ('PESSOA_FISICA','PESSOA_JURIDICA')),
+    CONSTRAINT ck_frete_status_fiscal CHECK (status_fiscal IN ('PENDENTE','CALCULADO','ERRO','VALIDADO_CTE')),
     CONSTRAINT ck_frete_valor        CHECK (valor_frete >= 0)
 );
 
