@@ -9,6 +9,8 @@ import br.com.gw.Enums.TipoOcorrencia;
 import br.com.gw.Enums.TipoOperacao;
 import br.com.gw.Enums.TipoVeiculo;
 import br.com.gw.cliente.Cliente;
+import br.com.gw.motorfiscal.TaxAmount;
+import br.com.gw.motorfiscal.TaxSimulationResponse;
 import br.com.gw.motorista.Motorista;
 import br.com.gw.nucleo.utils.ConexaoUtil;
 import br.com.gw.veiculos.Veiculo;
@@ -110,6 +112,64 @@ public class FreteDAO {
             ps.setString(1, String.valueOf(novoStatus.getCodigo()));
             ps.setString(2, usuario);
             ps.setInt   (3, idFrete);
+            ps.executeUpdate();
+        }
+    }
+
+    /**
+     * Persiste no frete o retorno calculado pelo Motor Fiscal.
+     * Esse método atualiza somente o resumo fiscal, sem alterar o fluxo operacional do frete.
+     */
+    public void atualizarResumoFiscal(int idFrete, TaxSimulationResponse response,
+                                      String usuario) throws SQLException {
+        final String sql =
+            "UPDATE frete SET " +
+            "  aliquota_icms=?, valor_icms=?, " +
+            "  aliquota_ibs=?, valor_ibs=?, " +
+            "  aliquota_cbs=?, valor_cbs=?, " +
+            "  valor_total=?, cfop=?, motivo_cfop=?, " +
+            "  status_fiscal=?, regra_fiscal_aplicada=?, " +
+            "  total_tributos=?, valor_total_estimado=?, " +
+            "  updated_at=NOW(), updated_by=? " +
+            "WHERE idfrete=?";
+
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            int i = 1;
+            ps.setBigDecimal(i++, taxRate(response.getIcms()));
+            ps.setBigDecimal(i++, taxAmount(response.getIcms()));
+            ps.setBigDecimal(i++, taxRate(response.getIbs()));
+            ps.setBigDecimal(i++, taxAmount(response.getIbs()));
+            ps.setBigDecimal(i++, taxRate(response.getCbs()));
+            ps.setBigDecimal(i++, taxAmount(response.getCbs()));
+            ps.setBigDecimal(i++, bd(response.getTotalWithTax()));
+            ps.setString    (i++, coalesce(response.getCfop(), "Não calculado"));
+            ps.setString    (i++, motivoMotorFiscal(response));
+            ps.setString    (i++, StatusFiscal.CALCULADO.name());
+            ps.setString    (i++, regraAplicada(response));
+            ps.setBigDecimal(i++, bd(response.getTotalTax()));
+            ps.setBigDecimal(i++, bd(response.getTotalWithTax()));
+            ps.setString    (i++, usuario);
+            ps.setInt       (i, idFrete);
+
+            int afetados = ps.executeUpdate();
+            if (afetados == 0) {
+                throw new SQLException("Frete nao encontrado para atualizar resumo fiscal: " + idFrete);
+            }
+        }
+    }
+
+    public void marcarErroFiscal(int idFrete, String motivo, String usuario) throws SQLException {
+        final String sql =
+            "UPDATE frete SET status_fiscal=?, motivo_cfop=?, updated_at=NOW(), updated_by=? " +
+            "WHERE idfrete=?";
+
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, StatusFiscal.ERRO.name());
+            ps.setString(2, truncate(coalesce(motivo, "Falha ao calcular no Motor Fiscal."), 160));
+            ps.setString(3, usuario);
+            ps.setInt   (4, idFrete);
             ps.executeUpdate();
         }
     }
@@ -575,5 +635,53 @@ public class FreteDAO {
             throws SQLException {
         if (v != null) ps.setInt(idx, v);
         else           ps.setNull(idx, Types.INTEGER);
+    }
+
+    private BigDecimal taxRate(TaxAmount tax) {
+        return tax == null ? BigDecimal.ZERO : bd(tax.getRate());
+    }
+
+    private BigDecimal taxAmount(TaxAmount tax) {
+        return tax == null ? BigDecimal.ZERO : bd(tax.getAmount());
+    }
+
+    private BigDecimal bd(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return new BigDecimal(value.trim());
+    }
+
+    private String regraAplicada(TaxSimulationResponse response) {
+        String ruleCode = response.getRuleCode();
+        String ruleVersion = response.getRuleVersion();
+
+        if (ruleCode != null && !ruleCode.trim().isEmpty()
+                && ruleVersion != null && !ruleVersion.trim().isEmpty()) {
+            return truncate(ruleCode + " v" + ruleVersion, 160);
+        }
+        if (ruleVersion != null && !ruleVersion.trim().isEmpty()) {
+            return truncate(ruleVersion, 160);
+        }
+        return "Calculado pelo Motor Fiscal";
+    }
+
+    private String motivoMotorFiscal(TaxSimulationResponse response) {
+        String basis = response.getCalculationBasis();
+        if (basis != null && !basis.trim().isEmpty()) {
+            return truncate("Calculado pelo Motor Fiscal. Base: " + basis, 160);
+        }
+        return "Calculado pelo Motor Fiscal";
+    }
+
+    private String coalesce(String value, String fallback) {
+        return value != null && !value.trim().isEmpty() ? value.trim() : fallback;
+    }
+
+    private String truncate(String value, int maxLength) {
+        if (value == null || value.length() <= maxLength) {
+            return value;
+        }
+        return value.substring(0, maxLength);
     }
 }

@@ -10,6 +10,11 @@ import br.com.gw.Enums.TipoOcorrencia;
 import br.com.gw.Enums.TipoOperacao;
 import br.com.gw.cliente.Cliente;
 import br.com.gw.cliente.ClienteDAO;
+import br.com.gw.motorfiscal.MotorFiscalClient;
+import br.com.gw.motorfiscal.MotorFiscalException;
+import br.com.gw.motorfiscal.TaxPreviewRequest;
+import br.com.gw.motorfiscal.TaxSimulationRequest;
+import br.com.gw.motorfiscal.TaxSimulationResponse;
 import br.com.gw.motorista.Motorista;
 import br.com.gw.motorista.MotoristaDAO;
 import br.com.gw.nucleo.utils.ConexaoUtil;
@@ -119,6 +124,50 @@ public class FreteBO {
         }
     }
 
+    public void calcularFiscal(int idFrete, String usuario) throws NegocioException {
+        Frete frete = buscarPorId(idFrete);
+        TaxSimulationRequest request = TaxSimulationRequest.fromFrete(frete);
+        String correlationId = "frete-" + idFrete;
+
+        try {
+            TaxSimulationResponse response = new MotorFiscalClient().simulate(request, correlationId);
+            dao.atualizarResumoFiscal(idFrete, response, usuario);
+        } catch (MotorFiscalException e) {
+            marcarErroFiscalSemInterromper(idFrete, e.getMessage(), usuario);
+            LOG.warning("Motor Fiscal recusou o calculo do frete " + idFrete
+                + ". status=" + e.getStatusCode()
+                + ", code=" + e.getCode()
+                + ", correlationId=" + e.getCorrelationId()
+                + ", message=" + e.getMessage());
+            throw new NegocioException("Motor Fiscal não conseguiu calcular este frete: "
+                + e.getMessage(), e);
+        } catch (SQLException e) {
+            LOG.severe("Erro ao salvar retorno fiscal do frete " + idFrete + ": " + e.getMessage());
+            throw new NegocioException("Erro ao gravar o resumo fiscal do frete.", e);
+        }
+    }
+
+    public TaxSimulationResponse previsualizarFiscal(Frete f) throws NegocioException {
+        validarCamposPreviewFiscal(f);
+
+        f.setTipoOperacao(calcularTipoOperacao(f));
+        f.setTipoDestinatario(inferirTipoDestinatario(f.getIdDestinatario()));
+
+        try {
+            return new MotorFiscalClient().preview(
+                TaxPreviewRequest.fromFrete(f),
+                "frete-preview-" + System.currentTimeMillis()
+            );
+        } catch (MotorFiscalException e) {
+            LOG.warning("Motor Fiscal recusou preview fiscal. status=" + e.getStatusCode()
+                + ", code=" + e.getCode()
+                + ", correlationId=" + e.getCorrelationId()
+                + ", message=" + e.getMessage());
+            throw new NegocioException("Motor Fiscal não conseguiu calcular a prévia: "
+                + e.getMessage(), e);
+        }
+    }
+
     public List<OcorrenciaFrete> listarOcorrencias(int idFrete) throws NegocioException {
         try {
             return dao.listarOcorrencias(idFrete);
@@ -173,6 +222,7 @@ public class FreteBO {
             f.setId(idGerado);
 
             conn.commit();
+            calcularFiscalAposEmissao(f.getId(), usuario);
 
         } catch (SQLException e) {
             rollback(conn);
@@ -485,6 +535,21 @@ public class FreteBO {
             throw new CadastroException("O Valor do Frete deve ser maior que zero.");
     }
 
+    private void validarCamposPreviewFiscal(Frete f) throws CadastroException {
+        if (f.getIdDestinatario() == 0)
+            throw new CadastroException("Selecione o Destinatário antes de calcular o fiscal.");
+        if (f.getMunicipioOrigem() == null || f.getMunicipioOrigem().trim().isEmpty())
+            throw new CadastroException("Informe o Município de Origem antes de calcular o fiscal.");
+        if (f.getUfOrigem() == null || f.getUfOrigem().trim().isEmpty())
+            throw new CadastroException("Selecione a UF de Origem antes de calcular o fiscal.");
+        if (f.getMunicipioDestino() == null || f.getMunicipioDestino().trim().isEmpty())
+            throw new CadastroException("Informe o Município de Destino antes de calcular o fiscal.");
+        if (f.getUfDestino() == null || f.getUfDestino().trim().isEmpty())
+            throw new CadastroException("Selecione a UF de Destino antes de calcular o fiscal.");
+        if (f.getValorFrete() == null || f.getValorFrete().compareTo(BigDecimal.ZERO) <= 0)
+            throw new CadastroException("Informe um Valor do Frete maior que zero antes de calcular o fiscal.");
+    }
+
     private void validarDatas(Frete f) throws CadastroException {
         LocalDate hoje = LocalDate.now();
 
@@ -737,6 +802,24 @@ public class FreteBO {
         String semAcento = Normalizer.normalize(valor.trim(), Normalizer.Form.NFD)
             .replaceAll("\\p{M}", "");
         return semAcento.toUpperCase();
+    }
+
+    private void marcarErroFiscalSemInterromper(int idFrete, String motivo, String usuario) {
+        try {
+            dao.marcarErroFiscal(idFrete, motivo, usuario);
+        } catch (SQLException e) {
+            LOG.warning("Nao foi possivel marcar erro fiscal no frete " + idFrete
+                + ": " + e.getMessage());
+        }
+    }
+
+    private void calcularFiscalAposEmissao(int idFrete, String usuario) {
+        try {
+            calcularFiscal(idFrete, usuario);
+        } catch (NegocioException e) {
+            LOG.warning("Frete " + idFrete + " emitido, mas o calculo fiscal automatico falhou: "
+                + e.getMessage());
+        }
     }
 
     /* =========================================================

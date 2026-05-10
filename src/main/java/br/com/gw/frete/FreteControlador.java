@@ -4,12 +4,14 @@ import br.com.gw.Enums.StatusFrete;
 import br.com.gw.Enums.TipoOcorrencia;
 import br.com.gw.cliente.Cliente;
 import br.com.gw.cliente.ClienteDAO;
+import br.com.gw.motorfiscal.TaxSimulationResponse;
 import br.com.gw.motorista.Motorista;
 import br.com.gw.motorista.MotoristaDAO;
 import br.com.gw.nucleo.exception.CadastroException;
 import br.com.gw.nucleo.exception.NegocioException;
 import br.com.gw.veiculos.Veiculo;
 import br.com.gw.veiculos.VeiculoDAO;
+import com.google.gson.Gson;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -23,7 +25,9 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,11 +45,14 @@ import java.util.logging.Logger;
  *  naoEntrega(POST) → registra não entrega
  *  cancelar (POST)  → cancela o frete
  *  ocorrencia(POST) → registra ocorrência avulsa
+ *  previewFiscal(POST) → calcula uma prévia fiscal sem salvar frete
+ *  calcularFiscal(POST) → calcula impostos no Motor Fiscal
  */
 @WebServlet("/fretes")
 public class FreteControlador extends HttpServlet {
 
     private static final Logger LOG = Logger.getLogger(FreteControlador.class.getName());
+    private static final int HTTP_UNPROCESSABLE_ENTITY = 422;
 
     /** Limite máximo de registros para os selects do formulário. */
     private static final int LIMITE_SELECT = 500;
@@ -54,6 +61,7 @@ public class FreteControlador extends HttpServlet {
     private final ClienteDAO   clienteDAO = new ClienteDAO();
     private final MotoristaDAO motoDAO    = new MotoristaDAO();
     private final VeiculoDAO   veicDAO    = new VeiculoDAO();
+    private final Gson         gson       = new Gson();
 
     /* =========================================================
        GET — listagem, formulários, detalhe
@@ -108,6 +116,8 @@ public class FreteControlador extends HttpServlet {
                 case "naoEntrega": registrarNaoEntrega(req, resp, usuario); break;
                 case "cancelar":   cancelar(req, resp, usuario);         break;
                 case "ocorrencia": ocorrencia(req, resp, usuario);       break;
+                case "previewFiscal": previewFiscal(req, resp);          break;
+                case "calcularFiscal": calcularFiscal(req, resp, usuario); break;
                 default:
                     resp.sendRedirect(req.getContextPath() + "/fretes");
             }
@@ -210,7 +220,48 @@ public class FreteControlador extends HttpServlet {
 
         setarSucesso(req, "Frete " + f.getNumero() + " emitido com sucesso! "
             + "Rota: " + f.getRota());
-        resp.sendRedirect(req.getContextPath() + "/fretes");
+        resp.sendRedirect(req.getContextPath() + "/fretes?acao=detalhe&id=" + f.getId());
+    }
+
+    private void previewFiscal(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("application/json;charset=UTF-8");
+
+        try {
+            Frete frete = montarFreteDoRequest(req);
+            TaxSimulationResponse response = bo.previsualizarFiscal(frete);
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.getWriter().write(gson.toJson(response));
+        } catch (NegocioException e) {
+            resp.setStatus(HTTP_UNPROCESSABLE_ENTITY);
+            Map<String, Object> error = new LinkedHashMap<>();
+            error.put("code", "FISCAL_PREVIEW_ERROR");
+            error.put("message", e.getMessage());
+            resp.getWriter().write(gson.toJson(error));
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Erro inesperado no preview fiscal.", e);
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            Map<String, Object> error = new LinkedHashMap<>();
+            error.put("code", "INTERNAL_ERROR");
+            error.put("message", "Erro inesperado ao calcular prévia fiscal.");
+            resp.getWriter().write(gson.toJson(error));
+        }
+    }
+
+    private void calcularFiscal(HttpServletRequest req, HttpServletResponse resp, String usuario)
+            throws NegocioException, ServletException, IOException {
+
+        int idFrete = parsInt(req.getParameter("idFrete"));
+        if (idFrete <= 0) {
+            throw new CadastroException("Frete inválido para cálculo fiscal.");
+        }
+
+        bo.calcularFiscal(idFrete, usuario);
+
+        setarSucesso(req, "Resumo fiscal calculado pelo Motor Fiscal.");
+        resp.sendRedirect(req.getContextPath() + "/fretes?acao=detalhe&id=" + idFrete);
     }
 
     private void confirmarSaida(HttpServletRequest req, HttpServletResponse resp, String usuario)
