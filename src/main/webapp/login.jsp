@@ -129,7 +129,6 @@
 
         <div class="auth-form-options">
             <label><input type="checkbox" name="lembrar" checked> <span>Lembrar-me</span></label>
-            <a href="${pageContext.request.contextPath}/login">Esqueci minha senha</a>
         </div>
 
         <button type="submit" class="btn btn-primary btn-block" style="margin-top:8px;">
@@ -148,9 +147,37 @@
 </div>
 
     <div class="auth-trust-row">
-        <span>Dados protegidos</span>
-        <span>Acesso seguro</span>
-        <span>Disponível 24/7</span>
+        <span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2 4 5.5v6.2c0 5 3.4 8.7 8 10.3 4.6-1.6 8-5.3 8-10.3V5.5L12 2Zm0 2.2 6 2.6v4.9c0 3.8-2.4 6.6-6 8.1-3.6-1.5-6-4.3-6-8.1V6.8l6-2.6Z"/>
+            </svg>
+            <span>
+                <strong>Dados protegidos</strong>
+                <small>Segurança de ponta</small>
+            </span>
+        </span>
+        <span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M17 9h1a2 2 0 0 1 2 2v9H4v-9a2 2 0 0 1 2-2h1V7a5 5 0 0 1 10 0v2Zm-8 0h6V7a3 3 0 0 0-6 0v2Zm-3 2v7h12v-7H6Z"/>
+            </svg>
+            <span>
+                <strong>Acesso seguro</strong>
+                <small>Autenticação protegida</small>
+            </span>
+        </span>
+        <span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm1 3v5.1l3.4 2-.9 1.7-4.5-2.7V7h2Z"/>
+            </svg>
+            <span>
+                <strong>Disponível 24/7</strong>
+                <small>Suporte sempre ativo</small>
+            </span>
+        </span>
+    </div>
+
+    <div class="auth-copyright">
+        © 2026 FiscalMove. Todos os direitos reservados.
     </div>
 </main>
 
