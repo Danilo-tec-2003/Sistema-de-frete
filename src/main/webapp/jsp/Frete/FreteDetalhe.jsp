@@ -19,6 +19,15 @@
     <div class="topbar">
         <div class="topbar-title">Fretes</div>
         <div class="topbar-actions">
+            <c:if test="${frete.fiscalRecalculoDisponivel}">
+                <form method="post" action="${pageContext.request.contextPath}/fretes" style="display:inline;">
+                    <input type="hidden" name="acao" value="calcularFiscal">
+                    <input type="hidden" name="idFrete" value="${frete.id}">
+                    <button type="submit" class="btn btn-secondary">
+                        Recalcular Fiscal
+                    </button>
+                </form>
+            </c:if>
             <a href="${pageContext.request.contextPath}/relatorios?acao=documentoFrete&idFrete=${frete.id}"
                class="btn btn-primary"
                onclick="window.open(this.href, '_blank'); return false;">

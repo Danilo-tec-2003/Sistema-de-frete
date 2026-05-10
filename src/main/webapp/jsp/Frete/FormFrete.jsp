@@ -382,6 +382,9 @@
     var freteInput = document.getElementById('valorFrete');
     var totalEstimadoInput = document.getElementById('valorTotalEstimadoPreview');
     var btnCalcularFiscal = document.getElementById('btnCalcularFiscal');
+    var form = document.getElementById('form-frete');
+    var fiscalInfo = document.querySelector('.info-calculada');
+    var contextPath = '${pageContext.request.contextPath}';
 
     function parseNumeroLocal(valor) {
         if (!valor) return 0;
@@ -409,13 +412,114 @@
     atualizarTotalEstimado();
 
     btnCalcularFiscal.addEventListener('click', function () {
-        var mensagem = 'Funcionalidade preparada para futura integração com o Motor Fiscal.';
-        if (window.FiscalMoveUI && typeof window.FiscalMoveUI.showFormError === 'function') {
-            window.FiscalMoveUI.showFormError(document.getElementById('form-frete'), mensagem);
-        } else {
-            alert(mensagem);
-        }
+        calcularPreviewFiscal();
     });
+
+    function calcularPreviewFiscal() {
+        btnCalcularFiscal.disabled = true;
+        btnCalcularFiscal.textContent = 'Calculando...';
+        if (fiscalInfo) {
+            fiscalInfo.textContent = 'Consultando Motor Fiscal...';
+        }
+
+        fetch(contextPath + '/fretes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                'Accept': 'application/json'
+            },
+            body: criarParametrosPreviewFiscal().toString()
+        })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    if (!response.ok) {
+                        throw new Error(data && data.message ? data.message : 'Erro ao calcular prévia fiscal.');
+                    }
+                    return data;
+                });
+            })
+            .then(function (data) {
+                preencherResumoFiscal(data);
+                if (fiscalInfo) {
+                    fiscalInfo.textContent = 'Prévia calculada pelo Motor Fiscal. O cálculo oficial será refeito ao emitir o frete.';
+                }
+            })
+            .catch(function (err) {
+                limparResumoFiscalPreview();
+                var mensagem = err && err.message ? err.message : 'Erro ao calcular prévia fiscal.';
+                if (window.FiscalMoveUI && typeof window.FiscalMoveUI.showFormError === 'function') {
+                    window.FiscalMoveUI.showFormError(form, mensagem);
+                } else {
+                    alert(mensagem);
+                }
+                if (fiscalInfo) {
+                    fiscalInfo.textContent = mensagem;
+                }
+            })
+            .finally(function () {
+                btnCalcularFiscal.disabled = false;
+                btnCalcularFiscal.textContent = 'Calcular Fiscal';
+            });
+    }
+
+    function criarParametrosPreviewFiscal() {
+        var params = new URLSearchParams();
+        params.append('acao', 'previewFiscal');
+        params.append('idDestinatario', document.getElementById('idDestinatario').value || '');
+        params.append('municipioOrigem', document.getElementById('municipioOrigem').value || '');
+        params.append('ufOrigem', document.getElementById('ufOrigem').value || '');
+        params.append('municipioDestino', document.getElementById('municipioDestino').value || '');
+        params.append('ufDestino', document.getElementById('ufDestino').value || '');
+        params.append('valorFrete', document.getElementById('valorFrete').value || '');
+        return params;
+    }
+
+    function preencherResumoFiscal(data) {
+        document.getElementById('cfopPreview').value = data.cfop || 'Não calculado';
+        document.getElementById('statusFiscalPreview').value = 'CALCULADO';
+        document.getElementById('regraFiscalPreview').value = regraFiscalTexto(data);
+        document.getElementById('aliquotaIcmsPreview').value = formatarPercentual(data.icms && data.icms.rate);
+        document.getElementById('valorIcmsPreview').value = formatarMoedaTecnica(data.icms && data.icms.amount);
+        document.getElementById('aliquotaIbsPreview').value = formatarPercentual(data.ibs && data.ibs.rate);
+        document.getElementById('valorIbsPreview').value = formatarMoedaTecnica(data.ibs && data.ibs.amount);
+        document.getElementById('aliquotaCbsPreview').value = formatarPercentual(data.cbs && data.cbs.rate);
+        document.getElementById('valorCbsPreview').value = formatarMoedaTecnica(data.cbs && data.cbs.amount);
+        document.getElementById('totalTributosPreview').value = formatarMoedaTecnica(data.total_tax);
+        document.getElementById('valorTotalEstimadoPreview').value = formatarMoedaTecnica(data.total_with_tax);
+    }
+
+    function limparResumoFiscalPreview() {
+        document.getElementById('cfopPreview').value = 'Não calculado';
+        document.getElementById('statusFiscalPreview').value = 'PENDENTE';
+        document.getElementById('regraFiscalPreview').value = 'Aguardando integração';
+        document.getElementById('aliquotaIcmsPreview').value = '0,00%';
+        document.getElementById('valorIcmsPreview').value = 'R$ 0,00';
+        document.getElementById('aliquotaIbsPreview').value = '0,00%';
+        document.getElementById('valorIbsPreview').value = 'R$ 0,00';
+        document.getElementById('aliquotaCbsPreview').value = '0,00%';
+        document.getElementById('valorCbsPreview').value = 'R$ 0,00';
+        document.getElementById('totalTributosPreview').value = 'R$ 0,00';
+        atualizarTotalEstimado();
+    }
+
+    function regraFiscalTexto(data) {
+        if (data.rule_code && data.rule_version) return data.rule_code + ' v' + data.rule_version;
+        if (data.rule_version) return data.rule_version;
+        return 'Calculado pelo Motor Fiscal';
+    }
+
+    function formatarPercentual(valor) {
+        var numero = parseFloat(String(valor || '0').replace(',', '.')) || 0;
+        return numero.toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + '%';
+    }
+
+    function formatarMoedaTecnica(valor) {
+        var numero = parseFloat(String(valor || '0').replace(',', '.')) || 0;
+        return fmt(numero);
+    }
 
     var selVeiculo   = document.getElementById('idVeiculo');
     var selMotorista = document.getElementById('idMotorista');
@@ -565,7 +669,6 @@
     atualizarTipoOperacao();
     atualizarTipoDestinatario();
 
-    var form     = document.getElementById('form-frete');
     var alertaEl = document.getElementById('alerta-validacao');
     var listaEl  = document.getElementById('lista-erros-validacao');
 

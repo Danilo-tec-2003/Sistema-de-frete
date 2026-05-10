@@ -335,4 +335,8 @@ public class Frete {
     public String getStatusFiscalDescricao() {
         return statusFiscal != null ? statusFiscal.getDescricao() : StatusFiscal.PENDENTE.getDescricao();
     }
+
+    public boolean isFiscalRecalculoDisponivel() {
+        return statusFiscal == StatusFiscal.PENDENTE || statusFiscal == StatusFiscal.ERRO;
+    }
 }
