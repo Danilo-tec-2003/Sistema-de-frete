@@ -7,6 +7,7 @@ import br.com.gw.nucleo.utils.ValidadorCNPJ;
 import br.com.gw.nucleo.utils.ValidadorCPF;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 import br.com.gw.nucleo.utils.ValidadorUtil;
@@ -15,6 +16,10 @@ public class ClienteBO {
 
     private static final Logger     LOG = Logger.getLogger(ClienteBO.class.getName());
     private static final int        TAMANHO_PAGINA = 10;
+    private static final int        LOGO_MAX_BYTES = 2 * 1024 * 1024;
+    private static final List<String> LOGO_CONTENT_TYPES = Arrays.asList(
+        "image/png", "image/jpeg", "image/webp", "image/gif"
+    );
 
     private final ClienteDAO dao = new ClienteDAO();
 
@@ -51,9 +56,25 @@ public class ClienteBO {
         }
     }
 
+    public Cliente buscarLogo(int id) throws NegocioException {
+        try {
+            Cliente c = dao.buscarLogo(id);
+            if (c == null || c.getLogoDados() == null || c.getLogoDados().length == 0) {
+                throw new CadastroException("Logo do cliente não encontrada.");
+            }
+            return c;
+        } catch (CadastroException e) {
+            throw e;
+        } catch (SQLException e) {
+            LOG.severe("Erro ao buscar logo do cliente id=" + id + ": " + e.getMessage());
+            throw new NegocioException("Erro ao carregar logo do cliente.", e);
+        }
+    }
+
     public void salvar(Cliente c) throws NegocioException {
         c.setTipo(TipoCliente.AMBOS);
         validar(c);
+        validarLogo(c);
 
         try {
             if (c.getCnpj() != null && !c.getCnpj().trim().isEmpty()) {
@@ -150,6 +171,22 @@ public class ClienteBO {
     
         if (!vazio(c.getEmail()) && !ValidadorUtil.isEmailValido(c.getEmail()))
             throw new CadastroException("O E-mail informado não é válido.");
+    }
+
+    private void validarLogo(Cliente c) throws CadastroException {
+        if (!c.isLogoAlterada() || c.isRemoverLogo()) return;
+
+        byte[] dados = c.getLogoDados();
+        if (dados == null || dados.length == 0) return;
+
+        if (dados.length > LOGO_MAX_BYTES) {
+            throw new CadastroException("A logo deve ter no máximo 2 MB.");
+        }
+
+        String contentType = c.getLogoContentType();
+        if (contentType == null || !LOGO_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+            throw new CadastroException("Use uma logo em PNG, JPG, WEBP ou GIF.");
+        }
     }
     
     // ── helper ────────────────────────────────────────────────────────────────

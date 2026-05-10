@@ -20,6 +20,11 @@ public class Cliente {
     private String      cep;
     private String      telefone;
     private String      email;
+    private String      logoNomeArquivo;
+    private String      logoContentType;
+    private byte[]      logoDados;
+    private boolean     logoAlterada;
+    private boolean     removerLogo;
     private boolean     ativo;
 
     public Cliente() {}
@@ -60,6 +65,14 @@ public class Cliente {
     public String      getCep()           { return cep; }
     public String      getTelefone()      { return telefone; }
     public String      getEmail()         { return email; }
+    public String      getLogoNomeArquivo() { return logoNomeArquivo; }
+    public String      getLogoContentType() { return logoContentType; }
+    public byte[]      getLogoDados()     { return logoDados; }
+    public boolean     isLogoAlterada()   { return logoAlterada; }
+    public boolean     isRemoverLogo()    { return removerLogo; }
+    public boolean     isLogoDisponivel() {
+        return logoContentType != null && !logoContentType.trim().isEmpty();
+    }
     public boolean     isAtivo()          { return ativo; }
 
     public void setId(int id)                         { this.id           = id; }
@@ -78,9 +91,15 @@ public class Cliente {
     public void setCep(String v)                      { this.cep          = v; }
     public void setTelefone(String v)                 { this.telefone     = v; }
     public void setEmail(String v)                    { this.email        = v; }
+    public void setLogoNomeArquivo(String v)          { this.logoNomeArquivo = v; }
+    public void setLogoContentType(String v)          { this.logoContentType = v; }
+    public void setLogoDados(byte[] v)                { this.logoDados    = v; }
+    public void setLogoAlterada(boolean v)            { this.logoAlterada = v; }
+    public void setRemoverLogo(boolean v)             { this.removerLogo  = v; }
     public void setAtivo(boolean v)                   { this.ativo        = v; }
 
     private String somenteDigitos(String valor) {
         return valor == null ? "" : valor.replaceAll("[^0-9]", "");
     }
+
 }

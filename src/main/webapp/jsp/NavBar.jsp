@@ -31,7 +31,7 @@
         </div>
     </div>
 
-    <nav class="sidebar-nav" aria-label="Navegação principal">
+  <nav class="sidebar-nav" aria-label="Navegação principal">
 
         <a href="${pageContext.request.contextPath}/home"
            class="nav-item ${pageContext.request.servletPath.contains('/home') ? 'active' : ''}">

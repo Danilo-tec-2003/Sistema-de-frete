@@ -24,31 +24,57 @@
         </div>
     </div>
 
-    <div class="container relatorios-page">
+    <main class="container relatorios-page">
 
-        <div class="relatorios-hero">
-            <div>
-                <span class="eyebrow">Central de relatórios</span>
-                <h1>Informações operacionais para acompanhamento e impressão</h1>
+        <header class="card relatorios-hero">
+            <div class="relatorios-hero-copy">
+                <span class="eyebrow">Central operacional</span>
+                <h1>Relatórios para fechar a operação sem perder contexto</h1>
                 <p>
-                    Gere relatórios consolidados, documentos de frete e demonstrativos por período
-                    para apoiar a conferência diária e a gestão da operação.
+                    Gere documentos de transporte, extratos por cliente, histórico de ocorrências
+                    e indicadores de desempenho com os filtros usados no dia a dia.
                 </p>
             </div>
-        </div>
+            <div class="relatorios-hero-stats" aria-label="Resumo da central de relatórios">
+                <div>
+                    <strong>6</strong>
+                    <span>modelos</span>
+                </div>
+                <div>
+                    <strong>PDF</strong>
+                    <span>saída padrão</span>
+                </div>
+                <div>
+                    <strong>${dataHoje}</strong>
+                    <span>data base</span>
+                </div>
+            </div>
+        </header>
 
         <c:if test="${not empty erro}">
             <div class="alert alert-erro">${erro}</div>
         </c:if>
 
+        <section class="relatorio-section-head">
+            <div>
+                <span class="eyebrow">Catálogo</span>
+                <h2>Escolha o documento</h2>
+            </div>
+            <a href="${pageContext.request.contextPath}/fretes" class="btn btn-secondary btn-sm">
+                Consultar fretes
+            </a>
+        </section>
+
         <div class="relatorio-grid">
 
-            <section class="card relatorio-card">
-                <div class="relatorio-card-header">
-                    <div class="relatorio-sigla">FA</div>
+            <section class="card relatorio-card relatorio-card-wide">
+                <div class="relatorio-card-top">
+                    <span class="relatorio-icon">
+                        <svg viewBox="0 0 24 24"><path d="M4 5h11a2 2 0 0 1 2 2v3h1.5l2.5 3.2V18h-2.1a3 3 0 0 1-5.8 0H9.9a3 3 0 0 1-5.8 0H2V7a2 2 0 0 1 2-2Zm0 2v9h.8a3 3 0 0 1 4.4 0H15V7H4Zm13 5v4h.8a3 3 0 0 1 1.2-.8V14l-1.5-2H17Z"/></svg>
+                    </span>
                     <div>
+                        <span>Entrega e acompanhamento</span>
                         <h2>Fretes em aberto</h2>
-                        <p>Entrega e acompanhamento</p>
                     </div>
                 </div>
                 <p class="relatorio-desc">
@@ -62,11 +88,13 @@
             </section>
 
             <section class="card relatorio-card">
-                <div class="relatorio-card-header">
-                    <div class="relatorio-sigla">RC</div>
+                <div class="relatorio-card-top">
+                    <span class="relatorio-icon">
+                        <svg viewBox="0 0 24 24"><path d="M6 3h12v18H6V3Zm2 2v14h8V5H8Zm2 3h4v2h-4V8Zm0 4h4v2h-4v-2Z"/></svg>
+                    </span>
                     <div>
+                        <span>Conferência de saída</span>
                         <h2>Romaneio de carga</h2>
-                        <p>Conferência de saída</p>
                     </div>
                 </div>
                 <p class="relatorio-desc">
@@ -94,11 +122,13 @@
             </section>
 
             <section class="card relatorio-card">
-                <div class="relatorio-card-header">
-                    <div class="relatorio-sigla">DF</div>
+                <div class="relatorio-card-top">
+                    <span class="relatorio-icon">
+                        <svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5V3Zm9 2H7v14h10V8h-3V5Zm-4 6h5v2h-5v-2Zm0 4h5v2h-5v-2Z"/></svg>
+                    </span>
                     <div>
+                        <span>Impressão individual</span>
                         <h2>Documento de frete</h2>
-                        <p>Impressão individual</p>
                     </div>
                 </div>
                 <p class="relatorio-desc">
@@ -122,11 +152,13 @@
             </section>
 
             <section class="card relatorio-card">
-                <div class="relatorio-card-header">
-                    <div class="relatorio-sigla">FC</div>
+                <div class="relatorio-card-top">
+                    <span class="relatorio-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 9a8 8 0 0 1 16 0h-2a6 6 0 0 0-12 0H4Z"/></svg>
+                    </span>
                     <div>
+                        <span>Extrato comercial</span>
                         <h2>Fretes por cliente</h2>
-                        <p>Extrato comercial</p>
                     </div>
                 </div>
                 <p class="relatorio-desc">
@@ -162,11 +194,13 @@
             </section>
 
             <section class="card relatorio-card">
-                <div class="relatorio-card-header">
-                    <div class="relatorio-sigla">OP</div>
+                <div class="relatorio-card-top">
+                    <span class="relatorio-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 1 8 8c0 5.3-8 12-8 12S4 15.3 4 10a8 8 0 0 1 8-8Zm0 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg>
+                    </span>
                     <div>
+                        <span>Rastreamento e auditoria</span>
                         <h2>Ocorrências por período</h2>
-                        <p>Rastreamento e auditoria</p>
                     </div>
                 </div>
                 <p class="relatorio-desc">
@@ -193,11 +227,13 @@
             </section>
 
             <section class="card relatorio-card">
-                <div class="relatorio-card-header">
-                    <div class="relatorio-sigla">DM</div>
+                <div class="relatorio-card-top">
+                    <span class="relatorio-icon">
+                        <svg viewBox="0 0 24 24"><path d="M4 20V5h2v13h14v2H4Zm4-4V9h3v7H8Zm5 0V4h3v12h-3Zm5 0v-5h3v5h-3Z"/></svg>
+                    </span>
                     <div>
+                        <span>Indicadores de entrega</span>
                         <h2>Desempenho de motoristas</h2>
-                        <p>Indicadores de entrega</p>
                     </div>
                 </div>
                 <p class="relatorio-desc">
@@ -223,7 +259,7 @@
                 </form>
             </section>
         </div>
-    </div>
+    </main>
 </div>
 </body>
 </html>

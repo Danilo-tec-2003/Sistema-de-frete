@@ -121,7 +121,16 @@
                                             <td>${c.id}</td>
                                             <td>
                                                 <div class="entity-name">
-                                                    <span>${empty c.razaoSocial ? 'CL' : fn:substring(c.razaoSocial,0,1)}</span>
+                                                    <c:choose>
+                                                        <c:when test="${c.logoDisponivel}">
+                                                            <img class="entity-logo"
+                                                                 src="${pageContext.request.contextPath}/clientes?acao=logo&id=${c.id}"
+                                                                 alt="Logo de ${c.razaoSocial}">
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span>${empty c.razaoSocial ? 'CL' : fn:substring(c.razaoSocial,0,1)}</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                     <div>
                                                         <strong>${c.razaoSocial}</strong>
                                                         <c:if test="${not empty c.nomeFantasia}">
@@ -199,7 +208,16 @@
             <c:forEach var="clienteDestaque" items="${clientes}" begin="0" end="0">
                 <aside class="card entity-detail">
                     <div class="detail-person">
-                        <span>${empty clienteDestaque.razaoSocial ? 'CL' : fn:substring(clienteDestaque.razaoSocial,0,1)}</span>
+                        <c:choose>
+                            <c:when test="${clienteDestaque.logoDisponivel}">
+                                <img class="detail-logo"
+                                     src="${pageContext.request.contextPath}/clientes?acao=logo&id=${clienteDestaque.id}"
+                                     alt="Logo de ${clienteDestaque.razaoSocial}">
+                            </c:when>
+                            <c:otherwise>
+                                <span>${empty clienteDestaque.razaoSocial ? 'CL' : fn:substring(clienteDestaque.razaoSocial,0,1)}</span>
+                            </c:otherwise>
+                        </c:choose>
                         <div>
                             <h2>${clienteDestaque.razaoSocial}</h2>
                             <c:choose>

@@ -42,7 +42,8 @@
             <div class="alert alert-erro">${erro}</div>
         </c:if>
 
-        <form method="post" action="${pageContext.request.contextPath}/clientes" class="app-form">
+        <form method="post" action="${pageContext.request.contextPath}/clientes"
+              class="app-form" enctype="multipart/form-data">
             <input type="hidden" name="id" value="${cliente.id}">
 
             <section class="card form-section">
@@ -87,13 +88,36 @@
                         </div>
                     </div>
 
-                    <div class="logo-drop" aria-hidden="true">
-                        <span>Logo</span>
-                        <div>
-                            <svg viewBox="0 0 24 24"><path d="M5 20h14a2 2 0 0 0 2-2v-5h-2v5H5v-5H3v5a2 2 0 0 0 2 2Zm7-16 5 5-1.4 1.4L13 7.8V16h-2V7.8l-2.6 2.6L7 9l5-5Z"/></svg>
-                            <strong>Logo do cliente</strong>
-                            <small>Imagem opcional</small>
+                    <div class="logo-drop">
+                        <label for="logoArquivo">Logo</label>
+                        <div class="logo-upload" data-logo-drop>
+                            <input type="file" id="logoArquivo" name="logoArquivo"
+                                   accept="image/png,image/jpeg,image/webp,image/gif">
+                            <div class="logo-preview" data-logo-preview>
+                                <c:choose>
+                                    <c:when test="${not empty cliente && cliente.logoDisponivel && cliente.id > 0}">
+                                        <img src="${pageContext.request.contextPath}/clientes?acao=logo&id=${cliente.id}"
+                                             alt="Logo de ${cliente.razaoSocial}">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <svg viewBox="0 0 24 24"><path d="M5 20h14a2 2 0 0 0 2-2v-5h-2v5H5v-5H3v5a2 2 0 0 0 2 2Zm7-16 5 5-1.4 1.4L13 7.8V16h-2V7.8l-2.6 2.6L7 9l5-5Z"/></svg>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                            <strong data-logo-title>
+                                <c:choose>
+                                    <c:when test="${not empty cliente && cliente.logoDisponivel}">Trocar logo</c:when>
+                                    <c:otherwise>Enviar logo</c:otherwise>
+                                </c:choose>
+                            </strong>
+                            <small data-logo-help>PNG, JPG, WEBP ou GIF até 2 MB</small>
                         </div>
+                        <c:if test="${not empty cliente && cliente.logoDisponivel && cliente.id > 0}">
+                            <label class="logo-remove">
+                                <input type="checkbox" name="removerLogo" value="on">
+                                <span>Remover logo atual</span>
+                            </label>
+                        </c:if>
                     </div>
                 </div>
             </section>
@@ -202,5 +226,28 @@
         </form>
     </main>
 </div>
+<script>
+(function () {
+    var input = document.getElementById('logoArquivo');
+    var preview = document.querySelector('[data-logo-preview]');
+    var title = document.querySelector('[data-logo-title]');
+    var help = document.querySelector('[data-logo-help]');
+    if (!input || !preview) return;
+
+    input.addEventListener('change', function () {
+        var file = input.files && input.files[0];
+        if (!file) return;
+
+        if (title) title.textContent = file.name;
+        if (help) help.textContent = 'Pronto para salvar';
+
+        var reader = new FileReader();
+        reader.onload = function (event) {
+            preview.innerHTML = '<img src="' + event.target.result + '" alt="">';
+        };
+        reader.readAsDataURL(file);
+    });
+})();
+</script>
 </body>
 </html>

@@ -66,6 +66,24 @@ public class ClienteDAO {
         }
     }
 
+    public Cliente buscarLogo(int id) throws SQLException {
+        String sql = "SELECT idcliente, logo_nome_arquivo, logo_content_type, logo_dados "
+                   + "FROM cliente WHERE idcliente = ? AND logo_dados IS NOT NULL";
+        try (Connection conn = ConexaoUtil.getConexao();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+                Cliente c = new Cliente();
+                c.setId(rs.getInt("idcliente"));
+                c.setLogoNomeArquivo(rs.getString("logo_nome_arquivo"));
+                c.setLogoContentType(rs.getString("logo_content_type"));
+                c.setLogoDados(rs.getBytes("logo_dados"));
+                return c;
+            }
+        }
+    }
+
     public boolean existeCnpj(String cnpj, int ignorarId) throws SQLException {
         return existeDocumentoFiscal(cnpj, ignorarId);
     }
@@ -95,12 +113,14 @@ public class ClienteDAO {
         String sql = "INSERT INTO cliente "
                    + "(razao_social, nome_fantasia, cnpj, inscricao_est, tipo, "
                    + " logradouro, numero_end, complemento, bairro, municipio, "
-                   + " uf, cep, telefone, email, is_ativo) "
-                   + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                   + " uf, cep, telefone, email, is_ativo, "
+                   + " logo_nome_arquivo, logo_content_type, logo_dados) "
+                   + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
  
         try (Connection conn = ConexaoUtil.getConexao();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             preencherStatement(ps, c);
+            preencherLogoStatement(ps, c, 16);
             ps.executeUpdate();
         }
     }
@@ -109,14 +129,25 @@ public class ClienteDAO {
         String sql = "UPDATE cliente SET "
                    + "razao_social=?, nome_fantasia=?, cnpj=?, inscricao_est=?, tipo=?, "
                    + "logradouro=?, numero_end=?, complemento=?, bairro=?, municipio=?, "
-                   + "uf=?, cep=?, telefone=?, email=?, is_ativo=?, "
-                   + "updated_at=NOW() "
-                   + "WHERE idcliente=?";
+                   + "uf=?, cep=?, telefone=?, email=?, is_ativo=?, ";
+
+        if (c.isRemoverLogo()) {
+            sql += "logo_nome_arquivo=NULL, logo_content_type=NULL, logo_dados=NULL, ";
+        } else if (c.isLogoAlterada()) {
+            sql += "logo_nome_arquivo=?, logo_content_type=?, logo_dados=?, ";
+        }
+
+        sql += "updated_at=NOW() WHERE idcliente=?";
  
         try (Connection conn = ConexaoUtil.getConexao();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             preencherStatement(ps, c);
-            ps.setInt(16, c.getId());  
+            int idx = 16;
+            if (!c.isRemoverLogo() && c.isLogoAlterada()) {
+                preencherLogoStatement(ps, c, idx);
+                idx += 3;
+            }
+            ps.setInt(idx, c.getId());
             ps.executeUpdate();
         }
     }
@@ -132,7 +163,10 @@ public class ClienteDAO {
 
     public List<Cliente> listarAtivos() throws SQLException {
         List<Cliente> lista = new ArrayList<>();
-        String sql = "SELECT idcliente, razao_social, nome_fantasia, cnpj, inscricao_est, tipo, logradouro, numero_end, complemento, bairro, municipio, uf, cep, telefone, email, is_ativo FROM cliente WHERE is_ativo = TRUE ORDER BY razao_social";
+        String sql = "SELECT idcliente, razao_social, nome_fantasia, cnpj, inscricao_est, tipo, "
+                   + "logradouro, numero_end, complemento, bairro, municipio, uf, cep, telefone, "
+                   + "email, is_ativo, logo_nome_arquivo, logo_content_type "
+                   + "FROM cliente WHERE is_ativo = TRUE ORDER BY razao_social";
         try (Connection conn = ConexaoUtil.getConexao();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -163,6 +197,13 @@ public class ClienteDAO {
         ps.setBoolean(15, c.isAtivo());
     }
 
+    private void preencherLogoStatement(PreparedStatement ps, Cliente c, int indiceInicial)
+            throws SQLException {
+        ps.setString(indiceInicial, c.getLogoNomeArquivo());
+        ps.setString(indiceInicial + 1, c.getLogoContentType());
+        ps.setBytes(indiceInicial + 2, c.getLogoDados());
+    }
+
     private Cliente mapear(ResultSet rs) throws SQLException {
         Cliente c = new Cliente();
         c.setId(rs.getInt("idcliente"));
@@ -181,8 +222,24 @@ public class ClienteDAO {
         c.setCep(rs.getString("cep"));
         c.setTelefone(rs.getString("telefone"));
         c.setEmail(rs.getString("email"));
+        c.setLogoNomeArquivo(getStringOpcional(rs, "logo_nome_arquivo"));
+        c.setLogoContentType(getStringOpcional(rs, "logo_content_type"));
         c.setAtivo(rs.getBoolean("is_ativo"));
         return c;
+    }
+
+    private String getStringOpcional(ResultSet rs, String coluna) throws SQLException {
+        return temColuna(rs, coluna) ? rs.getString(coluna) : null;
+    }
+
+    private boolean temColuna(ResultSet rs, String coluna) throws SQLException {
+        ResultSetMetaData metaData = rs.getMetaData();
+        for (int i = 1; i <= metaData.getColumnCount(); i++) {
+            if (coluna.equalsIgnoreCase(metaData.getColumnLabel(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -1,87 +1,171 @@
 .relatorios-page {
   display: grid;
-  gap: 22px;
+  gap: 18px;
 }
 
 .relatorios-hero {
-  padding: 26px;
-  border: 1px solid rgba(109, 197, 42, 0.22);
-  border-radius: var(--radius-lg);
+  position: relative;
+  min-height: 190px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 24px;
+  align-items: end;
+  padding: 28px;
+  overflow: hidden;
   background:
-    radial-gradient(circle at top right, rgba(109, 197, 42, 0.18), transparent 34%),
-    linear-gradient(135deg, rgba(26, 32, 53, 0.98), rgba(15, 17, 23, 0.98));
-  box-shadow: var(--shadow);
+    linear-gradient(90deg, rgba(13, 25, 39, .98), rgba(13, 25, 39, .8)),
+    linear-gradient(135deg, #102131, #050b12);
+}
+
+.relatorios-hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 44%;
+  background:
+    linear-gradient(14deg, transparent 0 44%, rgba(92,210,20,.35) 45%, rgba(92,210,20,.12) 46%, transparent 48%),
+    linear-gradient(180deg, transparent, rgba(0,0,0,.26));
+  opacity: .72;
+  pointer-events: none;
+}
+
+.relatorios-hero-copy,
+.relatorios-hero-stats {
+  position: relative;
+  z-index: 1;
 }
 
 .relatorios-hero h1,
+.relatorio-section-head h2,
 .relatorio-card h2 {
-  font-family: 'Rajdhani', sans-serif;
+  margin: 0;
+  font-family: 'Exo 2', sans-serif;
+  letter-spacing: 0;
 }
 
 .relatorios-hero h1 {
-  font-size: 2rem;
-  line-height: 1.05;
-  margin: 6px 0 8px;
+  max-width: 760px;
+  margin-top: 8px;
+  font-size: clamp(1.7rem, 2.6vw, 2.35rem);
+  line-height: 1.08;
 }
 
-.relatorios-hero p,
-.relatorio-desc,
-.relatorio-card-header p {
-  color: var(--text-muted);
-  font-size: 0.92rem;
+.relatorios-hero p {
+  max-width: 760px;
+  margin-top: 12px;
+  color: #aeb8c8;
+  font-size: .95rem;
 }
 
 .eyebrow {
   color: var(--green);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .14em;
   text-transform: uppercase;
+}
+
+.relatorios-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.relatorios-hero-stats div {
+  min-height: 88px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 14px;
+  border-radius: 8px;
+  background: rgba(6, 15, 24, .58);
+  border: 1px solid rgba(129, 161, 194, .13);
+}
+
+.relatorios-hero-stats strong {
+  color: #f5f8fc;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.relatorios-hero-stats span {
+  color: var(--text-muted);
+  font-size: .72rem;
+}
+
+.relatorio-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 2px;
+}
+
+.relatorio-section-head h2 {
+  margin-top: 4px;
+  font-size: 1.15rem;
 }
 
 .relatorio-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  gap: 16px;
 }
 
 .relatorio-card {
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-height: 100%;
+  padding: 20px;
 }
 
-.relatorio-card-header {
-  display: flex;
+.relatorio-card-wide {
+  background:
+    linear-gradient(180deg, rgba(20, 42, 59, .98), rgba(13, 25, 38, .96));
+}
+
+.relatorio-card-top {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 13px;
   align-items: center;
-  gap: 14px;
 }
 
-.relatorio-sigla {
+.relatorio-icon {
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
-  width: 54px;
-  height: 54px;
-  border-radius: var(--radius);
-  background: var(--green-dim);
-  border: 1px solid rgba(109, 197, 42, 0.24);
+  border-radius: 8px;
   color: var(--green);
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  flex-shrink: 0;
+  background: radial-gradient(circle, rgba(92,210,20,.22), rgba(92,210,20,.07));
+  border: 1px solid rgba(92,210,20,.14);
+}
+
+.relatorio-icon svg {
+  width: 25px;
+  height: 25px;
+  fill: currentColor;
+}
+
+.relatorio-card-top span:not(.relatorio-icon) {
+  display: block;
+  color: var(--green);
+  font-size: .72rem;
+  font-weight: 800;
 }
 
 .relatorio-card h2 {
-  font-size: 1.28rem;
-  line-height: 1;
+  margin-top: 3px;
+  color: #f1f6fc;
+  font-size: 1.05rem;
+  line-height: 1.2;
 }
 
-.relatorio-card-header p {
-  margin-top: 4px;
-  font-size: 0.78rem;
+.relatorio-desc {
+  color: var(--text-muted);
+  font-size: .86rem;
 }
 
 .relatorio-form {
@@ -93,9 +177,22 @@
   margin-top: auto;
 }
 
-@media (max-width: 1120px) {
+.relatorio-card .form-row {
+  gap: 10px;
+}
+
+.relatorio-card .form-control {
+  min-width: 0;
+}
+
+@media (max-width: 1260px) {
+  .relatorios-hero,
   .relatorio-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .relatorios-hero-copy {
+    grid-column: 1 / -1;
   }
 }
 
@@ -103,5 +200,91 @@
   .relatorios-hero,
   .relatorio-grid {
     grid-template-columns: 1fr;
+  }
+
+  .relatorios-hero {
+    padding: 22px;
+  }
+
+  .relatorios-hero-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .relatorio-section-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 1024px) {
+  .relatorios-page {
+    gap: 20px;
+  }
+
+  .relatorios-hero {
+    min-height: 250px;
+    grid-template-columns: minmax(0, 1fr) minmax(420px, 520px);
+    padding: 36px 38px;
+  }
+
+  .relatorios-hero h1 {
+    max-width: 840px;
+    font-size: clamp(2rem, 2.7vw, 2.65rem);
+  }
+
+  .relatorios-hero p {
+    max-width: 840px;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .relatorios-hero-stats div {
+    min-height: 104px;
+    padding: 18px;
+  }
+
+  .relatorios-hero-stats strong {
+    font-size: 1.55rem;
+  }
+
+  .relatorio-grid {
+    gap: 18px;
+  }
+
+  .relatorio-card {
+    min-height: 300px;
+    padding: 24px;
+  }
+
+  .relatorio-card-top {
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 15px;
+  }
+
+  .relatorio-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .relatorio-icon svg {
+    width: 29px;
+    height: 29px;
+  }
+
+  .relatorio-card h2 {
+    font-size: 1.14rem;
+  }
+
+  .relatorio-desc {
+    font-size: .9rem;
+    line-height: 1.55;
+  }
+
+  .relatorio-card .form-control {
+    min-height: 46px;
+  }
+
+  .relatorio-card .btn-primary {
+    min-height: 46px;
   }
 }

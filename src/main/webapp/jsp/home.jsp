@@ -49,11 +49,36 @@
                             </span>
                         </div>
                     </div>
-                    <div class="hero-visual" aria-hidden="true">
-                        <div class="hero-road"></div>
-                        <div class="hero-truck">
-                            <span></span><span></span><span></span>
-                        </div>
+                    <div class="hero-visual hero-banner" aria-hidden="true">
+                        <img src="${pageContext.request.contextPath}/img/banner-truck.png" alt="">
+                        <svg class="delivery-map hero-delivery-map" viewBox="0 0 640 300" preserveAspectRatio="none">
+                            <defs>
+                                <filter id="heroRouteGlow" x="-20%" y="-40%" width="140%" height="180%">
+                                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                                    <feMerge>
+                                        <feMergeNode in="blur"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
+                            </defs>
+                            <path class="route-track"
+                                  d="M38 258 C118 240 174 218 238 224 C302 230 344 252 414 236 C492 218 536 238 604 204"/>
+                            <path class="route-line route-line-strong"
+                                  d="M38 258 C118 240 174 218 238 224 C302 230 344 252 414 236 C492 218 536 238 604 204"
+                                  filter="url(#heroRouteGlow)"/>
+                            <path class="route-flow"
+                                  d="M38 258 C118 240 174 218 238 224 C302 230 344 252 414 236 C492 218 536 238 604 204"/>
+                            <g class="route-checkpoints">
+                                <circle cx="38" cy="258" r="5"/>
+                                <circle cx="238" cy="224" r="5"/>
+                                <circle cx="414" cy="236" r="5"/>
+                                <circle cx="604" cy="204" r="7" class="route-end"/>
+                            </g>
+                            <circle r="4.5" class="route-dot">
+                                <animateMotion dur="7s" repeatCount="indefinite"
+                                               path="M38 258 C118 240 174 218 238 224 C302 230 344 252 414 236 C492 218 536 238 604 204"/>
+                            </circle>
+                        </svg>
                     </div>
                 </section>
 

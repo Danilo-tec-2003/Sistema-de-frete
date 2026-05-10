@@ -12,9 +12,43 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <script type="module" src="${pageContext.request.contextPath}/js/validacoes.js"></script>
 </head>
-<body class="login-page">
+<body class="login-page auth-page auth-register-page">
 
-<div class="login-box">
+<main class="auth-shell auth-shell-register auth-stage">
+    <section class="auth-visual" aria-hidden="true">
+        <img src="${pageContext.request.contextPath}/img/banner-truck.png" alt="">
+        <svg class="delivery-map auth-delivery-map" viewBox="0 0 1440 520" preserveAspectRatio="none">
+            <defs>
+                <filter id="authRouteGlowRegister" x="-20%" y="-40%" width="140%" height="180%">
+                    <feGaussianBlur stdDeviation="3.5" result="blur"/>
+                    <feMerge>
+                        <feMergeNode in="blur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+            <path class="route-track"
+                  d="M28 470 C160 448 196 400 292 406 C430 414 468 492 650 506 C825 512 862 470 998 442 C1112 418 1190 446 1310 416 C1385 397 1382 352 1420 338"/>
+            <path class="route-line route-line-strong"
+                  d="M28 470 C160 448 196 400 292 406 C430 414 468 492 650 506 C825 512 862 470 998 442 C1112 418 1190 446 1310 416 C1385 397 1382 352 1420 338"
+                  filter="url(#authRouteGlowRegister)"/>
+            <path class="route-flow"
+                  d="M28 470 C160 448 196 400 292 406 C430 414 468 492 650 506 C825 512 862 470 998 442 C1112 418 1190 446 1310 416 C1385 397 1382 352 1420 338"/>
+            <g class="route-checkpoints">
+                <circle cx="28" cy="470" r="8"/>
+                <circle cx="292" cy="406" r="7"/>
+                <circle cx="650" cy="506" r="7"/>
+                <circle cx="998" cy="442" r="7"/>
+                <circle cx="1420" cy="338" r="12" class="route-end"/>
+            </g>
+            <circle r="6" class="route-dot">
+                <animateMotion dur="8.4s" repeatCount="indefinite"
+                               path="M28 470 C160 448 196 400 292 406 C430 414 468 492 650 506 C825 512 862 470 998 442 C1112 418 1190 446 1310 416 C1385 397 1382 352 1420 338"/>
+            </circle>
+        </svg>
+    </section>
+
+<div class="login-box auth-card">
 
     <div class="login-logo">
         <div class="brand-row">
@@ -35,64 +69,79 @@
     </c:if>
 
     <h2>Criar nova conta</h2>
+    <p class="auth-card-subtitle">Preencha os campos abaixo para criar sua conta e começar a usar o sistema.</p>
 
     <form method="post" action="${pageContext.request.contextPath}/cadastroUsuario"
           autocomplete="off" id="cadastroForm">
 
         <div class="form-group" style="margin-bottom:16px;">
             <label for="nome">Nome completo</label>
-            <input type="text" id="nome" name="nome"
-                   class="form-control"
-                   placeholder="Seu nome completo"
-                   value="${nome}"
-                   required autofocus>
+            <div class="input-shell">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 9a8 8 0 0 1 16 0h-2a6 6 0 0 0-12 0H4Z"/></svg>
+                <input type="text" id="nome" name="nome"
+                       class="form-control"
+                       placeholder="Seu nome completo"
+                       value="${nome}"
+                       required>
+            </div>
         </div>
 
         <div class="form-group" style="margin-bottom:16px;">
             <label for="login">Login</label>
-            <input type="text" id="login" name="login"
-                   class="form-control"
-                   placeholder="Mínimo 4 caracteres"
-                   minlength="4"
-                   value="${login}"
-                   required>
+            <div class="input-shell">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 9a8 8 0 0 1 16 0h-2a6 6 0 0 0-12 0H4Z"/></svg>
+                <input type="text" id="login" name="login"
+                       class="form-control"
+                       placeholder="Mínimo 4 caracteres"
+                       minlength="4"
+                       value="${login}"
+                       required>
+            </div>
         </div>
 
         <div class="form-group" style="margin-bottom:16px;">
             <label for="senha">Senha</label>
-            <div style="position:relative;">
+            <div class="password-field input-shell">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 9h1a2 2 0 0 1 2 2v9H4v-9a2 2 0 0 1 2-2h1V7a5 5 0 0 1 10 0v2Zm-8 0h6V7a3 3 0 0 0-6 0v2Z"/></svg>
                 <input type="password" id="senha" name="senha"
                        class="form-control"
                        placeholder="Mínimo 6 caracteres"
                        minlength="6"
-                       required
-                       style="padding-right:42px;">
+                       required>
                 <button type="button" id="toggleSenha"
-                        style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
-                               background:none;border:none;cursor:pointer;color:var(--text-muted);
-                               font-size:.9rem;padding:4px;">👁</button>
+                        class="password-toggle"
+                        aria-label="Mostrar senha"
+                        aria-pressed="false">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 5c5 0 8.7 4.4 9.7 6.3a1.5 1.5 0 0 1 0 1.4C20.7 14.6 17 19 12 19s-8.7-4.4-9.7-6.3a1.5 1.5 0 0 1 0-1.4C3.3 9.4 7 5 12 5Zm0 2c-3.8 0-6.8 3.2-7.8 5 1 1.8 4 5 7.8 5s6.8-3.2 7.8-5C18.8 10.2 15.8 7 12 7Zm0 2.2A2.8 2.8 0 1 1 12 14.8 2.8 2.8 0 0 1 12 9.2Z"/>
+                    </svg>
+                </button>
             </div>
         </div>
 
         <div class="form-group" style="margin-bottom:24px;">
             <label for="confirmaSenha">Confirmar senha</label>
-            <div style="position:relative;">
+            <div class="password-field input-shell">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 9h1a2 2 0 0 1 2 2v9H4v-9a2 2 0 0 1 2-2h1V7a5 5 0 0 1 10 0v2Zm-8 0h6V7a3 3 0 0 0-6 0v2Z"/></svg>
                 <input type="password" id="confirmaSenha" name="confirmaSenha"
                        class="form-control"
                        placeholder="Repita a senha"
                        data-match="#senha"
                        data-match-message="As senhas não coincidem."
-                       required
-                       style="padding-right:42px;">
+                       required>
                 <button type="button" id="toggleConfirma"
-                        style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
-                               background:none;border:none;cursor:pointer;color:var(--text-muted);
-                               font-size:.9rem;padding:4px;">👁</button>
+                        class="password-toggle"
+                        aria-label="Mostrar confirmação de senha"
+                        aria-pressed="false">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 5c5 0 8.7 4.4 9.7 6.3a1.5 1.5 0 0 1 0 1.4C20.7 14.6 17 19 12 19s-8.7-4.4-9.7-6.3a1.5 1.5 0 0 1 0-1.4C3.3 9.4 7 5 12 5Zm0 2c-3.8 0-6.8 3.2-7.8 5 1 1.8 4 5 7.8 5s6.8-3.2 7.8-5C18.8 10.2 15.8 7 12 7Zm0 2.2A2.8 2.8 0 1 1 12 14.8 2.8 2.8 0 0 1 12 9.2Z"/>
+                    </svg>
+                </button>
             </div>
         </div>
 
         <button type="submit" class="btn btn-primary btn-block">
-            Criar conta
+            Criar conta <span aria-hidden="true">→</span>
         </button>
     </form>
 
@@ -105,17 +154,19 @@
         FiscalMove FMS &nbsp;·&nbsp; v1.0
     </div>
 </div>
+</main>
 
 <script>
-function toggleInput(btnId, inputId) {
+function toggleInput(btnId, inputId, labelBase) {
     document.getElementById(btnId).addEventListener('click', function () {
         var inp = document.getElementById(inputId);
         inp.type = inp.type === 'password' ? 'text' : 'password';
-        this.textContent = inp.type === 'password' ? '👁' : '🙈';
+        this.setAttribute('aria-pressed', inp.type === 'text' ? 'true' : 'false');
+        this.setAttribute('aria-label', (inp.type === 'password' ? 'Mostrar ' : 'Ocultar ') + labelBase);
     });
 }
-toggleInput('toggleSenha',    'senha');
-toggleInput('toggleConfirma', 'confirmaSenha');
+toggleInput('toggleSenha', 'senha', 'senha');
+toggleInput('toggleConfirma', 'confirmaSenha', 'confirmação de senha');
 
 </script>
 </body>
