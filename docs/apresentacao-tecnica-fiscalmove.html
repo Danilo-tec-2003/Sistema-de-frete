@@ -1,0 +1,1160 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FiscalMove FMS - Apresentacao Tecnica</title>
+  <style>
+    :root {
+      --bg: #eef3f7;
+      --ink: #172033;
+      --muted: #5d6b7d;
+      --line: #cfd9e5;
+      --panel: #ffffff;
+      --panel-2: #f6f9fc;
+      --green: #4a9b2f;
+      --green-soft: #e6f3df;
+      --blue: #2563eb;
+      --blue-soft: #e8efff;
+      --teal: #0f8b8d;
+      --teal-soft: #dff5f3;
+      --amber: #b7791f;
+      --amber-soft: #fff1d6;
+      --red: #c2413b;
+      --red-soft: #ffe8e6;
+      --slate: #243247;
+      --shadow: 0 18px 45px rgba(23, 32, 51, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: 0;
+    }
+
+    body {
+      padding: 28px;
+    }
+
+    .deck {
+      display: grid;
+      gap: 28px;
+      justify-items: center;
+    }
+
+    .slide {
+      width: min(1280px, calc(100vw - 56px));
+      aspect-ratio: 16 / 9;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      padding: 46px 54px 42px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 22px;
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 8px;
+      background: linear-gradient(90deg, var(--green), var(--blue), var(--teal), var(--amber));
+    }
+
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      margin: 0 0 9px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      font-size: 52px;
+      line-height: 1.04;
+      max-width: 840px;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 34px;
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      font-size: 18px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 19px;
+      line-height: 1.45;
+      max-width: 780px;
+      margin-top: 14px;
+    }
+
+    .brand {
+      text-align: right;
+      min-width: 180px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+      font-weight: 700;
+    }
+
+    .brand strong {
+      display: block;
+      color: var(--ink);
+      font-size: 18px;
+      margin-bottom: 3px;
+    }
+
+    .content {
+      z-index: 1;
+      min-height: 0;
+    }
+
+    .footer {
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid #e5ecf3;
+      padding-top: 12px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.04fr 0.96fr;
+      gap: 26px;
+      height: 100%;
+      align-items: stretch;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel-2);
+      border: 1px solid #dce6f0;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .panel.white {
+      background: #fff;
+    }
+
+    .panel.dark {
+      background: var(--slate);
+      color: #fff;
+      border-color: var(--slate);
+    }
+
+    .panel.dark p,
+    .panel.dark .muted {
+      color: #c7d2df;
+    }
+
+    .panel.dark .item {
+      color: #ffffff;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .metric {
+      border-radius: 8px;
+      padding: 17px;
+      background: #fff;
+      border: 1px solid #dce6f0;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 30px;
+      line-height: 1;
+      margin-bottom: 7px;
+      color: var(--ink);
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.3;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 30px;
+      border-radius: 999px;
+      padding: 6px 11px;
+      background: var(--green-soft);
+      color: #286b1e;
+      border: 1px solid #c7e7b8;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .pill.blue {
+      background: var(--blue-soft);
+      color: #1646b8;
+      border-color: #c9d8ff;
+    }
+
+    .pill.teal {
+      background: var(--teal-soft);
+      color: #086467;
+      border-color: #bde9e5;
+    }
+
+    .pill.amber {
+      background: var(--amber-soft);
+      color: #87520e;
+      border-color: #f2d49a;
+    }
+
+    .pill.red {
+      background: var(--red-soft);
+      color: #96312d;
+      border-color: #ffc7c2;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      align-items: start;
+      font-size: 15px;
+      line-height: 1.35;
+      color: var(--ink);
+    }
+
+    .dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--green-soft);
+      color: var(--green);
+      font-weight: 900;
+      font-size: 14px;
+      border: 1px solid #c7e7b8;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .small {
+      font-size: 13px;
+      line-height: 1.42;
+    }
+
+    .code {
+      font-family: "Courier New", Courier, monospace;
+      background: #172033;
+      color: #eef6ff;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 12px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      border: 1px solid #33435b;
+    }
+
+    .flow {
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow-row {
+      display: grid;
+      grid-template-columns: 1fr 44px 1fr 44px 1fr;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .flow-card {
+      min-height: 100px;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #dce6f0;
+      background: #fff;
+    }
+
+    .flow-card strong {
+      display: block;
+      font-size: 17px;
+      margin-bottom: 7px;
+    }
+
+    .arrow {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 34px;
+      font-weight: 900;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      height: 100%;
+      align-items: stretch;
+    }
+
+    .step {
+      position: relative;
+      border-radius: 8px;
+      border: 1px solid #dce6f0;
+      background: #fff;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .step-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    .bar-chart {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .bar {
+      display: grid;
+      grid-template-columns: 105px 1fr 48px;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .bar-track {
+      height: 13px;
+      border-radius: 999px;
+      background: #e5ecf3;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .bar:nth-child(2) .bar-fill { background: var(--green); }
+    .bar:nth-child(3) .bar-fill { background: var(--teal); }
+    .bar:nth-child(4) .bar-fill { background: var(--amber); }
+
+    .mindmap {
+      width: 100%;
+      height: 388px;
+    }
+
+    .mindmap text {
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .arch {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .arch-card {
+      border-radius: 8px;
+      padding: 18px;
+      border: 1px solid #dce6f0;
+      background: #fff;
+      display: grid;
+      gap: 14px;
+    }
+
+    .arch-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .tag-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .mini-tag {
+      font-size: 11px;
+      border: 1px solid #dce6f0;
+      color: var(--muted);
+      background: #f8fbfe;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    a.mini-tag {
+      text-decoration: none;
+    }
+
+    .repo-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .repo-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 36px;
+      border-radius: 999px;
+      padding: 8px 14px;
+      border: 1px solid #cbd8e6;
+      background: #ffffff;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .repo-link::after {
+      content: ">";
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .repo-link.blue {
+      border-color: #b9ccff;
+      background: var(--blue-soft);
+      color: #1646b8;
+    }
+
+    .repo-link.teal {
+      border-color: #a8dfdc;
+      background: var(--teal-soft);
+      color: #086467;
+    }
+
+    .repo-link:hover {
+      filter: brightness(0.97);
+    }
+
+    .sequence {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr 1fr;
+      gap: 18px;
+      height: 100%;
+      align-items: stretch;
+    }
+
+    .lane {
+      border-radius: 8px;
+      border: 1px solid #dce6f0;
+      background: #fff;
+      padding: 16px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 16px;
+    }
+
+    .lane h3 {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e7edf4;
+    }
+
+    .lane-steps {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+
+    .lane-step {
+      border-radius: 8px;
+      background: var(--panel-2);
+      border: 1px solid #e1e9f2;
+      padding: 11px;
+      font-size: 13px;
+      line-height: 1.32;
+    }
+
+    .split-title {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: 30px;
+      height: 100%;
+      align-items: center;
+    }
+
+    .hero-panel {
+      background: var(--slate);
+      color: #fff;
+      border-radius: 8px;
+      padding: 28px;
+      min-height: 370px;
+      display: grid;
+      align-content: center;
+      gap: 20px;
+      border: 1px solid var(--slate);
+    }
+
+    .hero-panel p {
+      color: #c7d2df;
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    .system-map {
+      width: 100%;
+      height: 410px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid #dce6f0;
+    }
+
+    .tech-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      line-height: 1.32;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid #dce6f0;
+    }
+
+    .tech-table th,
+    .tech-table td {
+      border-bottom: 1px solid #e5ecf3;
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .tech-table th {
+      background: #f2f6fa;
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    .tech-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .notes {
+      display: none;
+    }
+
+    @media print {
+      @page {
+        size: 16in 9in;
+        margin: 0;
+      }
+
+      body {
+        background: #fff;
+        padding: 0;
+      }
+
+      .deck {
+        display: block;
+      }
+
+      .slide {
+        width: 16in;
+        height: 9in;
+        box-shadow: none;
+        border: 0;
+        page-break-after: always;
+        break-after: page;
+      }
+
+      .footer {
+        color: #667085;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <section class="slide">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Apresentacao tecnica</p>
+          <h1>FiscalMove FMS: do diagnostico em PRs ao Motor Fiscal</h1>
+          <p class="subtitle">Uma solucao de fretes onde a operacao fica no sistema Java, a inteligencia fiscal fica em uma API Go, e a decisao arquitetural nasce de dados reais de manutencao.</p>
+          <div class="repo-links" aria-label="Links dos repositorios">
+            <a class="repo-link" href="https://github.com/Danilo-tec-2003/Sistema-de-frete" target="_blank" rel="noopener noreferrer">Sistema-de-frete</a>
+            <a class="repo-link blue" href="https://github.com/Danilo-tec-2003/analise-prs" target="_blank" rel="noopener noreferrer">analise-prs</a>
+            <a class="repo-link teal" href="https://github.com/Danilo-tec-2003/motor-fiscal-go" target="_blank" rel="noopener noreferrer">motor-fiscal-go</a>
+          </div>
+        </div>
+        <div class="brand">
+          <strong>FiscalMove</strong>
+          Sistema de fretes<br>
+          Java + Go + PostgreSQL
+        </div>
+      </header>
+      <div class="content split-title">
+        <div class="hero-panel">
+          <span class="pill">Tese central</span>
+          <h2>Separar regra fiscal da operacao reduziu acoplamento e tornou o calculo explicavel.</h2>
+          <p>O projeto combina diagnostico, arquitetura e implementacao: primeiro foram analisados PRs, depois o sistema de fretes foi estruturado, e por fim o Motor Fiscal centralizou a decisao tributaria.</p>
+        </div>
+        <svg class="system-map" viewBox="0 0 620 410" role="img" aria-label="Mapa geral da solucao">
+          <rect x="0" y="0" width="620" height="410" rx="8" fill="#ffffff"/>
+          <rect x="40" y="42" width="170" height="88" rx="8" fill="#e8efff" stroke="#b9ccff"/>
+          <text x="125" y="74" text-anchor="middle" font-size="16" font-weight="700" fill="#172033">analise-prs</text>
+          <text x="125" y="99" text-anchor="middle" font-size="12" fill="#5d6b7d">Python + GitHub API</text>
+          <text x="125" y="118" text-anchor="middle" font-size="12" fill="#5d6b7d">diagnostico tecnico</text>
+
+          <rect x="225" y="160" width="170" height="92" rx="8" fill="#e6f3df" stroke="#b8dfaa"/>
+          <text x="310" y="192" text-anchor="middle" font-size="16" font-weight="700" fill="#172033">sistema-fretes</text>
+          <text x="310" y="217" text-anchor="middle" font-size="12" fill="#5d6b7d">Java/JSP + Jasper</text>
+          <text x="310" y="236" text-anchor="middle" font-size="12" fill="#5d6b7d">operacao do frete</text>
+
+          <rect x="410" y="282" width="170" height="88" rx="8" fill="#dff5f3" stroke="#a8dfdc"/>
+          <text x="495" y="314" text-anchor="middle" font-size="16" font-weight="700" fill="#172033">Motor_fiscal</text>
+          <text x="495" y="339" text-anchor="middle" font-size="12" fill="#5d6b7d">Go + PostgreSQL</text>
+          <text x="495" y="358" text-anchor="middle" font-size="12" fill="#5d6b7d">regras e auditoria</text>
+
+          <path d="M205 108 C255 118 273 137 293 160" fill="none" stroke="#2563eb" stroke-width="3"/>
+          <path d="M286 151 L294 162 L280 160" fill="#2563eb"/>
+          <text x="256" y="120" font-size="12" fill="#2563eb" font-weight="700">evidencia</text>
+
+          <path d="M390 242 C430 260 442 275 460 292" fill="none" stroke="#0f8b8d" stroke-width="3"/>
+          <path d="M450 289 L463 294 L452 301" fill="#0f8b8d"/>
+          <text x="420" y="263" font-size="12" fill="#0f8b8d" font-weight="700">integracao</text>
+
+          <path d="M430 326 C325 350 220 312 168 135" fill="none" stroke="#b7791f" stroke-width="2" stroke-dasharray="6 6"/>
+          <text x="214" y="337" font-size="12" fill="#87520e" font-weight="700">aprendizado realimenta arquitetura</text>
+        </svg>
+      </div>
+      <footer class="footer">
+        <span>Objetivo: explicar decisao, arquitetura e resultado</span>
+        <span>1 / 9</span>
+      </footer>
+      <aside class="notes">Abra dizendo que a apresentacao nao comeca pelo codigo, mas pela razao tecnica da solucao.</aside>
+    </section>
+
+    <section class="slide">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Etapa 1 - diagnostico</p>
+          <h2>Antes de propor arquitetura, foram analisados dados reais de PRs</h2>
+          <p class="subtitle">O projeto Python transformou historico de manutencao em insumo tecnico para identificar dores recorrentes.</p>
+        </div>
+        <div class="brand"><strong>analise-prs</strong>Python</div>
+      </header>
+      <div class="content grid-2">
+        <div class="panel white">
+          <h3>Pipeline de coleta e tratamento</h3>
+          <div class="flow" style="margin-top: 16px;">
+            <div class="flow-row">
+              <div class="flow-card"><strong>GitHub API</strong><span class="small muted">PRs fechados, titulo, autor, data e corpo do PR.</span></div>
+              <div class="arrow">></div>
+              <div class="flow-card"><strong>extrair_prs.py</strong><span class="small muted">Coleta paginada, retry, classificacao e salvamento incremental.</span></div>
+              <div class="arrow">></div>
+              <div class="flow-card"><strong>limpar_dados.py</strong><span class="small muted">Normalizacao, score de qualidade e bases para analise.</span></div>
+            </div>
+            <div class="flow-row">
+              <div class="flow-card"><strong>analise_ia.csv</strong><span class="small muted">274 registros com maior qualidade para leitura aprofundada.</span></div>
+              <div class="arrow">></div>
+              <div class="flow-card"><strong>gerar_dashboard.py</strong><span class="small muted">Resumo por tipo, categoria, causa e evolucao mensal.</span></div>
+              <div class="arrow">></div>
+              <div class="flow-card"><strong>Dashboard</strong><span class="small muted">Base para justificar decisao arquitetural.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Numeros da base local</h3>
+          <div class="metric-grid" style="margin-top: 16px;">
+            <div class="metric"><strong>13.397</strong><span>PRs coletados</span></div>
+            <div class="metric"><strong>2</strong><span>repositorios analisados</span></div>
+            <div class="metric"><strong>55</strong><span>autores identificados</span></div>
+            <div class="metric"><strong>2019-2026</strong><span>periodo analisado</span></div>
+          </div>
+          <div class="bar-chart">
+            <div class="bar"><span>Banco</span><div class="bar-track"><div class="bar-fill" style="width: 100%;"></div></div><strong>209</strong></div>
+            <div class="bar"><span>Relatorio</span><div class="bar-track"><div class="bar-fill" style="width: 89%;"></div></div><strong>185</strong></div>
+            <div class="bar"><span>Performance</span><div class="bar-track"><div class="bar-fill" style="width: 53%;"></div></div><strong>111</strong></div>
+            <div class="bar"><span>Regra negocio</span><div class="bar-track"><div class="bar-fill" style="width: 28%;"></div></div><strong>58</strong></div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <span>Escolha tecnica: diagnosticar antes de redesenhar</span>
+        <span>2 / 9</span>
+      </footer>
+    </section>
+
+    <section class="slide">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Mapa mental</p>
+          <h2>As dores apontavam para uma regra fiscal espalhada e dificil de explicar</h2>
+          <p class="subtitle">A leitura dos PRs e do sistema levou a uma separacao de responsabilidades mais clara.</p>
+        </div>
+        <div class="brand"><strong>Diagnostico</strong>Dores recorrentes</div>
+      </header>
+      <div class="content grid-2">
+        <svg class="mindmap" viewBox="0 0 650 388" role="img" aria-label="Mapa mental de dores tecnicas">
+          <rect x="0" y="0" width="650" height="388" fill="#ffffff"/>
+          <circle cx="325" cy="194" r="78" fill="#172033"/>
+          <text x="325" y="182" text-anchor="middle" font-size="18" font-weight="800" fill="#ffffff">Problema</text>
+          <text x="325" y="207" text-anchor="middle" font-size="14" fill="#c7d2df">regra fiscal</text>
+          <text x="325" y="227" text-anchor="middle" font-size="14" fill="#c7d2df">espalhada</text>
+
+          <g stroke-width="3" fill="none">
+            <path d="M260 150 C205 110 170 92 123 72" stroke="#2563eb"/>
+            <path d="M260 235 C205 278 170 302 120 326" stroke="#4a9b2f"/>
+            <path d="M390 150 C448 106 486 84 535 62" stroke="#0f8b8d"/>
+            <path d="M390 235 C452 280 488 305 540 326" stroke="#b7791f"/>
+            <path d="M325 116 C325 82 325 60 325 40" stroke="#c2413b"/>
+          </g>
+
+          <g>
+            <rect x="28" y="32" width="190" height="76" rx="8" fill="#e8efff" stroke="#b9ccff"/>
+            <text x="123" y="62" text-anchor="middle" font-size="15" font-weight="800" fill="#172033">Banco</text>
+            <text x="123" y="86" text-anchor="middle" font-size="12" fill="#5d6b7d">campos fiscais e resumo</text>
+
+            <rect x="30" y="288" width="190" height="76" rx="8" fill="#e6f3df" stroke="#b8dfaa"/>
+            <text x="125" y="318" text-anchor="middle" font-size="15" font-weight="800" fill="#172033">Dados</text>
+            <text x="125" y="342" text-anchor="middle" font-size="12" fill="#5d6b7d">frete precisa de resumo confiavel</text>
+
+            <rect x="432" y="24" width="190" height="76" rx="8" fill="#dff5f3" stroke="#a8dfdc"/>
+            <text x="527" y="54" text-anchor="middle" font-size="15" font-weight="800" fill="#172033">Auditoria</text>
+            <text x="527" y="78" text-anchor="middle" font-size="12" fill="#5d6b7d">qual regra gerou o imposto?</text>
+
+            <rect x="430" y="288" width="190" height="76" rx="8" fill="#fff1d6" stroke="#f2d49a"/>
+            <text x="525" y="318" text-anchor="middle" font-size="15" font-weight="800" fill="#172033">Manutencao</text>
+            <text x="525" y="342" text-anchor="middle" font-size="12" fill="#5d6b7d">evitar duplicidade no Java</text>
+
+            <rect x="230" y="10" width="190" height="64" rx="8" fill="#ffe8e6" stroke="#ffc7c2"/>
+            <text x="325" y="38" text-anchor="middle" font-size="15" font-weight="800" fill="#172033">Risco tecnico</text>
+            <text x="325" y="59" text-anchor="middle" font-size="12" fill="#5d6b7d">calculo sem memoria</text>
+          </g>
+        </svg>
+        <div class="panel dark">
+          <span class="pill amber">Conclusao do diagnostico</span>
+          <h2 style="margin-top: 16px;">A solucao nao era apenas criar mais uma tela.</h2>
+          <p class="subtitle" style="font-size: 17px;">A dor pedia uma decisao arquitetural: manter o sistema Java focado na operacao e mover a decisao fiscal para um servico especializado.</p>
+          <div class="list">
+            <div class="item"><span class="dot">1</span><span><strong>Operacao</strong><br><span class="muted">fretes, clientes, motoristas, veiculos e ocorrencias.</span></span></div>
+            <div class="item"><span class="dot">2</span><span><strong>Dados operacionais</strong><br><span class="muted">frete, resumo fiscal e ocorrencias precisam estar consistentes.</span></span></div>
+            <div class="item"><span class="dot">3</span><span><strong>Fiscal</strong><br><span class="muted">regras, calculos e auditoria concentrados no Motor Fiscal.</span></span></div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <span>Leitura: regra fiscal precisa ser centralizada, auditavel e versionavel</span>
+        <span>3 / 9</span>
+      </footer>
+    </section>
+
+    <section class="slide">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Arquitetura pensada</p>
+          <h2>Tres projetos, tres responsabilidades bem separadas</h2>
+          <p class="subtitle">Cada repositorio tem uma funcao clara na historia tecnica da solucao.</p>
+        </div>
+        <div class="brand"><strong>Arquitetura</strong>Separacao por papel</div>
+      </header>
+      <div class="content arch">
+        <div class="arch-card">
+          <div class="arch-head">
+            <h3>1. Diagnostico</h3>
+            <span class="pill blue">Python</span>
+          </div>
+          <p class="small muted">Coleta e analisa PRs para revelar recorrencia de manutencao.</p>
+          <div class="code">extrair_prs.py
+limpar_dados.py
+gerar_dashboard.py</div>
+          <div class="tag-stack">
+            <span class="mini-tag">GitHub API</span>
+            <span class="mini-tag">CSV</span>
+            <span class="mini-tag">dashboard</span>
+            <span class="mini-tag">evidencia</span>
+          </div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-head">
+            <h3>2. Operacao</h3>
+            <span class="pill">Java</span>
+          </div>
+          <p class="small muted">Executa o fluxo operacional de fretes e consome o resultado fiscal da API.</p>
+          <div class="code">FreteBO
+RelatorioBO
+MotorFiscalClient</div>
+          <div class="tag-stack">
+            <span class="mini-tag">Servlets</span>
+            <span class="mini-tag">JSP</span>
+            <span class="mini-tag">Jasper</span>
+            <span class="mini-tag">PostgreSQL</span>
+          </div>
+        </div>
+        <div class="arch-card">
+          <div class="arch-head">
+            <h3>3. Fiscal</h3>
+            <span class="pill teal">Go</span>
+          </div>
+          <p class="small muted">Centraliza regras, impostos, simulacoes e memoria de calculo.</p>
+          <div class="code">FiscalRuleService
+TaxCalculator
+FiscalSimulationRepository</div>
+          <div class="tag-stack">
+            <span class="mini-tag">API REST</span>
+            <span class="mini-tag">rules engine</span>
+            <span class="mini-tag">decimal</span>
+            <span class="mini-tag">auditavel</span>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <span>Decisao: cada camada tem dono, contrato e limite tecnico</span>
+        <span>4 / 9</span>
+      </footer>
+    </section>
+
+    <section class="slide">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Sistema de fretes</p>
+          <h2>O Java continua responsavel pelo ciclo operacional</h2>
+          <p class="subtitle">O sistema principal mantem cadastro, validacao, emissao, status, ocorrencias e resumo fiscal retornado pela API.</p>
+        </div>
+        <div class="brand"><strong>sistema-fretes</strong>Java/JSP</div>
+      </header>
+      <div class="content">
+        <div class="timeline">
+          <div class="step">
+            <div class="step-number">1</div>
+            <h3>Cadastros base</h3>
+            <p class="small muted">Clientes, motoristas e veiculos com validacoes de CPF/CNPJ, CNH, status e capacidade.</p>
+            <span class="pill">BO + DAO</span>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <h3>Emissao do frete</h3>
+            <p class="small muted">Valida datas, peso, valores, origem, destino, motorista ativo e veiculo disponivel.</p>
+            <span class="pill blue">FreteBO</span>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <h3>Calculo fiscal</h3>
+            <p class="small muted">Java monta o payload e chama o Motor Fiscal com API Key e Correlation ID.</p>
+            <span class="pill teal">HTTP</span>
+          </div>
+          <div class="step">
+            <div class="step-number">4</div>
+            <h3>Status e ocorrencias</h3>
+            <p class="small muted">Controla a maquina de estados: emitido, saida, transito, entregue, nao entregue e cancelado.</p>
+            <span class="pill amber">Workflow</span>
+          </div>
+          <div class="step">
+            <div class="step-number">5</div>
+            <h3>Consolidacao</h3>
+            <p class="small muted">Resumo fiscal, ocorrencias e documentos ficam disponiveis para consulta operacional.</p>
+            <span class="pill red">Dados</span>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <span>Principio: operacao no Java, decisao fiscal no Go</span>
+        <span>5 / 9</span>
+      </footer>
+    </section>
+
+    <section class="slide">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Decisoes arquiteturais</p>
+          <h2>O desenho final separa operacao, regra fiscal e auditoria</h2>
+          <p class="subtitle">A arquitetura foi pensada para reduzir acoplamento, proteger credenciais, manter contrato claro e permitir evolucao fiscal sem espalhar regra no Java.</p>
+        </div>
+        <div class="brand"><strong>Arquitetura</strong>Escolhas e motivos</div>
+      </header>
+      <div class="content grid-2">
+        <div class="panel white">
+          <h3>Fluxo arquitetural escolhido</h3>
+          <svg viewBox="0 0 560 304" style="width:100%; height:304px; margin-top:12px;" role="img" aria-label="Fluxo arquitetural da solucao">
+            <rect x="15" y="36" width="128" height="62" rx="8" fill="#e8efff" stroke="#b9ccff"/>
+            <text x="79" y="62" text-anchor="middle" font-size="13" font-weight="800" fill="#172033">JSP</text>
+            <text x="79" y="82" text-anchor="middle" font-size="11" fill="#5d6b7d">interface</text>
+            <path d="M143 67 H181" stroke="#5d6b7d" stroke-width="2"/>
+            <path d="M173 60 L183 67 L173 74" fill="#5d6b7d"/>
+
+            <rect x="184" y="36" width="142" height="62" rx="8" fill="#e6f3df" stroke="#b8dfaa"/>
+            <text x="255" y="62" text-anchor="middle" font-size="13" font-weight="800" fill="#172033">Servlet + BO</text>
+            <text x="255" y="82" text-anchor="middle" font-size="11" fill="#5d6b7d">regra operacional</text>
+            <path d="M326 67 H364" stroke="#5d6b7d" stroke-width="2"/>
+            <path d="M356 60 L366 67 L356 74" fill="#5d6b7d"/>
+
+            <rect x="368" y="36" width="166" height="62" rx="8" fill="#dff5f3" stroke="#a8dfdc"/>
+            <text x="451" y="62" text-anchor="middle" font-size="13" font-weight="800" fill="#172033">MotorFiscalClient</text>
+            <text x="451" y="82" text-anchor="middle" font-size="11" fill="#5d6b7d">HTTP + API Key</text>
+
+            <path d="M451 98 V132" stroke="#5d6b7d" stroke-width="2"/>
+            <path d="M444 124 L451 134 L458 124" fill="#5d6b7d"/>
+
+            <rect x="368" y="134" width="166" height="62" rx="8" fill="#172033" stroke="#172033"/>
+            <text x="451" y="160" text-anchor="middle" font-size="13" font-weight="800" fill="#ffffff">API Go</text>
+            <text x="451" y="180" text-anchor="middle" font-size="11" fill="#c7d2df">rules engine</text>
+
+            <path d="M368 165 H322" stroke="#5d6b7d" stroke-width="2"/>
+            <path d="M330 158 L320 165 L330 172" fill="#5d6b7d"/>
+
+            <rect x="154" y="134" width="166" height="62" rx="8" fill="#fff1d6" stroke="#f2d49a"/>
+            <text x="237" y="160" text-anchor="middle" font-size="13" font-weight="800" fill="#172033">Banco fiscal</text>
+            <text x="237" y="180" text-anchor="middle" font-size="11" fill="#5d6b7d">regras + simulacoes</text>
+
+            <path d="M237 196 V230" stroke="#5d6b7d" stroke-width="2"/>
+            <path d="M230 222 L237 232 L244 222" fill="#5d6b7d"/>
+
+            <rect x="154" y="232" width="166" height="52" rx="8" fill="#ffe8e6" stroke="#ffc7c2"/>
+            <text x="237" y="255" text-anchor="middle" font-size="13" font-weight="800" fill="#172033">Auditoria</text>
+            <text x="237" y="273" text-anchor="middle" font-size="11" fill="#5d6b7d">memoria por imposto</text>
+
+            <rect x="365" y="232" width="169" height="52" rx="8" fill="#f2f6fa" stroke="#dce6f0"/>
+            <text x="449" y="255" text-anchor="middle" font-size="13" font-weight="800" fill="#172033">Banco operacional</text>
+            <text x="449" y="273" text-anchor="middle" font-size="11" fill="#5d6b7d">resumo no frete</text>
+            <path d="M451 196 V230" stroke="#5d6b7d" stroke-width="2"/>
+            <path d="M444 222 L451 232 L458 222" fill="#5d6b7d"/>
+          </svg>
+        </div>
+        <div class="panel">
+          <h3>Por que essa arquitetura?</h3>
+          <table class="tech-table" style="margin-top: 14px;">
+            <thead><tr><th>Escolha</th><th>Resultado tecnico</th></tr></thead>
+            <tbody>
+              <tr><td>Java como sistema principal</td><td>Mantem telas, cadastros, fretes, status e documentos operacionais.</td></tr>
+              <tr><td>Go como servico fiscal</td><td>Isola regra tributaria em uma API menor, testavel e evolutiva.</td></tr>
+              <tr><td>Dois bancos conceituais</td><td>Operacao e auditoria fiscal nao ficam misturadas.</td></tr>
+              <tr><td>Contrato HTTP</td><td>Integra sem acoplar classes internas entre Java e Go.</td></tr>
+              <tr><td>API Key no backend</td><td>Token nao fica exposto na tela ou no JavaScript.</td></tr>
+              <tr><td>Correlation ID</td><td>A mesma operacao pode ser rastreada entre Java, Go e banco.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <footer class="footer">
+        <span>Escolha: operacao no Java, regra fiscal no Go, auditoria no banco fiscal</span>
+        <span>6 / 9</span>
+      </footer>
+    </section>
+
+    <section class="slide">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Motor Fiscal</p>
+          <h2>A API Go virou o nucleo tecnico da decisao fiscal</h2>
+          <p class="subtitle">Ela concentra contrato, seguranca, motor de regras, calculo com decimal, persistencia e memoria de calculo.</p>
+        </div>
+        <div class="brand"><strong>Motor_fiscal</strong>Go + PostgreSQL</div>
+      </header>
+      <div class="content grid-2">
+        <div class="panel white">
+          <h3>Contrato e responsabilidades</h3>
+          <div class="sequence" style="margin-top: 14px;">
+            <div class="lane">
+              <h3>API <span class="pill blue">HTTP</span></h3>
+              <div class="lane-steps">
+                <div class="lane-step">/health verifica disponibilidade.</div>
+                <div class="lane-step">/tax/preview calcula antes de salvar o frete.</div>
+                <div class="lane-step">/tax/simulate calcula e persiste auditoria.</div>
+              </div>
+            </div>
+            <div class="lane">
+              <h3>Service <span class="pill">Rules</span></h3>
+              <div class="lane-steps">
+                <div class="lane-step">TaxService valida e orquestra o fluxo.</div>
+                <div class="lane-step">FiscalRuleService aplica matching, prioridade e conflito.</div>
+                <div class="lane-step">TaxCalculator calcula ICMS, IBS e CBS com decimal.</div>
+                <div class="lane-step">Erros retornam JSON padronizado para o Java tratar.</div>
+              </div>
+            </div>
+            <div class="lane">
+              <h3>Dados <span class="pill teal">SQL</span></h3>
+              <div class="lane-steps">
+                <div class="lane-step">fiscal_rules guarda vigencia, CFOP, prioridade e status.</div>
+                <div class="lane-step">fiscal_rule_conditions decide quando a regra vale.</div>
+                <div class="lane-step">fiscal_rule_taxes guarda aliquotas por imposto.</div>
+                <div class="lane-step">fiscal_simulations registra memoria fiscal.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Por que Go aqui?</h3>
+          <div class="list">
+            <div class="item"><span class="dot">1</span><span><strong>Servico pequeno e focado</strong><br><span class="muted">A API faz uma coisa bem definida: decisao fiscal.</span></span></div>
+            <div class="item"><span class="dot">2</span><span><strong>Contrato independente</strong><br><span class="muted">O Java nao precisa conhecer classes internas do motor.</span></span></div>
+            <div class="item"><span class="dot">3</span><span><strong>Calculo previsivel</strong><br><span class="muted">Valores trafegam como string e sao calculados com `decimal`, nao `float`.</span></span></div>
+            <div class="item"><span class="dot">4</span><span><strong>Regra versionavel</strong><br><span class="muted">Vigencia, status, prioridade, fonte e revisao contabil ficam modelados.</span></span></div>
+            <div class="item"><span class="dot">5</span><span><strong>Auditoria nativa</strong><br><span class="muted">Cada simulacao guarda regra aplicada, impostos e formula de calculo.</span></span></div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <span>Escolha: contrato HTTP, regra no banco, calculo no service, auditoria persistida</span>
+        <span>7 / 9</span>
+      </footer>
+    </section>
+
+    <section class="slide">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Integracao finalizada</p>
+          <h2>O Java chama o Go, recebe o calculo e grava o resumo no frete</h2>
+          <p class="subtitle">A integracao foi pensada para nao expor token no navegador e para permitir rastreabilidade entre sistemas.</p>
+        </div>
+        <div class="brand"><strong>Contrato</strong>HTTP + JSON</div>
+      </header>
+      <div class="content">
+        <div class="sequence">
+          <div class="lane">
+            <h3>sistema-fretes <span class="pill">Java</span></h3>
+            <div class="lane-steps">
+              <div class="lane-step">Tela de frete solicita preview ou emissao.</div>
+              <div class="lane-step">`FreteBO` valida dados operacionais.</div>
+              <div class="lane-step">`TaxSimulationRequest.fromFrete` monta payload.</div>
+              <div class="lane-step">`MotorFiscalClient` envia JSON com headers.</div>
+              <div class="lane-step">`FreteDAO.atualizarResumoFiscal` grava retorno.</div>
+            </div>
+          </div>
+          <div class="lane">
+            <h3>Motor Fiscal <span class="pill teal">Go</span></h3>
+            <div class="lane-steps">
+              <div class="lane-step">Recebe `POST /api/v1/tax/simulate`.</div>
+              <div class="lane-step">Valida `X-API-Key`.</div>
+              <div class="lane-step">Propaga `X-Correlation-ID`.</div>
+              <div class="lane-step">Seleciona regra fiscal aplicavel.</div>
+              <div class="lane-step">Retorna CFOP, impostos, regra e memoria.</div>
+            </div>
+          </div>
+          <div class="lane">
+            <h3>PostgreSQL <span class="pill amber">Dados</span></h3>
+            <div class="lane-steps">
+              <div class="lane-step">Sistema Java: tabela `frete` guarda resumo fiscal.</div>
+              <div class="lane-step">Motor Fiscal: `fiscal_rules` guarda regras.</div>
+              <div class="lane-step">Motor Fiscal: `fiscal_simulations` guarda historico.</div>
+              <div class="lane-step">Motor Fiscal: `fiscal_simulation_tax_details` guarda memoria por imposto.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <span>Seguranca: token fica no backend; rastreabilidade: correlation ID</span>
+        <span>8 / 9</span>
+      </footer>
+    </section>
+
+    <section class="slide">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Resultado tecnico</p>
+          <h2>Arquitetura fiscal orientada por dados e preparada para evolucao</h2>
+          <p class="subtitle">A solucao organiza diagnostico, operacao e decisao fiscal em camadas independentes, com contrato claro e auditoria persistida.</p>
+        </div>
+        <div class="brand"><strong>Entrega</strong>Arquitetura fiscal</div>
+      </header>
+      <div class="content grid-2">
+        <div class="panel white">
+          <h3>Resultado da composicao</h3>
+          <div class="metric-grid" style="margin-top: 16px;">
+            <div class="metric"><strong>13.397</strong><span>PRs usados como base de diagnostico tecnico</span></div>
+            <div class="metric"><strong>3</strong><span>repositorios com responsabilidades separadas</span></div>
+            <div class="metric"><strong>API</strong><span>contrato fiscal independente do sistema Java</span></div>
+            <div class="metric"><strong>SQL</strong><span>regras, simulacoes e memoria de calculo auditaveis</span></div>
+          </div>
+          <div class="tag-stack" style="margin-top: 18px;">
+            <a class="mini-tag" href="https://github.com/Danilo-tec-2003/analise-prs" target="_blank" rel="noopener noreferrer">analise-prs</a>
+            <a class="mini-tag" href="https://github.com/Danilo-tec-2003/Sistema-de-frete" target="_blank" rel="noopener noreferrer">Sistema-de-frete</a>
+            <a class="mini-tag" href="https://github.com/Danilo-tec-2003/motor-fiscal-go" target="_blank" rel="noopener noreferrer">Motor_fiscal</a>
+            <span class="mini-tag">OpenAPI</span>
+            <span class="mini-tag">PostgreSQL</span>
+          </div>
+        </div>
+        <div class="panel dark">
+          <h3>Valor tecnico entregue</h3>
+          <div class="list">
+            <div class="item"><span class="dot">1</span><span>Decisao arquitetural sustentada por diagnostico de manutencao.</span></div>
+            <div class="item"><span class="dot">2</span><span>Separacao entre operacao de frete e decisao fiscal.</span></div>
+            <div class="item"><span class="dot">3</span><span>API Go com regras no banco, prioridade, vigencia, status e auditoria.</span></div>
+            <div class="item"><span class="dot">4</span><span>Integracao segura com API Key e rastreavel por Correlation ID.</span></div>
+            <div class="item"><span class="dot">5</span><span>Memoria de calculo persistida por simulacao e por imposto.</span></div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <span>Do diagnostico ao motor fiscal: problema entendido, arquitetura justificada, solucao implementada</span>
+        <span>9 / 9</span>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>
