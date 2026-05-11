@@ -407,38 +407,3 @@ sistema-fretes/
     |-- jsp/
     `-- WEB-INF/
 ```
-
-## Pontos Fortes Para Apresentacao
-
-- separacao clara entre operacao de frete e regra fiscal;
-- integracao Java -> Go via contrato HTTP;
-- uso de `X-Correlation-ID` para rastrear chamadas;
-- resumo fiscal persistido no frete;
-- relatorios JasperReports com PDF gerado em runtime;
-- banco relacional com constraints e indices;
-- validacoes de negocio concentradas nos BOs;
-- origem da solucao sustentada por diagnostico em PRs reais;
-- desenho preparado para evoluir regras fiscais sem espalhar calculo no Java.
-
-## Limitacoes E Proximos Passos
-
-- mover credenciais locais para variaveis de ambiente em ambiente real;
-- criar tela administrativa para regras fiscais no Motor Fiscal;
-- criar pipeline de CI;
-- ampliar testes automatizados no sistema Java;
-- evoluir logs estruturados entre Java e Go;
-- validar regras fiscais reais com apoio contabil;
-- versionar documentos tecnicos finais na pasta `docs/`.
-
-## Narrativa Recomendada
-
-Uma forma direta de apresentar:
-
-```text
-O sistema de fretes resolve a operacao diaria: clientes, motoristas, veiculos,
-fretes, ocorrencias e relatorios. Durante a analise de PRs internos, identifiquei
-dores recorrentes em manutencao, regras de negocio, banco e relatorios. Com base
-nisso, propus separar a parte fiscal em um microservico Go. O Java continua como
-sistema operacional, enquanto o Motor Fiscal centraliza regras, calculos e
-auditoria tributaria.
-```
