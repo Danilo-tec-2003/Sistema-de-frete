@@ -4911,3 +4911,344 @@ body {
     display: none;
   }
 }
+
+/* ================================================================
+   Dashboard banner: aligned composition + operational animation
+================================================================ */
+.dashboard-container .dashboard-hero.card {
+  min-height: clamp(340px, 27vw, 430px);
+  height: auto;
+  display: grid;
+  grid-template-columns: minmax(360px, 42%) minmax(0, 1fr);
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden;
+  border-color: rgba(129, 161, 194, .18);
+  background:
+    linear-gradient(90deg, rgba(6, 16, 27, .98) 0%, rgba(7, 18, 30, .86) 42%, rgba(5, 12, 20, .98) 100%),
+    linear-gradient(135deg, #07111b, #03080f);
+}
+
+.dashboard-container .dashboard-hero .hero-copy {
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: clamp(32px, 2.6vw, 46px);
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 0;
+  border-right: 1px solid rgba(129, 161, 194, .12);
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(92, 210, 20, .1), transparent 32%),
+    linear-gradient(180deg, rgba(13, 29, 45, .74), rgba(6, 15, 25, .56));
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.dashboard-container .dashboard-hero .hero-copy h1 {
+  max-width: 100%;
+  margin: 0 0 16px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: clamp(2.15rem, 3.2vw, 3.35rem);
+  line-height: 1;
+  letter-spacing: 0;
+  overflow-wrap: normal;
+}
+
+.dashboard-container .dashboard-hero .hero-copy h1 span {
+  display: block;
+}
+
+.dashboard-container .dashboard-hero .hero-copy p {
+  max-width: 360px;
+  color: #a8b5c6;
+  font-size: clamp(.9rem, 1.02vw, 1.08rem);
+  line-height: 1.55;
+}
+
+.dashboard-container .dashboard-hero .hero-meta {
+  margin-top: clamp(24px, 2.4vw, 34px);
+  gap: 10px;
+}
+
+.dashboard-container .dashboard-hero .hero-meta span {
+  min-height: 42px;
+  padding: 0 15px;
+  border-color: rgba(129, 161, 194, .18);
+  background: rgba(4, 12, 21, .54);
+  font-size: .82rem;
+}
+
+.dashboard-container .dashboard-hero .hero-visual.hero-banner {
+  position: relative;
+  min-height: clamp(340px, 27vw, 430px);
+  overflow: hidden;
+  background: #050b12;
+}
+
+.dashboard-container .dashboard-hero .hero-visual.hero-banner img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 62% center;
+  z-index: 1;
+  filter: saturate(1.18) contrast(1.1) brightness(1.02);
+  transform: scale(1.02);
+  animation: heroTruckBreathe 9s ease-in-out infinite;
+}
+
+.dashboard-container .dashboard-hero .hero-visual.hero-banner::before {
+  content: '';
+  position: absolute;
+  inset: -22% -18%;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(106deg, transparent 0 43%, rgba(122, 241, 37, .16) 48%, rgba(122, 241, 37, .04) 53%, transparent 59%),
+    radial-gradient(ellipse at 58% 74%, rgba(92, 210, 20, .22), transparent 36%);
+  opacity: .82;
+  transform: translateX(-28%);
+  animation: heroRadarSweep 6.8s ease-in-out infinite;
+}
+
+.dashboard-container .dashboard-hero .hero-visual.hero-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(5, 11, 18, .62) 0%, rgba(5, 11, 18, .08) 45%, rgba(5, 11, 18, .2) 100%),
+    linear-gradient(180deg, rgba(5, 11, 18, .04) 0%, rgba(5, 11, 18, .28) 70%, rgba(5, 11, 18, .78) 100%);
+}
+
+.dashboard-container .dashboard-hero .hero-delivery-map {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: 4%;
+  width: 92%;
+  height: 52%;
+  z-index: 5;
+  opacity: .98;
+  mix-blend-mode: screen;
+}
+
+.dashboard-container .dashboard-hero .hero-signal-grid path {
+  fill: none;
+  stroke: rgba(122, 241, 37, .1);
+  stroke-width: 1;
+  stroke-dasharray: 5 16;
+  animation: heroGridPulse 4.8s ease-in-out infinite;
+}
+
+.dashboard-container .dashboard-hero .hero-route-track {
+  stroke: rgba(129, 161, 194, .14);
+  stroke-width: 8;
+}
+
+.dashboard-container .dashboard-hero .hero-route-main {
+  stroke: url(#heroRouteGradient);
+  stroke-width: 3.4;
+  stroke-dasharray: 26 18;
+  animation: heroRouteMarch 5.8s linear infinite;
+}
+
+.dashboard-container .dashboard-hero .hero-route-flow {
+  stroke: rgba(238, 255, 229, .9);
+  stroke-width: 1.6;
+  stroke-dasharray: 2 28;
+  animation: heroRouteFlow 1.8s linear infinite;
+}
+
+.dashboard-container .dashboard-hero .hero-route-scan {
+  fill: none;
+  stroke: rgba(255, 255, 255, .58);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 44 560;
+  filter: drop-shadow(0 0 10px rgba(122, 241, 37, .88));
+  animation: heroRouteScan 3.2s linear infinite;
+}
+
+.dashboard-container .dashboard-hero .route-checkpoints circle {
+  animation: heroNodePulse 2.6s ease-in-out infinite;
+}
+
+.dashboard-container .dashboard-hero .route-checkpoints circle:nth-child(2) { animation-delay: .3s; }
+.dashboard-container .dashboard-hero .route-checkpoints circle:nth-child(3) { animation-delay: .6s; }
+.dashboard-container .dashboard-hero .route-checkpoints circle:nth-child(4) { animation-delay: .9s; }
+
+.dashboard-container .dashboard-hero .hero-route-dot {
+  fill: #ecffdc;
+}
+
+.dashboard-container .dashboard-hero .hero-route-dot-secondary {
+  fill: var(--green-light);
+  opacity: .76;
+}
+
+.hero-banner-telemetry {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.telemetry-chip {
+  position: absolute;
+  min-width: 112px;
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: center;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid rgba(129, 161, 194, .16);
+  background: rgba(5, 13, 22, .62);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, .28);
+  backdrop-filter: blur(12px);
+  animation: heroTelemetryFloat 4.8s ease-in-out infinite;
+}
+
+.telemetry-chip i {
+  width: 9px;
+  height: 9px;
+  grid-row: 1 / span 2;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.telemetry-chip strong {
+  color: #f6fbff;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.telemetry-chip small {
+  color: #9daabc;
+  font-size: .58rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.telemetry-green {
+  top: 14%;
+  left: 10%;
+  color: var(--green-light);
+}
+
+.telemetry-amber {
+  top: 18%;
+  right: 10%;
+  color: #ffb000;
+  animation-delay: .45s;
+}
+
+.telemetry-red {
+  left: 18%;
+  bottom: 23%;
+  color: #ef4444;
+  animation-delay: .9s;
+}
+
+.telemetry-blue {
+  right: 9%;
+  bottom: 18%;
+  color: #1d9bf0;
+  animation-delay: 1.25s;
+}
+
+@keyframes heroTruckBreathe {
+  0%, 100% { transform: scale(1.02); filter: saturate(1.14) contrast(1.08) brightness(1); }
+  50% { transform: scale(1.045); filter: saturate(1.22) contrast(1.12) brightness(1.08); }
+}
+
+@keyframes heroRadarSweep {
+  0%, 100% { transform: translateX(-36%) skewX(-8deg); opacity: .28; }
+  46% { transform: translateX(18%) skewX(-8deg); opacity: .78; }
+  68% { transform: translateX(36%) skewX(-8deg); opacity: .18; }
+}
+
+@keyframes heroGridPulse {
+  0%, 100% { opacity: .28; }
+  50% { opacity: .74; }
+}
+
+@keyframes heroRouteMarch {
+  to { stroke-dashoffset: -220; }
+}
+
+@keyframes heroRouteFlow {
+  to { stroke-dashoffset: -112; }
+}
+
+@keyframes heroRouteScan {
+  to { stroke-dashoffset: -604; }
+}
+
+@keyframes heroNodePulse {
+  0%, 100% { opacity: .72; transform: scale(.92); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
+
+@keyframes heroTelemetryFloat {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -8px, 0); }
+}
+
+@media (max-width: 1100px) {
+  .dashboard-container .dashboard-hero.card {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-container .dashboard-hero .hero-copy {
+    border-right: 0;
+    border-bottom: 1px solid rgba(129, 161, 194, .12);
+  }
+
+  .dashboard-container .dashboard-hero .hero-visual.hero-banner {
+    min-height: 280px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-container .dashboard-hero .hero-copy {
+    padding: 26px 22px;
+  }
+
+  .dashboard-container .dashboard-hero .hero-copy h1 {
+    font-size: clamp(2rem, 12vw, 2.75rem);
+  }
+
+  .dashboard-container .dashboard-hero .hero-visual.hero-banner {
+    min-height: 360px;
+  }
+
+  .dashboard-container .dashboard-hero .hero-delivery-map {
+    bottom: 20%;
+    height: 44%;
+  }
+
+  .hero-banner-telemetry {
+    inset: auto 12px 12px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .telemetry-chip {
+    position: relative;
+    inset: auto;
+    min-width: 0;
+  }
+}

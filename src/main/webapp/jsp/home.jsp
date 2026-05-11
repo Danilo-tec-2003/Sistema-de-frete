@@ -53,6 +53,11 @@
                         <img src="${pageContext.request.contextPath}/img/banner-truck.png" alt="">
                         <svg class="delivery-map hero-delivery-map" viewBox="0 0 640 300" preserveAspectRatio="none">
                             <defs>
+                                <linearGradient id="heroRouteGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#5cd214" stop-opacity=".28"/>
+                                    <stop offset="45%" stop-color="#c8ff96" stop-opacity=".92"/>
+                                    <stop offset="100%" stop-color="#5cd214" stop-opacity=".68"/>
+                                </linearGradient>
                                 <filter id="heroRouteGlow" x="-20%" y="-40%" width="140%" height="180%">
                                     <feGaussianBlur stdDeviation="3" result="blur"/>
                                     <feMerge>
@@ -61,24 +66,56 @@
                                     </feMerge>
                                 </filter>
                             </defs>
-                            <path class="route-track"
-                                  d="M38 258 C118 240 174 218 238 224 C302 230 344 252 414 236 C492 218 536 238 604 204"/>
-                            <path class="route-line route-line-strong"
-                                  d="M38 258 C118 240 174 218 238 224 C302 230 344 252 414 236 C492 218 536 238 604 204"
-                                  filter="url(#heroRouteGlow)"/>
-                            <path class="route-flow"
-                                  d="M38 258 C118 240 174 218 238 224 C302 230 344 252 414 236 C492 218 536 238 604 204"/>
-                            <g class="route-checkpoints">
-                                <circle cx="38" cy="258" r="5"/>
-                                <circle cx="238" cy="224" r="5"/>
-                                <circle cx="414" cy="236" r="5"/>
-                                <circle cx="604" cy="204" r="7" class="route-end"/>
+                            <g class="hero-signal-grid">
+                                <path d="M52 76H588M52 142H588M52 208H588"/>
+                                <path d="M114 50V248M238 50V248M362 50V248M486 50V248"/>
                             </g>
-                            <circle r="4.5" class="route-dot">
-                                <animateMotion dur="7s" repeatCount="indefinite"
-                                               path="M38 258 C118 240 174 218 238 224 C302 230 344 252 414 236 C492 218 536 238 604 204"/>
+                            <path class="route-track hero-route-track"
+                                  d="M38 250 C116 230 168 204 236 214 C304 224 348 246 420 226 C494 206 542 226 604 190"/>
+                            <path class="route-line route-line-strong hero-route-main"
+                                  d="M38 250 C116 230 168 204 236 214 C304 224 348 246 420 226 C494 206 542 226 604 190"
+                                  filter="url(#heroRouteGlow)"/>
+                            <path class="route-flow hero-route-flow"
+                                  d="M38 250 C116 230 168 204 236 214 C304 224 348 246 420 226 C494 206 542 226 604 190"/>
+                            <path class="hero-route-scan"
+                                  d="M38 250 C116 230 168 204 236 214 C304 224 348 246 420 226 C494 206 542 226 604 190"/>
+                            <g class="route-checkpoints">
+                                <circle cx="38" cy="250" r="5"/>
+                                <circle cx="236" cy="214" r="5"/>
+                                <circle cx="420" cy="226" r="5"/>
+                                <circle cx="604" cy="190" r="7" class="route-end"/>
+                            </g>
+                            <circle r="4.5" class="route-dot hero-route-dot">
+                                <animateMotion dur="6.2s" repeatCount="indefinite"
+                                               path="M38 250 C116 230 168 204 236 214 C304 224 348 246 420 226 C494 206 542 226 604 190"/>
+                            </circle>
+                            <circle r="3.4" class="route-dot hero-route-dot-secondary">
+                                <animateMotion dur="6.2s" begin="1.7s" repeatCount="indefinite"
+                                               path="M38 250 C116 230 168 204 236 214 C304 224 348 246 420 226 C494 206 542 226 604 190"/>
                             </circle>
                         </svg>
+                        <div class="hero-banner-telemetry">
+                            <span class="telemetry-chip telemetry-green">
+                                <i></i>
+                                <strong>${empty fretesAndamento ? 0 : fretesAndamento}</strong>
+                                <small>em andamento</small>
+                            </span>
+                            <span class="telemetry-chip telemetry-amber">
+                                <i></i>
+                                <strong>${empty aguardandoColeta ? 0 : aguardandoColeta}</strong>
+                                <small>coleta</small>
+                            </span>
+                            <span class="telemetry-chip telemetry-red">
+                                <i></i>
+                                <strong>${empty fretesAtrasados ? 0 : fretesAtrasados}</strong>
+                                <small>atrasados</small>
+                            </span>
+                            <span class="telemetry-chip telemetry-blue">
+                                <i></i>
+                                <strong>${empty entregasHoje ? 0 : entregasHoje}</strong>
+                                <small>hoje</small>
+                            </span>
+                        </div>
                     </div>
                 </section>
 
